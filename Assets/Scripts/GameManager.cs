@@ -1,21 +1,26 @@
 ﻿using UnityEngine;
 
-public class GameManager : MonoBehaviour
+namespace AnarchyBros
 {
-    public static GameManager Instance { get; private set; }
-
-    void Awake()
+    public class GameManager : MonoBehaviour
     {
-        Instance = this;
-    }
+        public static GameManager Instance { get; private set; }
 
-    void Start()
-    {
+        public SpawnManager SpawnManager;
 
-    }
+        void Awake()
+        {
+            Instance = this;
+        }
 
-    void Update()
-    {
+        void Start()
+        {
 
+        }
+
+        void Update()
+        {
+
+        }
     }
 }

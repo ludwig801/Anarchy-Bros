@@ -1,38 +1,51 @@
 ﻿using UnityEngine;
 
-public class Player : MonoBehaviour, IKillable
+namespace AnarchyBros
 {
-    public Transform MoveTo;
-    public float Speed, Health;
-
-    public bool IsAlive
+    public class Player : MonoBehaviour, IKillable
     {
-        get
+        public float Speed, Health;
+        public Collider2D Collider;
+        public PlayerSpot CurrentSpot;
+
+        Transform _moveTo;
+
+        public bool IsAlive
         {
-            return Health > 0f;
+            get
+            {
+                return Health > 0f;
+            }
         }
-    }
 
-    void Update()
-    {
-        if (!Mathf.Approximately(Vector3.Distance(transform.position, MoveTo.position), 0f))
+        void Start()
         {
-            transform.position = Vector3.MoveTowards(transform.position, MoveTo.position, Time.deltaTime * Speed);
+            Collider = GetComponent<Collider2D>();
         }
-    }
 
-    public void TakeDamage(float amount)
-    {
-        Health -= amount;
-
-        if (!IsAlive)
+        void Update()
         {
-            Kill();
-        }       
-    }
+            _moveTo = CurrentSpot.transform;
 
-    public void Kill()
-    {
-        Debug.Log("The player died");
+            if (!Mathf.Approximately(Vector3.Distance(transform.position, _moveTo.position), 0f))
+            {
+                transform.position = Vector3.MoveTowards(transform.position, _moveTo.position, Time.deltaTime * Speed);
+            }
+        }
+
+        public void TakeDamage(float amount)
+        {
+            Health -= amount;
+
+            if (!IsAlive)
+            {
+                Kill();
+            }
+        }
+
+        public void Kill()
+        {
+            Debug.Log("The player died");
+        }
     }
 }

@@ -1,16 +1,15 @@
 ﻿using UnityEngine;
 
-public class PlayerSpot : MonoBehaviour
+namespace AnarchyBros
 {
-    Player _player;
-
-    void Start()
+    public class PlayerSpot : MonoBehaviour
     {
-        _player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
-    }
+        public Collider2D Collider;
+        public bool Occupied;
 
-    void OnMouseUp()
-    {
-        _player.MoveTo = transform;
+        void Start()
+        {
+            Collider = GetComponent<Collider2D>();
+        }
     }
 }
