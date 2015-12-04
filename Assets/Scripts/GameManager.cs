@@ -6,7 +6,14 @@ namespace AnarchyBros
     {
         public static GameManager Instance { get; private set; }
 
-        public SpawnManager SpawnManager;
+        public State CurrentState { get; private set; }
+
+        public enum State
+        {
+            Stopped = 0,
+            Playing = 1,
+            Editing = 2
+        }
 
         void Awake()
         {
@@ -15,12 +22,22 @@ namespace AnarchyBros
 
         void Start()
         {
-
+            Stop();
         }
 
-        void Update()
+        void Play()
         {
+            CurrentState = State.Playing;
+        }
 
+        void Stop()
+        {
+            CurrentState = State.Stopped;
+        }
+
+        void Edit()
+        {
+            CurrentState = State.Editing;
         }
     }
 }

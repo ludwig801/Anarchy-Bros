@@ -18,26 +18,29 @@ namespace AnarchyBros
 
         void Update()
         {
-            Vector2 point = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-
-            if (Input.GetMouseButtonDown(0))
+            if (GameManager.Instance.CurrentState == GameManager.State.Playing)
             {
-                for (int i = 0; i < _players.Count; i++)
+                Vector2 point = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+
+                if (Input.GetMouseButtonDown(0))
                 {
-                    if (_players[i].Collider.OverlapPoint(point))
+                    for (int i = 0; i < _players.Count; i++)
                     {
-                        SelectedPlayer = (SelectedPlayer == i) ? int.MinValue : i;
-                        break;
-                    }
-                }
-          
-                for (int i = 0; i < _spots.Count; i++)
-                {
-                    if (SelectedPlayer >= 0)
-                    {
-                        if (!_spots[i].Occupied && _spots[i].Collider.OverlapPoint(point))
+                        if (_players[i].Collider.OverlapPoint(point))
                         {
-                            MoveTo(_spots[i]);
+                            SelectedPlayer = (SelectedPlayer == i) ? int.MinValue : i;
+                            break;
+                        }
+                    }
+
+                    for (int i = 0; i < _spots.Count; i++)
+                    {
+                        if (SelectedPlayer >= 0)
+                        {
+                            if (!_spots[i].Occupied && _spots[i].Collider.OverlapPoint(point))
+                            {
+                                MoveTo(_spots[i]);
+                            }
                         }
                     }
                 }
