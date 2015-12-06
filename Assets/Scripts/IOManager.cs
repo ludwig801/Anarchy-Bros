@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
+using System;
 
 namespace AnarchyBros
 {
@@ -13,7 +14,7 @@ namespace AnarchyBros
         {
             Instance = this;
         }
-        
+
         void Start()
         {
         }
@@ -21,21 +22,25 @@ namespace AnarchyBros
         public void SaveGraph()
         {
             List<Node> nodes = NodeManager.Instance.Nodes;
-            List<GameNode> toSave = new List<GameNode>();
+            List<Edge> edges = NodeManager.Instance.Edges;
+            GameGraph toSave = new GameGraph();
 
             for (int i = 0; i < nodes.Count; i++)
             {
-                List<Edge> neighbors = nodes[i].Edges;
                 GameNode gameNode = new GameNode();
-                gameNode.Position = new Point(nodes[i].transform.position.x, nodes[i].transform.position.y);
+                gameNode.Position = new Point(nodes[i].transform.position);
+                gameNode.Type = nodes[i].Type;
 
-                for (int j = 0; j < neighbors.Count; j++)
-                {
-                    Vector2 pt = neighbors[j].GetNeighbor(nodes[i]).transform.position;
-                    gameNode.Neighbors.Add(new Point(pt.x, pt.y));
-                }
+                toSave.Nodes.Add(gameNode);
+            }
 
-                toSave.Add(gameNode);
+            for (int i = 0; i < edges.Count; i++)
+            {
+                GameEdge gameEdge = new GameEdge();
+                gameEdge.a = new Point(edges[i].A.transform.position);
+                gameEdge.b = new Point(edges[i].B.transform.position);
+
+                toSave.Edges.Add(gameEdge);
             }
 
             BinaryFormatter bf = new BinaryFormatter();
@@ -50,37 +55,59 @@ namespace AnarchyBros
             {
                 BinaryFormatter bf = new BinaryFormatter();
                 FileStream file = File.Open(Application.dataPath + "/GraphData.sav", FileMode.Open);
-                List<GameNode> nodes = (List<GameNode>)bf.Deserialize(file);
+                GameGraph graph = (GameGraph)bf.Deserialize(file);
                 file.Close();
-                
-                // TODO : Rebuild graph
+
+                NodeManager.Instance.RebuildGraph(graph);
+
+                graph.Nodes.Clear();
+                graph.Edges.Clear();
             }
         }
 
-        [System.Serializable]
+        [Serializable]
+        public class GameGraph
+        {
+            public List<GameNode> Nodes;
+            public List<GameEdge> Edges;
+
+            public GameGraph()
+            {
+                Nodes = new List<GameNode>();
+                Edges = new List<GameEdge>();
+            }
+        }
+
+        [Serializable]
         public class GameNode
         {
-            public enum NodeType { PlayerSpot = 0, SpawnPoint = 1, Node = 2 }
-
-            public NodeType Type;
+            public Node.NodeType Type;
             public Point Position;
-            public List<Point> Neighbors;
-
-            public GameNode()
-            {
-                Neighbors = new List<Point>();
-            }
         }
 
-        [System.Serializable]
+        [Serializable]
+        public class GameEdge
+        {
+            public Point a, b;
+        }
+
+        [Serializable]
         public class Point
         {
             public float x, y;
 
-            public Point(float x, float y)
+            public Vector2 ToVector2
             {
-                this.x = x;
-                this.y = y;
+                get
+                {
+                    return new Vector2(x, y);
+                }
+            }
+
+            public Point(Vector2 pos)
+            {
+                x = pos.x;
+                y = pos.y;
             }
         }
     }

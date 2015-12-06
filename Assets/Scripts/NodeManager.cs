@@ -8,11 +8,11 @@ namespace AnarchyBros
     {
         public static NodeManager Instance { get; private set; }
 
-        public GameObject EdgePrefab;
-        public GameObject NodePrefab;
+        public GameObject PlayerSpotPrefab, SpawnPointPrefab, EdgePrefab, NodePrefab;
         public List<Node> Nodes;
         public List<Edge> Edges;
 
+        Transform _playerSpots, _spawnPoints, _nodes, _edges;
         Vector2 _origin, _target;
         bool _targeting;
         Edge _refEdge, _hitEdge;
@@ -37,17 +37,24 @@ namespace AnarchyBros
 
         void Start()
         {
-            GetAllNodes();
-
             GameObject instance = Instantiate(EdgePrefab);
             instance.name = "Reference Edge";
             instance.GetComponent<Collider2D>().enabled = false;
+            instance.transform.parent = transform;
             _refEdge = instance.GetComponent<Edge>();
 
             instance = Instantiate(NodePrefab);
             instance.name = "Reference Node";
             instance.GetComponent<Collider2D>().enabled = false;
+            instance.transform.parent = transform;
             _refNode = instance.GetComponent<Node>();
+
+            _playerSpots = GameObject.FindGameObjectWithTag("Player Spots").transform;
+            _spawnPoints = GameObject.FindGameObjectWithTag("Spawn Points").transform;
+            _nodes = GameObject.FindGameObjectWithTag("Nodes").transform;
+            _edges = GameObject.FindGameObjectWithTag("Edges").transform;
+
+            GetAllNodes();
 
             Targeting = false;
         }
@@ -60,72 +67,6 @@ namespace AnarchyBros
                 _refEdge.SetNodesPositions(_origin, _target);
                 _refNode.transform.position = _target;
             }
-
-            //if (GameManager.Instance.CurrentState == GameManager.State.Editing)
-            //{
-            //    if (_hitEdge != null)
-            //    {
-            //        _hitEdge.Highlight = false;
-            //        _hitEdge = null;
-            //    }
-
-            //    if (_hitNode != null)
-            //    {
-            //        _hitNode.Highlight = false;
-            //        _hitNode = null;
-            //    }
-
-            //    Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-
-            //    if (GetHitNode(mousePos, out _hitNode))
-            //    {
-            //        _hitNode.Highlight = true;
-            //    }
-            //    else
-            //    {
-            //        GetHitEdge(mousePos, out _hitEdge);
-            //    }
-
-            //    if (Input.GetMouseButtonDown(0))
-            //    {
-            //        if (!Targeting)
-            //        {
-            //            Targeting = true;
-
-            //            _origin = (_hitNode == null) ? mousePos : (Vector2)_hitNode.transform.position;
-            //            _refEdge.SetNodesPositions(_origin, _origin);
-            //        }
-            //        else
-            //        {
-            //            Targeting = false;
-            //            _target = (_hitNode == null) ? mousePos : (Vector2)_hitNode.transform.position;
-            //            CreateLink();
-            //        }
-            //    }
-            //    else if (Input.GetMouseButtonDown(1))
-            //    {
-            //        if (_hitNode != null)
-            //        {
-            //            RemoveNode(_hitNode);
-            //        }
-            //        else if (_hitEdge != null)
-            //        {
-            //            RemoveEdge(_hitEdge);
-            //        }
-            //        Targeting = false;
-            //    }
-            //    else
-            //    {
-            //        _target = (_hitNode == null) ? mousePos : (Vector2)_hitNode.transform.position;
-
-            //        if (_hitEdge != null)
-            //        {
-            //            _hitEdge.Highlight = true;
-            //        }
-
-            //        _refEdge.SetNodesPositions(_origin, _target);
-            //    }
-            //}
         }
 
         public void CreateLink()
@@ -135,7 +76,7 @@ namespace AnarchyBros
 
             if (!GetHitNode(_origin, out nodeA))
             {
-                nodeA = CreateNode(_origin);
+                nodeA = CreateNode(_origin, Node.NodeType.Node);
                 if (GetHitEdge(_origin, out hitEdge))
                 {
                     SplitEdge(hitEdge, nodeA);
@@ -144,7 +85,7 @@ namespace AnarchyBros
 
             if (!GetHitNode(_target, out nodeB))
             {
-                nodeB = CreateNode(_target);
+                nodeB = CreateNode(_target, Node.NodeType.Node);
                 if (GetHitEdge(_target, out hitEdge))
                 {
                     SplitEdge(hitEdge, nodeB);
@@ -167,16 +108,47 @@ namespace AnarchyBros
             Edges.Add(CreateEdge(spliter, oldA));
         }
 
-        public Node CreateNode(Vector2 worldPos)
+        public Node CreateNode(Vector2 worldPos, Node.NodeType type)
         {
-            GameObject obj = Instantiate(NodePrefab);
-            obj.name = "Node";
-            obj.layer = LayerMask.NameToLayer("Spots");
-            obj.transform.position = worldPos;
-            obj.transform.parent = transform;
+            GameObject obj;
+
+            switch (type)
+            {
+                case Node.NodeType.Node:
+                    obj = Instantiate(NodePrefab);
+                    obj.name = "Node";
+                    obj.layer = LayerMask.NameToLayer("Spots");
+                    obj.transform.position = worldPos;
+                    obj.transform.parent = _nodes;
+                    break;
+
+                case Node.NodeType.PlayerSpot:
+                    obj = Instantiate(PlayerSpotPrefab);
+                    obj.name = "Player Spot";
+                    obj.layer = LayerMask.NameToLayer("Spots");
+                    obj.transform.position = worldPos;
+                    obj.transform.parent = _playerSpots;
+                    break;
+
+                case Node.NodeType.SpawnPoint:
+                    obj = Instantiate(SpawnPointPrefab);
+                    obj.name = "Spawn Point";
+                    obj.layer = LayerMask.NameToLayer("Spots");
+                    obj.transform.position = worldPos;
+                    obj.transform.parent = _spawnPoints;
+                    break;
+
+                default:
+                    obj = Instantiate(NodePrefab);
+                    obj.name = "Node";
+                    obj.layer = LayerMask.NameToLayer("Spots");
+                    obj.transform.position = worldPos;
+                    obj.transform.parent = _nodes;
+                    break;
+            }
 
             Node n = obj.GetComponent<Node>();
-            n.Type = Node.NodeType.Node;
+            n.Type = type;
 
             Nodes.Add(n);
             return n;
@@ -186,9 +158,12 @@ namespace AnarchyBros
         {
             Edge e = Instantiate(EdgePrefab).GetComponent<Edge>();
             e.name = "Edge";
-            e.transform.parent = transform;
+            e.transform.parent = _edges;
             e.SetNodes(a, b);
             Edges.Add(e);
+
+            a.Edges.Add(e);
+            b.Edges.Add(e);
 
             return e;
         }
@@ -358,9 +333,6 @@ namespace AnarchyBros
                 Nodes.Clear();
             }
 
-            Transform _spawnPoints = GameObject.FindGameObjectWithTag("Spawn Points").transform;
-            Transform _playerSpots = GameObject.FindGameObjectWithTag("Player Spots").transform;
-
             for (int i = 0; i < _playerSpots.childCount; i++)
             {
                 Node n = _playerSpots.GetChild(i).GetComponent<Node>();
@@ -383,16 +355,68 @@ namespace AnarchyBros
                 }
             }
 
-            for (int i = 0; i < transform.childCount; i++)
+            for (int i = 0; i < _nodes.childCount; i++)
             {
-                Node n = transform.GetChild(i).GetComponent<Node>();
+                Node n = _nodes.GetChild(i).GetComponent<Node>();
                 n.Type = Node.NodeType.Node;
 
-                if (n != null)
-                {
-                    Nodes.Add(n);
-                }
+                Nodes.Add(n);
             }
+
+            for (int i = 0; i < _edges.childCount; i++)
+            {
+                Edge e = _edges.GetChild(i).GetComponent<Edge>();
+
+                Edges.Add(e);
+            }
+        }
+
+        public void RebuildGraph(IOManager.GameGraph newGraph)
+        {
+            DestroyGraph();
+
+            for (int i = 0; i < newGraph.Nodes.Count; i++)
+            {
+                IOManager.GameNode node = newGraph.Nodes[i];
+
+                CreateNode(node.Position.ToVector2, node.Type);
+            }
+
+            for (int i = 0; i < newGraph.Edges.Count; i++)
+            {
+                IOManager.GameEdge edge = newGraph.Edges[i];
+                Node a = null, b = null;
+                GetHitNode(edge.a.ToVector2, out a);
+                GetHitNode(edge.b.ToVector2, out b);
+
+                CreateEdge(a, b);
+            }
+        }
+
+        void DestroyGraph()
+        {
+            for (int i = 0; i < _spawnPoints.childCount; i++)
+            {
+                Destroy(_spawnPoints.GetChild(i).gameObject);
+            }
+
+            for (int i = 0; i < _playerSpots.childCount; i++)
+            {
+                Destroy(_playerSpots.GetChild(i).gameObject);
+            }
+
+            for (int i = 0; i < _nodes.childCount; i++)
+            {
+                Destroy(_nodes.GetChild(i).gameObject);
+            }
+
+            for (int i = 0; i < _edges.childCount; i++)
+            {
+                Destroy(_edges.GetChild(i).gameObject);
+            }
+
+            Nodes.Clear();
+            Edges.Clear();
         }
     }
 }

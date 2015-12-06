@@ -31,6 +31,7 @@ namespace AnarchyBros
         void Start()
         {
             _sprite = GetComponent<SpriteRenderer>();
+            _highlight = false;
         }
 
         void Update()
