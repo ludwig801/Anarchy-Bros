@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
+using AnarchyBros.Strings;
 
 namespace AnarchyBros
 {
@@ -11,6 +12,7 @@ namespace AnarchyBros
         public GameObject PlayerSpotPrefab, SpawnPointPrefab, EdgePrefab, NodePrefab;
         public List<Node> Nodes;
         public List<Edge> Edges;
+        public List<PlayerSpot> PlayerSpots;
 
         Transform _playerSpots, _spawnPoints, _nodes, _edges;
         Vector2 _origin, _target;
@@ -18,11 +20,11 @@ namespace AnarchyBros
         Edge _refEdge, _hitEdge;
         Node _refNode, _hitNode;
 
-        bool Targeting
+        public bool Targeting
         {
             get { return _targeting; }
 
-            set
+            private set
             {
                 _targeting = value;
                 _refEdge.gameObject.SetActive(value);
@@ -61,11 +63,18 @@ namespace AnarchyBros
 
         void Update()
         {
-            if (Targeting)
+            if (GameManager.Instance.IsEdit)
             {
-                _target = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                _refEdge.SetNodesPositions(_origin, _target);
-                _refNode.transform.position = _target;
+                if (Targeting)
+                {
+                    _target = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                    _refEdge.SetNodesPositions(_origin, _target);
+                    _refNode.transform.position = _target;
+                }
+            }
+            else
+            {
+                Targeting = false;
             }
         }
 
@@ -203,6 +212,19 @@ namespace AnarchyBros
             return false;
         }
 
+        public T GetHitNode<T>(Vector2 pos)
+        {
+            for (int i = 0; i < Nodes.Count; i++)
+            {
+                if (Nodes[i].Collider.OverlapPoint(pos))
+                {
+                    return Nodes[i].GetComponent<T>();
+                }
+            }
+
+            return default(T);
+        }
+
         public bool GetHitEdge(Vector2 pos, out Edge hit)
         {
             hit = null;
@@ -260,27 +282,35 @@ namespace AnarchyBros
 
         public void OnNodeClick(PointerEventData eventData, Node n)
         {
-            if (eventData.button == PointerEventData.InputButton.Left)
+            if (GameManager.Instance.IsEdit)
             {
-                if (Targeting)
+                if (eventData.button == PointerEventData.InputButton.Left)
                 {
-                    _target = n.transform.position;
-                    CreateLink();
+                    if (Targeting)
+                    {
+                        _target = n.transform.position;
+                        CreateLink();
 
-                    // For continuos targeting
-                    _origin = _target;
-                    // For one time targeting
-                    // Targeting = false;
+                        // For continuos targeting
+                        _origin = _target;
+                        // For one time targeting
+                        // Targeting = false;
+                    }
+                    else
+                    {
+                        Targeting = true;
+                        _origin = n.transform.position;
+                        _target = _origin;
+                    }
                 }
-                else
+                else if (eventData.button == PointerEventData.InputButton.Right)
                 {
-                    Targeting = true;
-                    _origin = n.transform.position;
+                    RemoveNode(n);
                 }
             }
-            else if (eventData.button == PointerEventData.InputButton.Right)
+            else if (GameManager.Instance.IsPlay)
             {
-                RemoveNode(n);
+                PlayerManager.Instance.OnNodeClicked(n);
             }
         }
 
@@ -333,6 +363,15 @@ namespace AnarchyBros
                 Nodes.Clear();
             }
 
+            if (PlayerSpots == null)
+            {
+                PlayerSpots = new List<PlayerSpot>();
+            }
+            else
+            {
+                PlayerSpots.Clear();
+            }
+
             for (int i = 0; i < _playerSpots.childCount; i++)
             {
                 Node n = _playerSpots.GetChild(i).GetComponent<Node>();
@@ -341,6 +380,7 @@ namespace AnarchyBros
                 if (n != null)
                 {
                     Nodes.Add(n);
+                    PlayerSpots.Add(n.GetComponent<PlayerSpot>());
                 }
             }
 
@@ -371,6 +411,19 @@ namespace AnarchyBros
             }
         }
 
+        public PlayerSpot GetPlayerSpot(Vector2 pos)
+        {
+            for (int i = 0; i < PlayerSpots.Count; i++)
+            {
+                if ((Vector2)PlayerSpots[i].transform.position == pos)
+                {
+                    return PlayerSpots[i];
+                }
+            }
+
+            return null;
+        }
+
         public void RebuildGraph(IOManager.GameGraph newGraph)
         {
             DestroyGraph();
@@ -379,7 +432,12 @@ namespace AnarchyBros
             {
                 IOManager.GameNode node = newGraph.Nodes[i];
 
-                CreateNode(node.Position.ToVector2, node.Type);
+                Node n = CreateNode(node.Position.ToVector2, node.Type);
+
+                if (n.Type == Node.NodeType.PlayerSpot)
+                {
+                    PlayerSpots.Add(n.GetComponent<PlayerSpot>());
+                }
             }
 
             for (int i = 0; i < newGraph.Edges.Count; i++)
@@ -415,6 +473,7 @@ namespace AnarchyBros
                 Destroy(_edges.GetChild(i).gameObject);
             }
 
+            PlayerSpots.Clear();
             Nodes.Clear();
             Edges.Clear();
         }

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using AnarchyBros.Strings;
+using UnityEngine;
 
 namespace AnarchyBros
 {
@@ -6,14 +7,7 @@ namespace AnarchyBros
     {
         public static GameManager Instance { get; private set; }
 
-        public State CurrentState { get; private set; }
-
-        public enum State
-        {
-            Stopped = 0,
-            Playing = 1,
-            Editing = 2
-        }
+        public string State { get; private set; }
 
         void Awake()
         {
@@ -22,22 +16,48 @@ namespace AnarchyBros
 
         void Start()
         {
-            Stop();
+            Edit();
         }
 
-        void Play()
+        public void Play()
         {
-            CurrentState = State.Playing;
+            State = GameStates.Play;
+            PlayerManager.Instance.SetPlayersActive(true);
         }
 
-        void Stop()
+        public void Stop()
         {
-            CurrentState = State.Stopped;
+            State = GameStates.Stop;
         }
 
-        void Edit()
+        public void Edit()
         {
-            CurrentState = State.Editing;
+            State = GameStates.Edit;
+            PlayerManager.Instance.SetPlayersActive(false);
+        }
+
+        public bool IsPlay
+        {
+            get
+            {
+                return State == GameStates.Play;
+            }
+        }
+
+        public bool IsStop
+        {
+            get
+            {
+                return State == GameStates.Stop;
+            }
+        }
+
+        public bool IsEdit
+        {
+            get
+            {
+                return State == GameStates.Edit;
+            }
         }
     }
 }

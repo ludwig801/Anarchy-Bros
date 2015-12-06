@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections.Generic;
 
 namespace AnarchyBros
 {
@@ -7,7 +6,8 @@ namespace AnarchyBros
     public class PlayerSpot : MonoBehaviour
     {
         public Collider2D Collider;
-        public bool Occupied;
+        public bool Occupied { get { return Player != null; } }
+        public Player Player;
 
         void Start()
         {
