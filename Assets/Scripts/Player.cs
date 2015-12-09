@@ -37,9 +37,14 @@ namespace AnarchyBros
                 if (CurrentSpot == null)
                 {
                     CurrentSpot = NodeManager.Instance.GetHitNode<PlayerSpot>(transform.position);
+                    CurrentSpot.Player = this;
                 }
                 else
                 {
+                    if (CurrentSpot.Player != this)
+                    {
+                        CurrentSpot.Player = this;
+                    }
                     _moveTo = new Vector3(CurrentSpot.transform.position.x, CurrentSpot.transform.position.y, _moveTo.z);
                 }
 

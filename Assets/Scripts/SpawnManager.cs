@@ -5,70 +5,100 @@ namespace AnarchyBros
 {
     public class SpawnManager : MonoBehaviour
     {
-        public Transform Objective, EnemyHolder;
+        public static SpawnManager Instance;
+
+        public Transform EnemyHolder;
         public GameObject EnemyPrefab;
         public float SpawnTime;
         public int MaxEnemyCount;
-
-        int EnemyCount
-        {
-            get
-            {
-                return EnemyHolder.transform.childCount;
-            }
-        }
-
-        bool CanSpawnEnemy
-        {
-            get
-            {
-                return EnemyCount < MaxEnemyCount;
-            }
-        }
+        public List<Transform> SpawnPoints;
 
         float _deltaTime;
-        List<Transform> _spawnPoints;
+        
+        int EnemyCount { get { return EnemyHolder.transform.childCount; } }   
+        bool CanSpawnEnemy { get { return EnemyCount < MaxEnemyCount; } }
 
         void Start()
         {
+            Instance = this;
+
             GetSpawnPoints();
         }
 
         void Update()
         {
-            _deltaTime += Time.deltaTime;
-
-            if (_deltaTime > SpawnTime && CanSpawnEnemy)
+            if (GameManager.Instance.IsPlay)
             {
-                Spawn();
-                _deltaTime = 0f;
+                _deltaTime += Time.deltaTime;
+
+                if (_deltaTime > SpawnTime && CanSpawnEnemy)
+                {
+                    Spawn();
+                    _deltaTime = 0f;
+                }
             }
         }
 
         public void Spawn()
         {
             int rand = Random.Range(0, int.MaxValue);
-            rand %= _spawnPoints.Count;
+            rand %= SpawnPoints.Count;
 
-            Enemy e = (Instantiate(EnemyPrefab, _spawnPoints[rand].position, Quaternion.identity) as GameObject).GetComponent<Enemy>();
-            e.Objective = Objective;
+            Enemy e = (Instantiate(EnemyPrefab) as GameObject).GetComponent<Enemy>();
+            e.LocalObjective = SpawnPoints[rand].position;
+
+            rand = Random.Range(0, int.MaxValue);
+            List<PlayerSpot> spots = NodeManager.Instance.PlayerSpots;
+            rand %= spots.Count;
+            int i = 0;
+            int iter = 0;
+            while (rand >= 0)
+            {
+                if (spots[i].Occupied)
+                {
+                    rand--;
+                    if (rand < 0)
+                    {
+                        break;
+                    }
+                }
+
+                i++;
+                i %= spots.Count;
+
+                iter++;
+                if (iter > 10000)
+                {
+                    Debug.Log("max iter");
+                    break;               
+                }
+            }
+
+            e.Objective = spots[i].transform.position;
             e.transform.parent = EnemyHolder;
+        }
+
+        public void ReEvaluate()
+        {
+            GetSpawnPoints();
         }
 
         void GetSpawnPoints()
         {
-            if (_spawnPoints == null)
+            if (SpawnPoints == null)
             {
-                _spawnPoints = new List<Transform>();
+                SpawnPoints = new List<Transform>();
             }
             else
             {
-                _spawnPoints.Clear();
+                SpawnPoints.Clear();
             }
 
-            for (int i = 0; i < transform.childCount; i++)
+            Transform spawnPoints = GameObject.FindGameObjectWithTag("Spawn Points").transform;
+
+            for (int i = 0; i < spawnPoints.childCount; i++)
             {
-                _spawnPoints.Add(transform.GetChild(i));
+                SpawnPoints.Add(spawnPoints.GetChild(i));
             }
         }
     }

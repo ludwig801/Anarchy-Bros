@@ -8,6 +8,7 @@ namespace AnarchyBros
     {
         public enum NodeType { PlayerSpot = 0, SpawnPoint = 1, Node = 2 }
 
+        public int Index;
         public NodeType Type;
         public Color ColorDefault = Color.black, ColorHighlight = Color.white;
         public List<Edge> Edges;
@@ -52,6 +53,17 @@ namespace AnarchyBros
         public void OnPointerClick(PointerEventData eventData)
         {
             NodeManager.Instance.OnNodeClick(eventData, this);
+        }
+
+        public static float Distance(Node a, Node b)
+        {
+            Vector2 v = (a.transform.position - b.transform.position);
+            return v.magnitude;
+        }
+
+        public Node GetNeighbor(int index)
+        {
+            return Edges[index].GetNeighbor(this);
         }
     }
 }

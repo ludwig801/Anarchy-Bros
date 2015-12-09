@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
-using AnarchyBros.Strings;
 
 namespace AnarchyBros
 {
@@ -13,6 +12,7 @@ namespace AnarchyBros
         public List<Node> Nodes;
         public List<Edge> Edges;
         public List<PlayerSpot> PlayerSpots;
+        public float[,] Distances;
 
         Transform _playerSpots, _spawnPoints, _nodes, _edges;
         Vector2 _origin, _target;
@@ -193,6 +193,8 @@ namespace AnarchyBros
 
         public void RemoveEdge(Edge e)
         {
+            e.A.Edges.Remove(e);
+            e.B.Edges.Remove(e);
             Edges.Remove(e);
             Destroy(e.gameObject);
         }
@@ -340,13 +342,71 @@ namespace AnarchyBros
             }
         }
 
-        static Transform NextStep(Node current, Node objective)
+        public void RebuildGraph(IOManager.GameGraph newGraph)
         {
-            // TODO : make algorithm to get next step
+            DestroyGraph();
+
+            for (int i = 0; i < newGraph.Nodes.Count; i++)
+            {
+                IOManager.GameNode node = newGraph.Nodes[i];
+
+                Node n = CreateNode(node.Position.ToVector2, node.Type);
+
+                if (n.Type == Node.NodeType.PlayerSpot)
+                {
+                    PlayerSpots.Add(n.GetComponent<PlayerSpot>());
+                }
+            }
+
+            for (int i = 0; i < newGraph.Edges.Count; i++)
+            {
+                IOManager.GameEdge edge = newGraph.Edges[i];
+                Node a = null, b = null;
+                GetHitNode(edge.a.ToVector2, out a);
+                GetHitNode(edge.b.ToVector2, out b);
+
+                CreateEdge(a, b);
+            }
+        }
+
+        public PlayerSpot GetPlayerSpot(Vector2 pos)
+        {
+            for (int i = 0; i < PlayerSpots.Count; i++)
+            {
+                if ((Vector2)PlayerSpots[i].transform.position == pos)
+                {
+                    return PlayerSpots[i];
+                }
+            }
+
             return null;
         }
 
-        static List<Transform> GetPath(Node begin, Node objective)
+        public Vector2 NextStep(Node current, Node objective)
+        {
+            int target = objective.Index;
+            float min = float.MaxValue;
+            int best = 0;
+
+            for (int i = 0; i < current.Edges.Count; i++)
+            {
+                int neighbor = current.GetNeighbor(i).Index;
+                if (Distances[neighbor, target] < min)
+                {
+                    min = Distances[neighbor, target];
+                    best = neighbor;
+                }
+            }
+
+            return Nodes[best].transform.position;
+        }
+
+        public Vector2 NextStep(Vector2 current, Vector2 objective)
+        {
+            return NextStep(GetHitNode<Node>(current), GetHitNode<Node>(objective));
+        }
+
+        public List<Transform> GetPath(Node begin, Node objective)
         {
             // TODO
             return null;
@@ -411,46 +471,6 @@ namespace AnarchyBros
             }
         }
 
-        public PlayerSpot GetPlayerSpot(Vector2 pos)
-        {
-            for (int i = 0; i < PlayerSpots.Count; i++)
-            {
-                if ((Vector2)PlayerSpots[i].transform.position == pos)
-                {
-                    return PlayerSpots[i];
-                }
-            }
-
-            return null;
-        }
-
-        public void RebuildGraph(IOManager.GameGraph newGraph)
-        {
-            DestroyGraph();
-
-            for (int i = 0; i < newGraph.Nodes.Count; i++)
-            {
-                IOManager.GameNode node = newGraph.Nodes[i];
-
-                Node n = CreateNode(node.Position.ToVector2, node.Type);
-
-                if (n.Type == Node.NodeType.PlayerSpot)
-                {
-                    PlayerSpots.Add(n.GetComponent<PlayerSpot>());
-                }
-            }
-
-            for (int i = 0; i < newGraph.Edges.Count; i++)
-            {
-                IOManager.GameEdge edge = newGraph.Edges[i];
-                Node a = null, b = null;
-                GetHitNode(edge.a.ToVector2, out a);
-                GetHitNode(edge.b.ToVector2, out b);
-
-                CreateEdge(a, b);
-            }
-        }
-
         void DestroyGraph()
         {
             for (int i = 0; i < _spawnPoints.childCount; i++)
@@ -477,5 +497,134 @@ namespace AnarchyBros
             Nodes.Clear();
             Edges.Clear();
         }
+
+        #region PathEval
+
+        public void ReEvaluate()
+        {
+            Distances = new float[Nodes.Count, Nodes.Count];
+            List<GraphNode> graph = new List<GraphNode>();
+
+            for (int i = 0; i < Nodes.Count; i++)
+            {
+                Node n = Nodes[i];
+                n.Index = i;
+                GraphNode gNode = new GraphNode(n.transform.position, float.MaxValue);
+                graph.Add(gNode);
+            }
+
+            for (int i = 0; i < Nodes.Count; i++)
+            {
+                CalculateDistancesForNode(i, graph);
+            }
+
+            PrintMatrix(Distances);
+        }
+
+        void CalculateDistancesForNode(int sourceIndex, List<GraphNode> graph)
+        {
+            List<GraphNode> unvisited = new List<GraphNode>();
+
+
+            for (int i = 0; i < graph.Count; i++)
+            {
+                unvisited.Add(graph[i]);
+                graph[i].Dist = int.MaxValue;
+            }
+
+            for (int i = 0; i < Nodes.Count; i++)
+            {
+                Node node = Nodes[i];
+
+                for (int j = 0; j < node.Edges.Count; j++)
+                {
+                    Node neighbor = node.Edges[j].GetNeighbor(node);
+                    for (int w = 0; w < unvisited.Count; w++)
+                    {
+                        if (unvisited[w].position == (Vector2)neighbor.transform.position)
+                        {
+                            unvisited[i].Neighbors.Add(unvisited[w]);
+                        }
+                    }
+                }
+            }
+
+            unvisited[sourceIndex].Dist = 0;
+
+            while (unvisited.Count > 0)
+            {
+                GraphNode node = unvisited[GetMinDistNode(unvisited)];
+                unvisited.Remove(node);
+
+                for (int i = 0; i < node.Neighbors.Count; i++)
+                {
+                    GraphNode neighbor = node.Neighbors[i];
+                    if (unvisited.Contains(neighbor))
+                    {
+                        float d = node.Dist + Vector2.Distance(neighbor.position, node.position);
+                        if (d <= neighbor.Dist)
+                        {
+                            neighbor.Dist = d;
+                        }
+                    }
+                }
+            }
+
+            for (int i = 0; i < graph.Count; i++)
+            {
+                Distances[sourceIndex, i] = graph[i].Dist;
+            }
+        }
+
+        int GetMinDistNode(List<GraphNode> graph)
+        {
+            float min = float.MaxValue;
+            int index = 0;
+
+            for (int i = 0; i < graph.Count; i++)
+            {
+                if (graph[i].Dist <= min)
+                {
+                    min = graph[i].Dist;
+                    index = i;
+                }
+            }
+
+            return index;
+        }
+
+        class GraphNode
+        {
+            public Vector2 position;
+            public float Dist;
+
+            public List<GraphNode> Neighbors;
+
+            public GraphNode(Vector2 pos, float dist)
+            {
+                position = pos;
+                Dist = dist;
+
+                Neighbors = new List<GraphNode>();
+            }
+        }
+
+        void PrintMatrix(float[,] m)
+        {
+            string output = "";
+
+            for(int i = 0; i < m.GetLength(0); i++)
+            {
+                for (int j = 0; j < m.GetLength(1); j++)
+                {
+                    output += (int)m[i, j] + " ";
+                }
+                output += '\n';
+            }
+
+            Debug.Log(output);
+        }
+
+        #endregion
     }
 }

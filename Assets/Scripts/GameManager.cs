@@ -22,6 +22,8 @@ namespace AnarchyBros
         public void Play()
         {
             State = GameStates.Play;
+            NodeManager.Instance.ReEvaluate();
+            SpawnManager.Instance.ReEvaluate();
             PlayerManager.Instance.SetPlayersActive(true);
         }
 
