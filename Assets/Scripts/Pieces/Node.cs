@@ -7,11 +7,11 @@ namespace AnarchyBros
 {
     public class Node : MonoBehaviour, IPointerClickHandler, IDragHandler, IBeginDragHandler, IEndDragHandler
     {
-        public enum NodeType { PlayerSpot = 0, Spawn = 1, Node = 2 }
+        public enum NodeType { TowerSpot = 0, EnemySpawn = 1, Node = 2 }
 
         public int Index;
         public NodeType Type;
-        public Pawn Pawn;
+        public Tower Pawn;
         public bool Occupied { get { return Pawn != null; } }
         public List<Edge> Edges;
         public Collider2D Collider
@@ -53,7 +53,7 @@ namespace AnarchyBros
         {
             if (!_justScrolled)
             {
-                NodeManager.Instance.OnNodeClick(eventData, this);
+                GraphManager.Instance.OnNodeClick(eventData, this);
             }
             _justScrolled = false;
         }
@@ -68,12 +68,12 @@ namespace AnarchyBros
             Vector2 newPos = Camera.main.ScreenToWorldPoint(eventData.position);
             transform.position = new Vector3(newPos.x, newPos.y, transform.position.z);
 
-            NodeManager.Instance.OnNodeDrag(eventData, this);
+            GraphManager.Instance.OnNodeDrag(eventData, this);
         }
 
         public void OnEndDrag(PointerEventData eventData)
         {
-            NodeManager.Instance.OnNodeDrag(eventData, this);
+            GraphManager.Instance.OnNodeDrag(eventData, this);
         }
     }
 }

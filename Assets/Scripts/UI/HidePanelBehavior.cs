@@ -16,7 +16,7 @@ public class HidePanelBehavior : MonoBehaviour, IPointerClickHandler
         _mainPanel = MainPanel.GetComponent<RectTransform>();
         _originalHeight = _mainPanel.sizeDelta.y;
 
-        OnPointerClick(null);
+        //OnPointerClick(null);
     }
 
     public void OnPointerClick(PointerEventData eventData)

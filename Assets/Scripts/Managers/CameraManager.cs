@@ -68,7 +68,7 @@ namespace AnarchyBros
 
             MainCamera.orthographicSize = Scale * 10;
 
-            NodeManager.Instance.OnScaleChanged();
+            GraphManager.Instance.OnScaleChanged();
         }
     }
 }

@@ -4,10 +4,10 @@ using AnarchyBros.Enums;
 
 namespace AnarchyBros
 {
-    public class Pawn : MonoBehaviour, IKillable, IPointerClickHandler
+    public class Tower : MonoBehaviour, IKillable, IPointerClickHandler
     {
         public float Speed, Health;
-        public Node CurrentSpot;
+        public Node Spot;
         public bool IsAlive { get { return Health > 0f; } }
 
         Vector3 _moveTo;
@@ -19,17 +19,17 @@ namespace AnarchyBros
                 return;
             }
 
-            if (CurrentSpot == null)
+            if (Spot == null)
             {
                 Debug.LogWarning("CurrentSpot is null! [Pawn at " + transform.position + "]");
                 return;
             }
  
-            if (CurrentSpot.Pawn != this)
+            if (Spot.Pawn != this)
             {
-                CurrentSpot.Pawn = this;
+                Spot.Pawn = this;
             }
-            _moveTo = new Vector3(CurrentSpot.transform.position.x, CurrentSpot.transform.position.y, _moveTo.z);
+            _moveTo = new Vector3(Spot.transform.position.x, Spot.transform.position.y, _moveTo.z);
 
             if (!Mathf.Approximately(Vector3.Distance(transform.position, _moveTo), 0f))
             {
@@ -54,7 +54,7 @@ namespace AnarchyBros
 
         public void OnPointerClick(PointerEventData eventData)
         {
-            PawnManager.Instance.OnPawnClicked(this);
+            TowerManager.Instance.OnTowerClicked(this);
         }
     }
 }

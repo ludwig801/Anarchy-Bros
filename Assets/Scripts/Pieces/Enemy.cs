@@ -28,7 +28,7 @@ namespace AnarchyBros
                 }
                 else
                 {
-                    Vector2 newObjective = NodeManager.Instance.NextStep(LocalObjective, Objective);
+                    Vector2 newObjective = GraphManager.Instance.NextStep(LocalObjective, Objective);
                     LocalObjective = MoveTo2D(transform.position, newObjective);
                 }
             }
@@ -49,7 +49,7 @@ namespace AnarchyBros
         {
             if (data.tag == "Player")
             {
-                Pawn p = data.gameObject.GetComponent<Pawn>();
+                Tower p = data.gameObject.GetComponent<Tower>();
                 p.TakeDamage(Damage);
                 TakeDamage(Health);
             }

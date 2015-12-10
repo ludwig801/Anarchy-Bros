@@ -5,21 +5,29 @@ using AnarchyBros.Enums;
 
 namespace AnarchyBros
 {
-    public class NodeManager : MonoBehaviour
+    public class GraphManager : MonoBehaviour
     {
-        public static NodeManager Instance { get; private set; }
+        public static GraphManager Instance { get; private set; }
 
-        public Transform PlayerSpotsObj, SpawnSpotsObj, NodesObj, EdgesObj;
-        public GameObject PlayerSpotPrefab, SpawnPointPrefab, EdgePrefab, NodePrefab;
+        public Transform TowerSpotsObj, EnemySpawnsObj, NodesObj, EdgesObj;
+        public GameObject TowerSpotPrefab, EnemySpawnPrefab, EdgePrefab, NodePrefab;
         public List<Node> Nodes;
-        public List<Node> Spots;
+        public List<Node> TowerSpots;
         public List<Edge> Edges;
+
+        public enum Mode
+        {
+            Edge = 0,
+            TowerSpot = 1,
+            EnemySpawn = 2
+        }
 
         Vector2 _source, _target;
         Edge _refEdge, _hitEdge;
         Node _refSource, _refTarget, _hitNode;
         bool _targeting;
         float[,] Distances;
+        Mode _mode;
 
         public bool Targeting
         {
@@ -62,6 +70,8 @@ namespace AnarchyBros
             GetAllNodes();
 
             Targeting = false;
+
+            _mode = Mode.Edge;
         }
 
         void Update()
@@ -93,31 +103,31 @@ namespace AnarchyBros
                 Nodes.Clear();
             }
 
-            if (Spots == null)
+            if (TowerSpots == null)
             {
-                Spots = new List<Node>();
+                TowerSpots = new List<Node>();
             }
             else
             {
-                Spots.Clear();
+                TowerSpots.Clear();
             }
 
-            for (int i = 0; i < PlayerSpotsObj.childCount; i++)
+            for (int i = 0; i < TowerSpotsObj.childCount; i++)
             {
-                Node n = PlayerSpotsObj.GetChild(i).GetComponent<Node>();
-                n.Type = Node.NodeType.PlayerSpot;
+                Node n = TowerSpotsObj.GetChild(i).GetComponent<Node>();
+                n.Type = Node.NodeType.TowerSpot;
 
                 if (n != null)
                 {
                     Nodes.Add(n);
-                    Spots.Add(n.GetComponent<Node>());
+                    TowerSpots.Add(n.GetComponent<Node>());
                 }
             }
 
-            for (int i = 0; i < SpawnSpotsObj.childCount; i++)
+            for (int i = 0; i < EnemySpawnsObj.childCount; i++)
             {
-                Node n = SpawnSpotsObj.GetChild(i).GetComponent<Node>();
-                n.Type = Node.NodeType.Spawn;
+                Node n = EnemySpawnsObj.GetChild(i).GetComponent<Node>();
+                n.Type = Node.NodeType.EnemySpawn;
 
                 if (n != null)
                 {
@@ -194,20 +204,18 @@ namespace AnarchyBros
                     obj.transform.parent = NodesObj;
                     break;
 
-                case Node.NodeType.PlayerSpot:
-                    obj = Instantiate(PlayerSpotPrefab);
-                    obj.name = "Player Spot";
+                case Node.NodeType.TowerSpot:
+                    obj = Instantiate(TowerSpotPrefab);
                     obj.layer = LayerMask.NameToLayer("Spots");
                     obj.transform.position = worldPos;
-                    obj.transform.parent = PlayerSpotsObj;
+                    obj.transform.parent = TowerSpotsObj;
                     break;
 
-                case Node.NodeType.Spawn:
-                    obj = Instantiate(SpawnPointPrefab);
-                    obj.name = "Spawn Point";
+                case Node.NodeType.EnemySpawn:
+                    obj = Instantiate(EnemySpawnPrefab);
                     obj.layer = LayerMask.NameToLayer("Spots");
                     obj.transform.position = worldPos;
-                    obj.transform.parent = SpawnSpotsObj;
+                    obj.transform.parent = EnemySpawnsObj;
                     break;
 
                 default:
@@ -324,20 +332,35 @@ namespace AnarchyBros
             PointerEventData eventData = baseData as PointerEventData;
             if (eventData.button == PointerEventData.InputButton.Left)
             {
-                if (Targeting)
+                switch (_mode)
                 {
-                    _target = eventData.pointerCurrentRaycast.worldPosition;
-                    CreateLink();
+                    case Mode.Edge:
+                        if (Targeting)
+                        {
+                            _target = eventData.pointerCurrentRaycast.worldPosition;
+                            CreateLink();
 
-                    // For continuos targeting
-                    _source = _target;
-                    // For one time targeting
-                    // Targeting = false;
-                }
-                else
-                {
-                    Targeting = true;
-                    _source = eventData.pointerCurrentRaycast.worldPosition;
+                            // For continuos targeting
+                            _source = _target;
+                            // For one time targeting
+                            // Targeting = false;
+                        }
+                        else
+                        {
+                            Targeting = true;
+                            _source = eventData.pointerCurrentRaycast.worldPosition;
+                        }
+                        break;
+
+                    case Mode.EnemySpawn:
+                        Targeting = false;
+                        CreateNode(eventData.pointerCurrentRaycast.worldPosition, Node.NodeType.EnemySpawn);
+                        break;
+
+                    case Mode.TowerSpot:
+                        Targeting = false;
+                        CreateNode(eventData.pointerCurrentRaycast.worldPosition, Node.NodeType.TowerSpot);
+                        break;
                 }
             }
             else if (eventData.button == PointerEventData.InputButton.Right)
@@ -352,21 +375,29 @@ namespace AnarchyBros
             {
                 if (eventData.button == PointerEventData.InputButton.Left)
                 {
-                    if (Targeting)
+                    switch (_mode)
                     {
-                        _target = n.transform.position;
-                        CreateLink();
+                        case Mode.Edge:
+                            if (Targeting)
+                            {
+                                _target = n.transform.position;
+                                CreateLink();
 
-                        // For continuos targeting
-                        _source = _target;
-                        // For one time targeting
-                        // Targeting = false;
-                    }
-                    else
-                    {
-                        Targeting = true;
-                        _source = n.transform.position;
-                        _target = _source;
+                                // For continuos targeting
+                                _source = _target;
+                                // For one time targeting
+                                // Targeting = false;
+                            }
+                            else
+                            {
+                                Targeting = true;
+                                _source = n.transform.position;
+                                _target = _source;
+                            }
+                            break;
+
+                        default:
+                            break;
                     }
                 }
                 else if (eventData.button == PointerEventData.InputButton.Right)
@@ -378,16 +409,16 @@ namespace AnarchyBros
                     else
                     {
                         RemoveNode(n);
-                    }               
+                    }
                 }
             }
             else if (GameManager.Instance.IsCurrentState(GameStates.Place))
             {
-                PawnManager.Instance.OnNodeClicked(n);
+                TowerManager.Instance.OnNodeClicked(n);
             }
             else if (GameManager.Instance.IsCurrentState(GameStates.Play))
             {
-                PawnManager.Instance.OnNodeClicked(n);
+                TowerManager.Instance.OnNodeClicked(n);
             }
         }
 
@@ -430,6 +461,12 @@ namespace AnarchyBros
             }
         }
 
+        public void OnModeChanged(int newMode)
+        {
+            Targeting = false;
+            _mode = (Mode)newMode;
+        }
+
         public void RebuildGraph(IOManager.GameGraph newGraph)
         {
             DestroyAll();
@@ -440,9 +477,9 @@ namespace AnarchyBros
 
                 Node n = CreateNode(node.Position.ToVector2, node.Type);
 
-                if (n.Type == Node.NodeType.PlayerSpot)
+                if (n.Type == Node.NodeType.TowerSpot)
                 {
-                    Spots.Add(n.GetComponent<Node>());
+                    TowerSpots.Add(n.GetComponent<Node>());
                 }
             }
 
@@ -456,13 +493,13 @@ namespace AnarchyBros
             }
         }
 
-        public Node GetPlayerSpot(Vector2 pos)
+        public Node GetTowerSpot(Vector2 pos)
         {
-            for (int i = 0; i < Spots.Count; i++)
+            for (int i = 0; i < TowerSpots.Count; i++)
             {
-                if ((Vector2)Spots[i].transform.position == pos)
+                if ((Vector2)TowerSpots[i].transform.position == pos)
                 {
-                    return Spots[i];
+                    return TowerSpots[i];
                 }
             }
 
@@ -495,7 +532,7 @@ namespace AnarchyBros
 
         public void DestroyNodes()
         {
-            for(int i = 0; i < NodesObj.childCount; i++)
+            for (int i = 0; i < NodesObj.childCount; i++)
             {
                 RemoveNode(NodesObj.GetChild(i).GetComponent<Node>());
             }
@@ -504,14 +541,14 @@ namespace AnarchyBros
 
         public void DestroyAll()
         {
-            for (int i = 0; i < SpawnSpotsObj.childCount; i++)
+            for (int i = 0; i < EnemySpawnsObj.childCount; i++)
             {
-                Destroy(SpawnSpotsObj.GetChild(i).gameObject);
+                Destroy(EnemySpawnsObj.GetChild(i).gameObject);
             }
 
-            for (int i = 0; i < PlayerSpotsObj.childCount; i++)
+            for (int i = 0; i < TowerSpotsObj.childCount; i++)
             {
-                Destroy(PlayerSpotsObj.GetChild(i).gameObject);
+                Destroy(TowerSpotsObj.GetChild(i).gameObject);
             }
 
             DestroyNodes();
@@ -521,7 +558,7 @@ namespace AnarchyBros
                 Destroy(EdgesObj.GetChild(i).gameObject);
             }
 
-            Spots.Clear();
+            TowerSpots.Clear();
             Edges.Clear();
         }
 
@@ -643,7 +680,7 @@ namespace AnarchyBros
         {
             string output = "";
 
-            for(int i = 0; i < m.GetLength(0); i++)
+            for (int i = 0; i < m.GetLength(0); i++)
             {
                 for (int j = 0; j < m.GetLength(1); j++)
                 {

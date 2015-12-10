@@ -22,27 +22,27 @@ namespace AnarchyBros
         public void Play()
         {
             _currentState = GameStates.Play;
-            NodeManager.Instance.ReEvaluate();
-            SpawnManager.Instance.ReEvaluate();
-            PawnManager.Instance.ReEvaluate();
+            GraphManager.Instance.ReEvaluate();
+            EnemyManager.Instance.ReEvaluate();
+            TowerManager.Instance.ReEvaluate();
         }
 
         public void Stop()
         {
             _currentState = GameStates.Stop;
-            PawnManager.Instance.ReEvaluate();
+            TowerManager.Instance.ReEvaluate();
         }
 
         public void Edit()
         {
             _currentState = GameStates.Edit;
-            PawnManager.Instance.ReEvaluate();
+            TowerManager.Instance.ReEvaluate();
         }
 
         public void Place()
         {
             _currentState = GameStates.Place;
-            PawnManager.Instance.ReEvaluate();
+            TowerManager.Instance.ReEvaluate();
         }
 
         public bool IsCurrentState(GameStates state)

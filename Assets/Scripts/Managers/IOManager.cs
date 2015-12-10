@@ -21,8 +21,8 @@ namespace AnarchyBros
 
         public void SaveGraph()
         {
-            List<Node> nodes = NodeManager.Instance.Nodes;
-            List<Edge> edges = NodeManager.Instance.Edges;
+            List<Node> nodes = GraphManager.Instance.Nodes;
+            List<Edge> edges = GraphManager.Instance.Edges;
             GameGraph toSave = new GameGraph();
 
             for (int i = 0; i < nodes.Count; i++)
@@ -58,7 +58,7 @@ namespace AnarchyBros
                 GameGraph graph = (GameGraph)bf.Deserialize(file);
                 file.Close();
 
-                NodeManager.Instance.RebuildGraph(graph);
+                GraphManager.Instance.RebuildGraph(graph);
 
                 graph.Nodes.Clear();
                 graph.Edges.Clear();

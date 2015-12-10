@@ -4,15 +4,15 @@ using AnarchyBros.Enums;
 
 namespace AnarchyBros
 {
-    public class SpawnManager : MonoBehaviour
+    public class EnemyManager : MonoBehaviour
     {
-        public static SpawnManager Instance { get; private set; }
+        public static EnemyManager Instance { get; private set; }
 
         public Transform EnemiesObj, SpawnSpotsObj;
         public GameObject EnemyPrefab;
         public float SpawnTime;
         public int MaxEnemyCount;
-        public List<Node> SpawnSpots;
+        public List<Node> EnemySpawns;
 
         float _deltaTime;      
         int EnemyCount { get { return EnemiesObj.transform.childCount; } }   
@@ -45,9 +45,9 @@ namespace AnarchyBros
         public void Spawn()
         {
             int randSpawnSpot = Random.Range(0, int.MaxValue);
-            randSpawnSpot = randSpawnSpot % SpawnSpots.Count;
+            randSpawnSpot = randSpawnSpot % EnemySpawns.Count;
 
-            List<Node> pawnSpots = NodeManager.Instance.Spots;
+            List<Node> pawnSpots = GraphManager.Instance.TowerSpots;
             int randPawnSpot = Random.Range(0, int.MaxValue);
             randPawnSpot %= pawnSpots.Count;
 
@@ -81,7 +81,7 @@ namespace AnarchyBros
             instance.transform.parent = EnemiesObj;
 
             Enemy e = instance.GetComponent<Enemy>();
-            e.LocalObjective = SpawnSpots[randSpawnSpot].transform.position;
+            e.LocalObjective = EnemySpawns[randSpawnSpot].transform.position;
             e.Objective = pawnSpots[i].transform.position;
         }
 
@@ -92,18 +92,18 @@ namespace AnarchyBros
 
         void GetSpawnSpots()
         {
-            if (SpawnSpots == null)
+            if (EnemySpawns == null)
             {
-                SpawnSpots = new List<Node>();
+                EnemySpawns = new List<Node>();
             }
             else
             {
-                SpawnSpots.Clear();
+                EnemySpawns.Clear();
             }
 
             for (int i = 0; i < SpawnSpotsObj.childCount; i++)
             {
-                SpawnSpots.Add(SpawnSpotsObj.GetChild(i).GetComponent<Node>());
+                EnemySpawns.Add(SpawnSpotsObj.GetChild(i).GetComponent<Node>());
             }
         }
     }

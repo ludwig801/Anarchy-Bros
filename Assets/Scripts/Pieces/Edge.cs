@@ -43,7 +43,7 @@ namespace AnarchyBros
 
         public void OnPointerClick(PointerEventData eventData)
         {
-            NodeManager.Instance.OnEdgeClick(eventData, this);
+            GraphManager.Instance.OnEdgeClick(eventData, this);
         }
 
         public void ReEvaluate()

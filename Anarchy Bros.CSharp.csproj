@@ -63,18 +63,19 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Libraries\Strings.cs" />
+    <Compile Include="Assets\Libraries\Tools2D.cs" />
     <Compile Include="Assets\Scripts\Interfaces\IKillable.cs" />
     <Compile Include="Assets\Scripts\Managers\CameraManager.cs" />
+    <Compile Include="Assets\Scripts\Managers\EnemyManager.cs" />
     <Compile Include="Assets\Scripts\Managers\GameManager.cs" />
+    <Compile Include="Assets\Scripts\Managers\GraphManager.cs" />
     <Compile Include="Assets\Scripts\Managers\IOManager.cs" />
-    <Compile Include="Assets\Scripts\Managers\NodeManager.cs" />
-    <Compile Include="Assets\Scripts\Managers\PawnManager.cs" />
-    <Compile Include="Assets\Scripts\Managers\SpawnManager.cs" />
+    <Compile Include="Assets\Scripts\Managers\TowerManager.cs" />
     <Compile Include="Assets\Scripts\Pieces\Edge.cs" />
     <Compile Include="Assets\Scripts\Pieces\Enemy.cs" />
     <Compile Include="Assets\Scripts\Pieces\Node.cs" />
-    <Compile Include="Assets\Scripts\Pieces\Pawn.cs" />
     <Compile Include="Assets\Scripts\Pieces\PieceBehavior.cs" />
+    <Compile Include="Assets\Scripts\Pieces\Tower.cs" />
     <Compile Include="Assets\Scripts\UI\HidePanelBehavior.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\SyntaxTree\UnityVS\2015\UnityVS.CSharp.targets" />
