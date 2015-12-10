@@ -1,9 +1,10 @@
-﻿namespace AnarchyBros.Strings
+﻿namespace AnarchyBros.Enums
 {
-    public abstract class GameStates
+    public enum GameStates
     {
-        public const string Play = "Play";
-        public const string Stop = "Stop";
-        public const string Edit = "Edit";
+        Stop = 0,
+        Play = 1,
+        Place = 2,
+        Edit = 3
     }
 }
