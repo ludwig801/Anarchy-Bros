@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using AnarchyBros.Enums;
+using UnityEngine.EventSystems;
 
 namespace AnarchyBros
 {
@@ -14,6 +15,7 @@ namespace AnarchyBros
         public List<Tower> Towers;
 
         int _selected;
+        int _activeTowers;
 
         void Awake()
         {
@@ -25,6 +27,7 @@ namespace AnarchyBros
             _selected = int.MinValue;
 
             Towers = new List<Tower>();
+            _activeTowers = 0;
         }
 
         void Update()
@@ -53,16 +56,16 @@ namespace AnarchyBros
         {
             if (tower.Spot != null)
             {
-                tower.Spot.Pawn = null;
+                tower.Spot.Tower = null;
             }
             tower.Spot = spot;
-            tower.Spot.Pawn = tower;
+            tower.Spot.Tower = tower;
         }
 
         void MoveTowerImmediate(Tower tower, Node spot)
         {
             MoveTower(tower, spot);
-            tower.transform.position = Tools2D.Move(tower.transform.position, spot.transform.position);
+            tower.transform.position = Tools2D.ConvertKeepZ(tower.transform.position, spot.transform.position);
         }
 
         int GetTowerIndex(Tower tower)
@@ -80,17 +83,57 @@ namespace AnarchyBros
 
         void PlaceTower(Node spot)
         {
-            GameObject instance = Instantiate(TowerPrefab);
-            Tower tower = instance.GetComponent<Tower>();
-            Towers.Add(tower);
+            Tower tower;
+
+            if (_activeTowers < Towers.Count)
+            {
+                tower = GetInactiveTower();
+                tower.gameObject.SetActive(true);
+            }
+            else
+            {
+                GameObject instance = Instantiate(TowerPrefab);
+                instance.name = "Tower";
+                instance.transform.parent = TowersObj;
+
+                tower = instance.GetComponent<Tower>();
+                Towers.Add(tower);
+            }
+
             MoveTowerImmediate(tower, spot);
+            _activeTowers++;
+        }
+
+        void RemoveTower(Tower tower)
+        {
+            if (tower.Spot != null)
+            {
+                tower.Spot.Tower = null;
+                tower.Spot = null;
+            }
+
+            tower.gameObject.SetActive(false);
+            _activeTowers--;
+        }
+
+        Tower GetInactiveTower()
+        {
+            for (int i = 0; i < Towers.Count; i++)
+            {
+                if (!Towers[i].gameObject.activeSelf)
+                {
+                    return Towers[i];
+                }
+            }
+
+            return null;
         }
 
         public void OnNodeClicked(Node node)
         {
             if (GameManager.Instance.IsCurrentState(GameStates.Place))
             {
-                if (Towers.Count < MaxTowerCount && node.Type == Node.NodeType.TowerSpot)
+                if (node.Type == Node.NodeType.TowerSpot && _activeTowers < MaxTowerCount)
                 {
                     PlaceTower(node);
                 }
@@ -103,7 +146,7 @@ namespace AnarchyBros
                     {
                         if (node.Occupied)
                         {
-                            _selected = GetTowerIndex(node.Pawn);
+                            _selected = GetTowerIndex(node.Tower);
                         }
                         else
                         {
@@ -112,15 +155,25 @@ namespace AnarchyBros
                     }
                     else
                     {
-                        _selected = GetTowerIndex(node.Pawn);
+                        _selected = GetTowerIndex(node.Tower);
                     }
                 }
             }           
         }
 
-        public void OnTowerClicked(Tower p)
+        public void OnTowerClicked(PointerEventData eventData, Tower tower)
         {
-            _selected = GetTowerIndex(p);
+            if (GameManager.Instance.IsCurrentState(GameStates.Play))
+            {
+                _selected = GetTowerIndex(tower);
+            }
+            else if (GameManager.Instance.IsCurrentState(GameStates.Place))
+            {
+                if (eventData.button == PointerEventData.InputButton.Right)
+                {
+                    RemoveTower(tower);
+                }
+            }
         }
 
         public void ReEvaluate()

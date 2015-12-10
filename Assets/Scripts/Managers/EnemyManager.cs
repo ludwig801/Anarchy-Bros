@@ -44,37 +44,26 @@ namespace AnarchyBros
 
         public void Spawn()
         {
-            int randSpawnSpot = Random.Range(0, int.MaxValue);
-            randSpawnSpot = randSpawnSpot % EnemySpawns.Count;
+            int randSpawnSpot = Random.Range(0, EnemySpawns.Count);
+            int randTowerSpot = Random.Range(0, TowerManager.Instance.Towers.Count);
 
-            List<Node> pawnSpots = GraphManager.Instance.TowerSpots;
-            int randPawnSpot = Random.Range(0, int.MaxValue);
-            randPawnSpot %= pawnSpots.Count;
+            int count = 0, iter = 0, i = 0;
 
-            //Debug.Log(randSpawnSpot + " | " + randPawnSpot); 
-
-            int i = 0;
-            int iter = 0;
-            while (randPawnSpot >= 0)
+            while (count <= randTowerSpot && iter < GraphManager.Instance.Nodes.Count * 2)
             {
-                if (pawnSpots[i].Occupied)
+                Node n = GraphManager.Instance.Nodes[i];
+                if (n.Type == Node.NodeType.TowerSpot && n.Occupied)
                 {
-                    randPawnSpot--;
-                    if (randPawnSpot < 0)
+                    count++;
+                    if (count > randTowerSpot)
                     {
                         break;
                     }
                 }
 
-                i++;
-                i %= pawnSpots.Count;
-
                 iter++;
-                if (iter > 10000)
-                {
-                    Debug.Log("max iter");
-                    break;               
-                }
+                i++;
+                i %= GraphManager.Instance.Nodes.Count;
             }
 
             GameObject instance = Instantiate(EnemyPrefab);
@@ -82,7 +71,7 @@ namespace AnarchyBros
 
             Enemy e = instance.GetComponent<Enemy>();
             e.LocalObjective = EnemySpawns[randSpawnSpot].transform.position;
-            e.Objective = pawnSpots[i].transform.position;
+            e.Objective = GraphManager.Instance.Nodes[i].transform.position;
         }
 
         public void ReEvaluate()

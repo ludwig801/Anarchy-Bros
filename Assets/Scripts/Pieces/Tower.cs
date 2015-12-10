@@ -25,9 +25,9 @@ namespace AnarchyBros
                 return;
             }
  
-            if (Spot.Pawn != this)
+            if (Spot.Tower != this)
             {
-                Spot.Pawn = this;
+                Spot.Tower = this;
             }
             _moveTo = new Vector3(Spot.transform.position.x, Spot.transform.position.y, _moveTo.z);
 
@@ -49,12 +49,12 @@ namespace AnarchyBros
 
         public void Kill()
         {
-            Debug.Log("The pawn died");
+            Debug.Log("The tower died");
         }
 
         public void OnPointerClick(PointerEventData eventData)
         {
-            TowerManager.Instance.OnTowerClicked(this);
+            TowerManager.Instance.OnTowerClicked(eventData, this);
         }
     }
 }

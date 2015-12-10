@@ -47,7 +47,7 @@ namespace AnarchyBros
 
         public void OnTriggerEnter2D(Collider2D data)
         {
-            if (data.tag == "Player")
+            if (data.tag == "Tower")
             {
                 Tower p = data.gameObject.GetComponent<Tower>();
                 p.TakeDamage(Damage);

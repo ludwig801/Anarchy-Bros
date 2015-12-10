@@ -75,6 +75,7 @@
     <Compile Include="Assets\Scripts\Pieces\Enemy.cs" />
     <Compile Include="Assets\Scripts\Pieces\Node.cs" />
     <Compile Include="Assets\Scripts\Pieces\PieceBehavior.cs" />
+    <Compile Include="Assets\Scripts\Pieces\TargetBehavior.cs" />
     <Compile Include="Assets\Scripts\Pieces\Tower.cs" />
     <Compile Include="Assets\Scripts\UI\HidePanelBehavior.cs" />
   </ItemGroup>

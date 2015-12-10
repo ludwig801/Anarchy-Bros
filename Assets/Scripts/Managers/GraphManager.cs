@@ -10,10 +10,10 @@ namespace AnarchyBros
         public static GraphManager Instance { get; private set; }
 
         public Transform TowerSpotsObj, EnemySpawnsObj, NodesObj, EdgesObj;
-        public GameObject TowerSpotPrefab, EnemySpawnPrefab, EdgePrefab, NodePrefab;
+        public GameObject TowerSpotPrefab, EnemySpawnPrefab, EdgePrefab, NodePrefab, TargetPrefab;
         public List<Node> Nodes;
-        public List<Node> TowerSpots;
         public List<Edge> Edges;
+        public Mode CurrentMode;
 
         public enum Mode
         {
@@ -27,7 +27,7 @@ namespace AnarchyBros
         Node _refSource, _refTarget, _hitNode;
         bool _targeting;
         float[,] Distances;
-        Mode _mode;
+        GameObject _targetObj;
 
         public bool Targeting
         {
@@ -67,24 +67,45 @@ namespace AnarchyBros
             instance.transform.parent = transform;
             _refTarget = instance.GetComponent<Node>();
 
+            _targetObj = Instantiate(TargetPrefab);
+            _targetObj.SetActive(false);
+            _targetObj.name = "Target";
+            _targetObj.transform.parent = transform;
+
             GetAllNodes();
 
             Targeting = false;
 
-            _mode = Mode.Edge;
+            CurrentMode = Mode.Edge;
         }
 
         void Update()
         {
             if (GameManager.Instance.IsCurrentState(GameStates.Edit))
             {
-                if (Targeting)
+                switch (CurrentMode)
                 {
-                    _target = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                    _refEdge.SetVertices(_source, _target);
-                    _refSource.transform.position = _target;
-                    _refTarget.transform.position = _source;
-                }
+                    case Mode.Edge:
+                        _targetObj.SetActive(false);
+                        if (Targeting)
+                        {
+                            _target = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                            _refEdge.SetVertices(_source, _target);
+                            _refSource.transform.position = _target;
+                            _refTarget.transform.position = _source;
+                        }
+                        break;
+
+                    case Mode.EnemySpawn:
+                        _targetObj.SetActive(true);
+                        _targetObj.transform.position = Tools2D.ConvertKeepZ(_targetObj.transform.position, Camera.main.ScreenToWorldPoint(Input.mousePosition));
+                        break;
+
+                    case Mode.TowerSpot:
+                        _targetObj.SetActive(true);
+                        _targetObj.transform.position = Tools2D.ConvertKeepZ(_targetObj.transform.position, Camera.main.ScreenToWorldPoint(Input.mousePosition));
+                        break;
+                }             
             }
             else
             {
@@ -103,15 +124,6 @@ namespace AnarchyBros
                 Nodes.Clear();
             }
 
-            if (TowerSpots == null)
-            {
-                TowerSpots = new List<Node>();
-            }
-            else
-            {
-                TowerSpots.Clear();
-            }
-
             for (int i = 0; i < TowerSpotsObj.childCount; i++)
             {
                 Node n = TowerSpotsObj.GetChild(i).GetComponent<Node>();
@@ -120,7 +132,6 @@ namespace AnarchyBros
                 if (n != null)
                 {
                     Nodes.Add(n);
-                    TowerSpots.Add(n.GetComponent<Node>());
                 }
             }
 
@@ -332,7 +343,7 @@ namespace AnarchyBros
             PointerEventData eventData = baseData as PointerEventData;
             if (eventData.button == PointerEventData.InputButton.Left)
             {
-                switch (_mode)
+                switch (CurrentMode)
                 {
                     case Mode.Edge:
                         if (Targeting)
@@ -369,18 +380,18 @@ namespace AnarchyBros
             }
         }
 
-        public void OnNodeClick(PointerEventData eventData, Node n)
+        public void OnNodeClick(PointerEventData eventData, Node node)
         {
             if (GameManager.Instance.IsCurrentState(GameStates.Edit))
             {
                 if (eventData.button == PointerEventData.InputButton.Left)
                 {
-                    switch (_mode)
+                    switch (CurrentMode)
                     {
                         case Mode.Edge:
                             if (Targeting)
                             {
-                                _target = n.transform.position;
+                                _target = node.transform.position;
                                 CreateLink();
 
                                 // For continuos targeting
@@ -391,7 +402,7 @@ namespace AnarchyBros
                             else
                             {
                                 Targeting = true;
-                                _source = n.transform.position;
+                                _source = node.transform.position;
                                 _target = _source;
                             }
                             break;
@@ -402,27 +413,40 @@ namespace AnarchyBros
                 }
                 else if (eventData.button == PointerEventData.InputButton.Right)
                 {
-                    if (Targeting)
+                    switch (CurrentMode)
                     {
-                        Targeting = false;
-                    }
-                    else
-                    {
-                        RemoveNode(n);
+                        case Mode.Edge:
+                            if (Targeting)
+                            {
+                                Targeting = false;
+                            }
+                            else
+                            {
+                                RemoveNode(node);
+                            }
+                            break;
+
+                        case Mode.EnemySpawn:
+                            RemoveNode(node);
+                            break;
+
+                        case Mode.TowerSpot:
+                            RemoveNode(node);
+                            break;
                     }
                 }
             }
             else if (GameManager.Instance.IsCurrentState(GameStates.Place))
             {
-                TowerManager.Instance.OnNodeClicked(n);
+                TowerManager.Instance.OnNodeClicked(node);
             }
             else if (GameManager.Instance.IsCurrentState(GameStates.Play))
             {
-                TowerManager.Instance.OnNodeClicked(n);
+                TowerManager.Instance.OnNodeClicked(node);
             }
         }
 
-        public void OnNodeDrag(PointerEventData eventData, Node n)
+        public void OnNodeDrag(PointerEventData eventData, Node node)
         {
             if (!GameManager.Instance.IsCurrentState(GameStates.Edit))
             {
@@ -435,7 +459,7 @@ namespace AnarchyBros
             }
         }
 
-        public void OnEdgeClick(PointerEventData eventData, Edge e)
+        public void OnEdgeClick(PointerEventData eventData, Edge edge)
         {
             if (eventData.button == PointerEventData.InputButton.Left)
             {
@@ -457,14 +481,14 @@ namespace AnarchyBros
             }
             else if (eventData.button == PointerEventData.InputButton.Right)
             {
-                RemoveEdge(e);
+                RemoveEdge(edge);
             }
         }
 
         public void OnModeChanged(int newMode)
         {
             Targeting = false;
-            _mode = (Mode)newMode;
+            CurrentMode = (Mode)newMode;
         }
 
         public void RebuildGraph(IOManager.GameGraph newGraph)
@@ -475,12 +499,7 @@ namespace AnarchyBros
             {
                 IOManager.GameNode node = newGraph.Nodes[i];
 
-                Node n = CreateNode(node.Position.ToVector2, node.Type);
-
-                if (n.Type == Node.NodeType.TowerSpot)
-                {
-                    TowerSpots.Add(n.GetComponent<Node>());
-                }
+                CreateNode(node.Position.ToVector2, node.Type);
             }
 
             for (int i = 0; i < newGraph.Edges.Count; i++)
@@ -493,13 +512,13 @@ namespace AnarchyBros
             }
         }
 
-        public Node GetTowerSpot(Vector2 pos)
+        public Node GetTowerSpot(Vector2 position)
         {
-            for (int i = 0; i < TowerSpots.Count; i++)
+            for (int i = 0; i < Nodes.Count; i++)
             {
-                if ((Vector2)TowerSpots[i].transform.position == pos)
+                if (Nodes[i].Type == Node.NodeType.TowerSpot && Tools2D.IsPositionEqual(Nodes[i].transform.position, position))
                 {
-                    return TowerSpots[i];
+                    return Nodes[i];
                 }
             }
 
@@ -558,7 +577,6 @@ namespace AnarchyBros
                 Destroy(EdgesObj.GetChild(i).gameObject);
             }
 
-            TowerSpots.Clear();
             Edges.Clear();
         }
 

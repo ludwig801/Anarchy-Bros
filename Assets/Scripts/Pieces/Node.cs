@@ -11,8 +11,8 @@ namespace AnarchyBros
 
         public int Index;
         public NodeType Type;
-        public Tower Pawn;
-        public bool Occupied { get { return Pawn != null; } }
+        public Tower Tower;
+        public bool Occupied { get { return Tower != null; } }
         public List<Edge> Edges;
         public Collider2D Collider
         {
@@ -28,7 +28,7 @@ namespace AnarchyBros
 
         void Start()
         {
-            Pawn = null;
+            Tower = null;
         }
 
         void Update()
