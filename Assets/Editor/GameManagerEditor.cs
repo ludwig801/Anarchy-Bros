@@ -10,6 +10,6 @@ public class GameManagerEditor : Editor
 
         GameManager script = (GameManager)target;
 
-        EditorGUILayout.LabelField("Current State", script.CurrentState.ToString());
+        EditorGUILayout.LabelField("Current State", script.State);
     }
 }

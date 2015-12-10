@@ -1,4 +1,4 @@
-﻿using AnarchyBros.Enums;
+﻿using AnarchyBros.Strings;
 using UnityEngine;
 
 namespace AnarchyBros
@@ -7,7 +7,7 @@ namespace AnarchyBros
     {
         public static GameManager Instance { get; private set; }
 
-        GameStates _currentState;
+        public string State { get; private set; }
 
         void Awake()
         {
@@ -21,40 +21,44 @@ namespace AnarchyBros
 
         public void Play()
         {
-            _currentState = GameStates.Play;
+            State = GameStates.Play;
             NodeManager.Instance.ReEvaluate();
             SpawnManager.Instance.ReEvaluate();
-            PawnManager.Instance.ReEvaluate();
+            PlayerManager.Instance.SetPlayersActive(true);
         }
 
         public void Stop()
         {
-            _currentState = GameStates.Stop;
-            PawnManager.Instance.ReEvaluate();
+            State = GameStates.Stop;
         }
 
         public void Edit()
         {
-            _currentState = GameStates.Edit;
-            PawnManager.Instance.ReEvaluate();
+            State = GameStates.Edit;
+            PlayerManager.Instance.SetPlayersActive(false);
         }
 
-        public void Place()
-        {
-            _currentState = GameStates.Place;
-            PawnManager.Instance.ReEvaluate();
-        }
-
-        public bool IsCurrentState(GameStates state)
-        {
-            return _currentState == state;
-        }
-
-        public GameStates CurrentState
+        public bool IsPlay
         {
             get
             {
-                return _currentState;
+                return State == GameStates.Play;
+            }
+        }
+
+        public bool IsStop
+        {
+            get
+            {
+                return State == GameStates.Stop;
+            }
+        }
+
+        public bool IsEdit
+        {
+            get
+            {
+                return State == GameStates.Edit;
             }
         }
     }
