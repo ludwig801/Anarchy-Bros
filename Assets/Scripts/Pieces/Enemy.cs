@@ -8,23 +8,12 @@ namespace AnarchyBros
         public Vector2 LocalObjective;
         public float Speed, Damage, Health;
 
-        //SpriteRenderer _renderer;
-
         void Start()
         {
-            //_renderer = GetComponent<SpriteRenderer>();
-            //_renderer.color = new Color(_renderer.color.r, _renderer.color.g, _renderer.color.b, 0f);
             transform.position = MoveTo2D(transform.position, LocalObjective);
         }
 
         void Update()
-        {
-            MoveToObjective();
-
-            //_renderer.color = new Color(_renderer.color.r, _renderer.color.g, _renderer.color.b, Mathf.Lerp(_renderer.color.a, 1f, Time.deltaTime * Speed));
-        }
-
-        void MoveToObjective()
         {
             Vector2 delta = LocalObjective - (Vector2)transform.position;
             float angle = (delta.x < 0f) ? Vector2.Angle(Vector2.up, delta) : 360f - Vector2.Angle(Vector2.up, delta);
@@ -38,9 +27,8 @@ namespace AnarchyBros
                     Destroy(gameObject);
                 }
                 else
-                {                   
+                {
                     Vector2 newObjective = NodeManager.Instance.NextStep(LocalObjective, Objective);
-                    //Debug.Log(transform.position + " --> " + newObjective);
                     LocalObjective = MoveTo2D(transform.position, newObjective);
                 }
             }
@@ -57,11 +45,11 @@ namespace AnarchyBros
             return new Vector3(to.x, to.y, from.z);
         }
 
-        void OnTriggerEnter2D(Collider2D data)
+        public void OnTriggerEnter2D(Collider2D data)
         {
             if (data.tag == "Player")
             {
-                Player p = data.gameObject.GetComponent<Player>();
+                Pawn p = data.gameObject.GetComponent<Pawn>();
                 p.TakeDamage(Damage);
                 TakeDamage(Health);
             }
