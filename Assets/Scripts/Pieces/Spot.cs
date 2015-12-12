@@ -5,7 +5,7 @@ using UnityEditor;
 
 namespace AnarchyBros
 {
-    public class Node : MonoBehaviour, IPointerClickHandler, IDragHandler, IBeginDragHandler, IEndDragHandler
+    public class Spot : MonoBehaviour, IPointerClickHandler, IDragHandler, IBeginDragHandler, IEndDragHandler
     {
         public enum NodeType { TowerSpot = 0, EnemySpawn = 1, Node = 2 }
 
@@ -44,7 +44,7 @@ namespace AnarchyBros
             Edges.Add(e);
         }
 
-        public Node GetNeighbor(int index)
+        public Spot GetNeighbor(int index)
         {
             return Edges[index].GetNeighbor(this);
         }

@@ -21,22 +21,22 @@ namespace AnarchyBros
 
         public void SaveGraph()
         {
-            List<Node> nodes = GraphManager.Instance.Nodes;
+            List<Spot> spots = GraphManager.Instance.Spots;
             List<Edge> edges = GraphManager.Instance.Edges;
             GameGraph toSave = new GameGraph();
 
-            for (int i = 0; i < nodes.Count; i++)
+            for (int i = 0; i < spots.Count; i++)
             {
-                GameNode gameNode = new GameNode();
-                gameNode.Position = new Point(nodes[i].transform.position);
-                gameNode.Type = nodes[i].Type;
+                IOSpot gameNode = new IOSpot();
+                gameNode.Position = new Point(spots[i].transform.position);
+                gameNode.Type = spots[i].Type;
 
-                toSave.Nodes.Add(gameNode);
+                toSave.Spots.Add(gameNode);
             }
 
             for (int i = 0; i < edges.Count; i++)
             {
-                GameEdge gameEdge = new GameEdge();
+                IOEdge gameEdge = new IOEdge();
                 gameEdge.a = new Point(edges[i].A.transform.position);
                 gameEdge.b = new Point(edges[i].B.transform.position);
 
@@ -60,7 +60,7 @@ namespace AnarchyBros
 
                 GraphManager.Instance.RebuildGraph(graph);
 
-                graph.Nodes.Clear();
+                graph.Spots.Clear();
                 graph.Edges.Clear();
             }
         }
@@ -68,25 +68,25 @@ namespace AnarchyBros
         [Serializable]
         public class GameGraph
         {
-            public List<GameNode> Nodes;
-            public List<GameEdge> Edges;
+            public List<IOSpot> Spots;
+            public List<IOEdge> Edges;
 
             public GameGraph()
             {
-                Nodes = new List<GameNode>();
-                Edges = new List<GameEdge>();
+                Spots = new List<IOSpot>();
+                Edges = new List<IOEdge>();
             }
         }
 
         [Serializable]
-        public class GameNode
+        public class IOSpot
         {
-            public Node.NodeType Type;
+            public Spot.NodeType Type;
             public Point Position;
         }
 
         [Serializable]
-        public class GameEdge
+        public class IOEdge
         {
             public Point a, b;
         }

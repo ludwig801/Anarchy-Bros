@@ -11,11 +11,10 @@ namespace AnarchyBros
 
         public Transform TowersObj;
         public GameObject TowerPrefab;
-        public int MaxTowerCount;
+        public int MaxTowerCount, ActiveTowers;
         public List<Tower> Towers;
 
         int _selected;
-        int _activeTowers;
 
         void Awake()
         {
@@ -27,7 +26,7 @@ namespace AnarchyBros
             _selected = int.MinValue;
 
             Towers = new List<Tower>();
-            _activeTowers = 0;
+            ActiveTowers = 0;
         }
 
         void Update()
@@ -52,7 +51,7 @@ namespace AnarchyBros
             }
         }
 
-        void MoveTower(Tower tower, Node spot)
+        void AssignSpot(Tower tower, Spot spot)
         {
             if (tower.Spot != null)
             {
@@ -60,12 +59,6 @@ namespace AnarchyBros
             }
             tower.Spot = spot;
             tower.Spot.Tower = tower;
-        }
-
-        void MoveTowerImmediate(Tower tower, Node spot)
-        {
-            MoveTower(tower, spot);
-            tower.transform.position = Tools2D.ConvertKeepZ(tower.transform.position, spot.transform.position);
         }
 
         int GetTowerIndex(Tower tower)
@@ -81,11 +74,11 @@ namespace AnarchyBros
             return int.MinValue;
         }
 
-        void PlaceTower(Node spot)
+        void PlaceTower(Spot spot)
         {
             Tower tower;
 
-            if (_activeTowers < Towers.Count)
+            if (ActiveTowers < Towers.Count)
             {
                 tower = GetInactiveTower();
                 tower.gameObject.SetActive(true);
@@ -100,8 +93,10 @@ namespace AnarchyBros
                 Towers.Add(tower);
             }
 
-            MoveTowerImmediate(tower, spot);
-            _activeTowers++;
+            AssignSpot(tower, spot);
+            tower.transform.position = Tools2D.Convert(tower.transform.position, spot.transform.position);
+            tower.LocalObjective = spot;
+            ActiveTowers++;
         }
 
         void RemoveTower(Tower tower)
@@ -113,7 +108,7 @@ namespace AnarchyBros
             }
 
             tower.gameObject.SetActive(false);
-            _activeTowers--;
+            ActiveTowers--;
         }
 
         Tower GetInactiveTower()
@@ -129,18 +124,18 @@ namespace AnarchyBros
             return null;
         }
 
-        public void OnNodeClicked(Node node)
+        public void OnNodeClicked(Spot node)
         {
             if (GameManager.Instance.IsCurrentState(GameStates.Place))
             {
-                if (node.Type == Node.NodeType.TowerSpot && _activeTowers < MaxTowerCount)
+                if (node.Type == Spot.NodeType.TowerSpot && ActiveTowers < MaxTowerCount)
                 {
                     PlaceTower(node);
                 }
             }
             else if(GameManager.Instance.IsCurrentState(GameStates.Play))
             {
-                if (node.Type == Node.NodeType.TowerSpot)
+                if (node.Type == Spot.NodeType.TowerSpot)
                 {
                     if (_selected >= 0)
                     {
@@ -150,7 +145,7 @@ namespace AnarchyBros
                         }
                         else
                         {
-                            MoveTower(Towers[_selected], node);
+                            AssignSpot(Towers[_selected], node);
                         }
                     }
                     else
@@ -182,7 +177,7 @@ namespace AnarchyBros
 
             for (int i = 0; i < Towers.Count; i++)
             {
-                Towers[i].Spot = GraphManager.Instance.GetHitNode<Node>(Towers[i].transform.position);
+                Towers[i].Spot = GraphManager.Instance.GetHitSpot<Spot>(Towers[i].transform.position);
                 Towers[i].gameObject.SetActive(GameManager.Instance.IsCurrentState(GameStates.Play));
             }
         }

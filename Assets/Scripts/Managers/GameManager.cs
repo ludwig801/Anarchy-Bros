@@ -25,24 +25,28 @@ namespace AnarchyBros
             GraphManager.Instance.ReEvaluate();
             EnemyManager.Instance.ReEvaluate();
             TowerManager.Instance.ReEvaluate();
+            UIManager.Instance.ReEvaluate();
         }
 
         public void Stop()
         {
             _currentState = GameStates.Stop;
             TowerManager.Instance.ReEvaluate();
+            UIManager.Instance.ReEvaluate();
         }
 
         public void Edit()
         {
             _currentState = GameStates.Edit;
             TowerManager.Instance.ReEvaluate();
+            UIManager.Instance.ReEvaluate();
         }
 
         public void Place()
         {
             _currentState = GameStates.Place;
             TowerManager.Instance.ReEvaluate();
+            UIManager.Instance.ReEvaluate();
         }
 
         public bool IsCurrentState(GameStates state)

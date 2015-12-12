@@ -71,10 +71,11 @@
     <Compile Include="Assets\Scripts\Managers\GraphManager.cs" />
     <Compile Include="Assets\Scripts\Managers\IOManager.cs" />
     <Compile Include="Assets\Scripts\Managers\TowerManager.cs" />
+    <Compile Include="Assets\Scripts\Managers\UIManager.cs" />
     <Compile Include="Assets\Scripts\Pieces\Edge.cs" />
     <Compile Include="Assets\Scripts\Pieces\Enemy.cs" />
-    <Compile Include="Assets\Scripts\Pieces\Node.cs" />
     <Compile Include="Assets\Scripts\Pieces\PieceBehavior.cs" />
+    <Compile Include="Assets\Scripts\Pieces\Spot.cs" />
     <Compile Include="Assets\Scripts\Pieces\TargetBehavior.cs" />
     <Compile Include="Assets\Scripts\Pieces\Tower.cs" />
     <Compile Include="Assets\Scripts\UI\HidePanelBehavior.cs" />

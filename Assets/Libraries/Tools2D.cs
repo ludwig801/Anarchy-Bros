@@ -4,19 +4,30 @@ namespace AnarchyBros
 {
     public abstract class Tools2D
     {
-        public static Vector3 AddKeepZ(Vector3 from, Vector3 to)
+        public static Vector3 Add(Vector3 a, Vector2 b)
         {
-            return from + new Vector3(to.x, to.y, 0);
+            return a + (Vector3)b;
         }
 
-        public static Vector3 ConvertKeepZ(Vector3 from, Vector3 to)
+        public static Vector3 Subtract(Vector3 a, Vector2 b)
+        {
+            return a - (Vector3)b;
+        }
+
+        public static Vector3 Convert(Vector3 from, Vector2 to)
         {
             return new Vector3(to.x, to.y, from.z);
         }
 
-        public static bool IsPositionEqual(Vector3 a, Vector3 b)
+        public static Vector3 MoveTowards(Vector3 from, Vector2 to, float t)
         {
-            return a.x == b.x && a.y == b.y;
+            Vector2 v2d = Vector2.MoveTowards(from, to, t);
+            return new Vector3(v2d.x, v2d.y, from.z);
+        }
+
+        public static bool IsPositionEqual(Vector2 a, Vector2 b)
+        {
+            return Mathf.Approximately(a.x, b.x) && Mathf.Approximately(a.y, b.y);
         }
     }
 }

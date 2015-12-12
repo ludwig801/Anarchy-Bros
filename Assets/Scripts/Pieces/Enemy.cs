@@ -4,53 +4,52 @@ namespace AnarchyBros
 {
     public class Enemy : MonoBehaviour, IKillable
     {
-        public Vector2 Objective;
-        public Vector2 LocalObjective;
-        public float Speed, Damage, Health;
+        public Spot Objective;
+        public Spot LocalObjective;
+        public float Speed, Attack, Health;
+
+        float _initialHealth;
 
         void Start()
         {
-            transform.position = MoveTo2D(transform.position, LocalObjective);
+            _initialHealth = Health;
         }
 
         void Update()
         {
-            Vector2 delta = LocalObjective - (Vector2)transform.position;
-            float angle = (delta.x < 0f) ? Vector2.Angle(Vector2.up, delta) : 360f - Vector2.Angle(Vector2.up, delta);
-            transform.rotation = Quaternion.Euler(0, 0, angle);
-            transform.position = MoveTowards2D(transform.position, LocalObjective);
-
-            if (Mathf.Approximately(Vector2.Distance(transform.position, LocalObjective), 0f))
+            if (!Objective.Occupied)
             {
-                if (LocalObjective == Objective)
+                if (!EnemyManager.Instance.GenerateObjective(LocalObjective, out Objective))
                 {
-                    Destroy(gameObject);
+                    Kill();
+                    return;
+                }
+            }
+
+            if (Mathf.Approximately(Vector2.Distance(transform.position, LocalObjective.transform.position), 0f))
+            {
+                if (Tools2D.IsPositionEqual(LocalObjective.transform.position, Objective.transform.position))
+                {
+                    Kill();
                 }
                 else
                 {
-                    Vector2 newObjective = GraphManager.Instance.NextStep(LocalObjective, Objective);
-                    LocalObjective = MoveTo2D(transform.position, newObjective);
+                    LocalObjective = GraphManager.Instance.NextStep(LocalObjective, Objective);
                 }
             }
+
+            Vector2 delta = Tools2D.Subtract(LocalObjective.transform.position, transform.position);
+            float angle = (delta.x < 0f) ? Vector2.Angle(Vector2.up, delta) : 360f - Vector2.Angle(Vector2.up, delta);
+            transform.rotation = Quaternion.Euler(0, 0, angle);
+            transform.position = Tools2D.MoveTowards(transform.position, LocalObjective.transform.position, Time.deltaTime * Speed);
         }
 
-        Vector3 MoveTowards2D(Vector3 from, Vector2 to)
-        {
-            Vector2 v2d = Vector2.MoveTowards(transform.position, LocalObjective, Time.deltaTime * Speed);
-            return new Vector3(v2d.x, v2d.y, from.z);
-        }
-
-        Vector3 MoveTo2D(Vector3 from, Vector2 to)
-        {
-            return new Vector3(to.x, to.y, from.z);
-        }
-
-        public void OnTriggerEnter2D(Collider2D data)
+        void OnTriggerEnter2D(Collider2D data)
         {
             if (data.tag == "Tower")
             {
                 Tower p = data.gameObject.GetComponent<Tower>();
-                p.TakeDamage(Damage);
+                p.TakeDamage(Attack);
                 TakeDamage(Health);
             }
         }
@@ -67,7 +66,9 @@ namespace AnarchyBros
 
         public void Kill()
         {
-            Destroy(gameObject);
+            gameObject.SetActive(false);
+            Health = _initialHealth;
+            EnemyManager.Instance.OnEnemyKill();
         }
     }
 }

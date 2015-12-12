@@ -7,6 +7,12 @@
         Place = 2,
         Edit = 3,
         Pause = 4,
-        Resume = 5
+    }
+
+    public enum GraphModes
+    {
+        Edge = 0,
+        TowerSpot = 1,
+        EnemySpawn = 2
     }
 }

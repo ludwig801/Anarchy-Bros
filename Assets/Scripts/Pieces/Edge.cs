@@ -5,8 +5,8 @@ namespace AnarchyBros
 {
     public class Edge : MonoBehaviour, IPointerClickHandler
     {
-        public Node A { get; private set; }
-        public Node B { get; private set; }
+        public Spot A { get; private set; }
+        public Spot B { get; private set; }
         public Collider2D Collider { get; private set; }
 
         void Start()
@@ -14,17 +14,17 @@ namespace AnarchyBros
             Collider = GetComponent<Collider2D>();
         }
 
-        public Node GetNeighbor(Node n)
+        public Spot GetNeighbor(Spot n)
         {
             return (n == A) ? B : (n == B) ? A : null;
         }
 
-        public bool HasNode(Node n)
+        public bool HasNode(Spot n)
         {
             return (n == A) || (n == B);
         }
 
-        public void SetNodes(Node a, Node b)
+        public void SetNodes(Spot a, Spot b)
         {
             A = a;
             B = b;
