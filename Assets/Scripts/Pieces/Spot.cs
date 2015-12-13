@@ -42,6 +42,11 @@ namespace AnarchyBros
             Edges.Add(e);
         }
 
+        public void RemoveEdge(Edge e)
+        {
+            Edges.Remove(e);
+        }
+
         public Spot GetNeighbor(int index)
         {
             return Edges[index].GetNeighbor(this);

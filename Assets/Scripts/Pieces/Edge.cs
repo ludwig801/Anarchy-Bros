@@ -19,6 +19,18 @@ namespace AnarchyBros
             return (n == A) ? B : (n == B) ? A : null;
         }
 
+        public void ReplaceNeighbor(Spot oldNeighbor, Spot newNeighbor)
+        {
+            if (A == oldNeighbor)
+            {
+                A = newNeighbor;
+            }
+            else if (B == oldNeighbor)
+            {
+                B = newNeighbor;
+            }
+        }
+
         public bool HasNode(Spot n)
         {
             return (n == A) || (n == B);

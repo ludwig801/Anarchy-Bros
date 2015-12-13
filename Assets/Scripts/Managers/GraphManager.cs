@@ -13,7 +13,7 @@ namespace AnarchyBros
         public GameObject TowerSpotPrefab, EnemySpawnPrefab, EdgePrefab, SpotPrefab, TargetPrefab;
         public List<Spot> Spots;
         public List<Edge> Edges;
-        public GraphModes CurrentMode;
+        public SpotTypes CurrentMode;
 
         GameObject _targetObj;
         Vector2 _source, _target;
@@ -73,7 +73,7 @@ namespace AnarchyBros
 
             Targeting = false;
 
-            CurrentMode = GraphModes.Edge;
+            CurrentMode = SpotTypes.Connection;
         }
 
         void Update()
@@ -82,7 +82,7 @@ namespace AnarchyBros
             {
                 switch (CurrentMode)
                 {
-                    case GraphModes.Edge:
+                    case SpotTypes.Connection:
                         _targetObj.SetActive(false);
                         if (Targeting)
                         {
@@ -93,16 +93,16 @@ namespace AnarchyBros
                         }
                         break;
 
-                    case GraphModes.EnemySpawn:
+                    case SpotTypes.EnemySpawn:
                         _targetObj.SetActive(true);
                         _targetObj.transform.position = Tools2D.Convert(_targetObj.transform.position, Camera.main.ScreenToWorldPoint(Input.mousePosition));
                         break;
 
-                    case GraphModes.TowerSpot:
+                    case SpotTypes.TowerSpot:
                         _targetObj.SetActive(true);
                         _targetObj.transform.position = Tools2D.Convert(_targetObj.transform.position, Camera.main.ScreenToWorldPoint(Input.mousePosition));
                         break;
-                }             
+                }
             }
             else
             {
@@ -148,24 +148,39 @@ namespace AnarchyBros
             }
         }
 
-        void CreateLink()
+        void CreateLink(Vector2 source)
+        {
+            Spot node;
+            Edge hitEdge;
+
+            if (!GetHitSpot(source, out node))
+            {
+                node = CreateSpot(source, CurrentMode);
+                if (GetHitEdge(source, out hitEdge))
+                {
+                    SplitEdge(hitEdge, node);
+                }
+            }
+        }
+
+        void CreateLink(Vector2 source, Vector2 target)
         {
             Spot nodeA, nodeB;
             Edge hitEdge;
 
-            if (!GetHitSpot(_source, out nodeA))
+            if (!GetHitSpot(source, out nodeA))
             {
-                nodeA = CreateSpot(_source, SpotTypes.Connection);
-                if (GetHitEdge(_source, out hitEdge))
+                nodeA = CreateSpot(source, CurrentMode);
+                if (GetHitEdge(source, out hitEdge))
                 {
                     SplitEdge(hitEdge, nodeA);
                 }
             }
 
-            if (!GetHitSpot(_target, out nodeB))
+            if (!GetHitSpot(target, out nodeB))
             {
-                nodeB = CreateSpot(_target, SpotTypes.Connection);
-                if (GetHitEdge(_target, out hitEdge))
+                nodeB = CreateSpot(target, CurrentMode);
+                if (GetHitEdge(target, out hitEdge))
                 {
                     SplitEdge(hitEdge, nodeB);
                 }
@@ -182,17 +197,20 @@ namespace AnarchyBros
             CreateEdge(nodeA, nodeB);
         }
 
-        void SplitEdge(Edge edge, Spot spliter)
+        void SplitEdge(Edge hitEdge, Spot spliterSpot)
         {
-            Spot spotA = edge.A;
-            edge.SetNodes(spliter, edge.B);
+            Vector2 spotA = hitEdge.A.transform.position;
+            hitEdge.A.RemoveEdge(hitEdge);
 
-            CreateEdge(spliter, spotA);
+            hitEdge.SetNodes(spliterSpot, hitEdge.B);
+            spliterSpot.AddEdge(hitEdge);
+
+            CreateEdge(spliterSpot, GetHitSpot(spotA));
         }
 
         Spot CreateSpot(Vector2 worldPos, SpotTypes type)
         {
-            GameObject obj;         
+            GameObject obj;
 
             switch (type)
             {
@@ -230,6 +248,22 @@ namespace AnarchyBros
             return n;
         }
 
+        Spot ReplaceSpot(Spot from, SpotTypes toType)
+        {
+            Spot to = CreateSpot(from.transform.position, toType);
+            for (int i = from.Edges.Count - 1; i >= 0; i--)
+            {
+                Edge e = from.Edges[i];
+                e.ReplaceNeighbor(from, to);
+                to.AddEdge(e);
+                from.RemoveEdge(from.Edges[i]);
+            }
+
+            RemoveSpot(from);
+
+            return to;
+        }
+
         Edge CreateEdge(Spot a, Spot b)
         {
             GameObject obj = Instantiate(EdgePrefab);
@@ -247,13 +281,9 @@ namespace AnarchyBros
 
         void RemoveSpot(Spot spot)
         {
-            for (int i = 0; i < Edges.Count; i++)
+            for (int i = spot.Edges.Count - 1; i >= 0; i--)
             {
-                if (Edges[i].HasNode(spot))
-                {
-                    RemoveEdge(Edges[i]);
-                    i--;
-                }
+                RemoveEdge(spot.Edges[i]);
             }
 
             switch (spot.Type)
@@ -276,8 +306,8 @@ namespace AnarchyBros
         void RemoveEdge(Edge edge)
         {
             Edges.Remove(edge);
-            edge.A.Edges.Remove(edge);
-            edge.B.Edges.Remove(edge); 
+            edge.A.RemoveEdge(edge);
+            edge.B.RemoveEdge(edge);
             Destroy(edge.gameObject);
         }
 
@@ -359,11 +389,11 @@ namespace AnarchyBros
             {
                 switch (CurrentMode)
                 {
-                    case GraphModes.Edge:
+                    case SpotTypes.Connection:
                         if (Targeting)
                         {
                             _target = eventData.pointerCurrentRaycast.worldPosition;
-                            CreateLink();
+                            CreateLink(_source, _target);
 
                             // For continuos targeting
                             _source = _target;
@@ -377,12 +407,12 @@ namespace AnarchyBros
                         }
                         break;
 
-                    case GraphModes.EnemySpawn:
+                    case SpotTypes.EnemySpawn:
                         Targeting = false;
                         CreateSpot(eventData.pointerCurrentRaycast.worldPosition, SpotTypes.EnemySpawn);
                         break;
 
-                    case GraphModes.TowerSpot:
+                    case SpotTypes.TowerSpot:
                         Targeting = false;
                         CreateSpot(eventData.pointerCurrentRaycast.worldPosition, SpotTypes.TowerSpot);
                         break;
@@ -394,19 +424,20 @@ namespace AnarchyBros
             }
         }
 
-        public void OnSpotClick(PointerEventData eventData, Spot node)
+        public void OnSpotClick(PointerEventData eventData, Spot spot)
         {
             if (GameManager.Instance.IsCurrentState(GameStates.Edit))
             {
                 if (eventData.button == PointerEventData.InputButton.Left)
                 {
+                    //Debug.Log("Clicked spot of type: " + spot.Type.ToString() + " while in mode: + " + CurrentMode.ToString());
                     switch (CurrentMode)
                     {
-                        case GraphModes.Edge:
+                        case SpotTypes.Connection:
                             if (Targeting)
                             {
-                                _target = node.transform.position;
-                                CreateLink();
+                                _target = spot.transform.position;
+                                CreateLink(_source, _target);
 
                                 // For continuos targeting
                                 _source = _target;
@@ -415,48 +446,49 @@ namespace AnarchyBros
                             }
                             else
                             {
+                                //spot = ReplaceSpot(spot, SpotTypes.TowerSpot);
                                 Targeting = true;
-                                _source = node.transform.position;
+                                _source = spot.transform.position;
                                 _target = _source;
                             }
                             break;
 
-                        default:
+                        case SpotTypes.TowerSpot:
+                            Targeting = false;
+                            ReplaceSpot(spot, SpotTypes.TowerSpot);
+                            break;
+
+                        case SpotTypes.EnemySpawn:
+                            Targeting = false;
+                            ReplaceSpot(spot, SpotTypes.EnemySpawn);
                             break;
                     }
                 }
                 else if (eventData.button == PointerEventData.InputButton.Right)
                 {
-                    switch (CurrentMode)
+                    switch (spot.Type)
                     {
-                        case GraphModes.Edge:
-                            if (Targeting)
-                            {
-                                Targeting = false;
-                            }
-                            else
-                            {
-                                RemoveSpot(node);
-                            }
+                        case SpotTypes.Connection:
+                            RemoveSpot(spot);
                             break;
 
-                        case GraphModes.EnemySpawn:
-                            RemoveSpot(node);
+                        case SpotTypes.EnemySpawn:
+                            ReplaceSpot(spot, SpotTypes.Connection);
                             break;
 
-                        case GraphModes.TowerSpot:
-                            RemoveSpot(node);
+                        case SpotTypes.TowerSpot:
+                            ReplaceSpot(spot, SpotTypes.Connection);
                             break;
                     }
                 }
             }
             else if (GameManager.Instance.IsCurrentState(GameStates.Place))
             {
-                TowerManager.Instance.OnNodeClicked(node);
+                TowerManager.Instance.OnNodeClicked(spot);
             }
             else if (GameManager.Instance.IsCurrentState(GameStates.Play))
             {
-                TowerManager.Instance.OnNodeClicked(node);
+                TowerManager.Instance.OnNodeClicked(spot);
             }
         }
 
@@ -477,20 +509,37 @@ namespace AnarchyBros
         {
             if (eventData.button == PointerEventData.InputButton.Left)
             {
-                if (Targeting)
+                switch (CurrentMode)
                 {
-                    _target = eventData.pointerCurrentRaycast.worldPosition;
-                    CreateLink();
+                    case SpotTypes.Connection:
+                        if (Targeting)
+                        {
+                            _target = eventData.pointerCurrentRaycast.worldPosition;
+                            CreateLink(_source, _target);
 
-                    // For continuos targeting
-                    _source = _target;
-                    // For one time targeting
-                    // Targeting = false;
-                }
-                else
-                {
-                    Targeting = true;
-                    _source = eventData.pointerCurrentRaycast.worldPosition;
+                            // For continuos targeting
+                            _source = _target;
+                            // For one time targeting
+                            // Targeting = false;
+                        }
+                        else
+                        {
+                            Targeting = true;
+                            _source = eventData.pointerCurrentRaycast.worldPosition;
+                        }
+                        break;
+
+                    case SpotTypes.TowerSpot:
+                        Targeting = false;
+                        _source = eventData.pointerCurrentRaycast.worldPosition;
+                        CreateLink(_source);
+                        break;
+
+                    case SpotTypes.EnemySpawn:
+                        Targeting = false;
+                        _source = eventData.pointerCurrentRaycast.worldPosition;
+                        CreateLink(_source);
+                        break;
                 }
             }
             else if (eventData.button == PointerEventData.InputButton.Right)
@@ -502,7 +551,7 @@ namespace AnarchyBros
         public void OnModeChanged(int newMode)
         {
             Targeting = false;
-            CurrentMode = (GraphModes)newMode;
+            CurrentMode = (SpotTypes)newMode;
         }
 
         public void RebuildGraph(IOManager.GameGraph newGraph)
