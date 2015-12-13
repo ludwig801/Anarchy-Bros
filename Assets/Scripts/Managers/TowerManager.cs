@@ -59,26 +59,13 @@ namespace AnarchyBros
             tower.Objective.Tower = tower;
         }
 
-        int GetTowerIndex(Tower tower)
-        {
-            for (int i = 0; i < Towers.Count; i++)
-            {
-                if (Towers[i] == tower)
-                {
-                    return i;
-                }
-            }
-
-            return int.MinValue;
-        }
-
         void PlaceTower(Spot spot)
         {
             Tower tower;
 
             if (ActiveTowers < Towers.Count)
             {
-                tower = GetInactiveTower();
+                tower = GetTower();
                 tower.gameObject.SetActive(true);
             }
             else
@@ -109,7 +96,31 @@ namespace AnarchyBros
             ActiveTowers--;
         }
 
-        Tower GetInactiveTower()
+        void DestroyAllTowers()
+        {
+            for (int i = 0; i < Towers.Count; i++)
+            {
+                Destroy(Towers[i].gameObject);
+            }
+
+            Towers.Clear();
+            ActiveTowers = 0;
+        }
+
+        int GetTowerIndex(Tower tower)
+        {
+            for (int i = 0; i < Towers.Count; i++)
+            {
+                if (Towers[i] == tower)
+                {
+                    return i;
+                }
+            }
+
+            return int.MinValue;
+        }
+
+        Tower GetTower()
         {
             for (int i = 0; i < Towers.Count; i++)
             {
@@ -190,17 +201,6 @@ namespace AnarchyBros
         public void OnTowerKill()
         {
             ActiveTowers--;
-        }
-
-        public void DestroyAllTowers()
-        {
-            for (int i = 0; i < Towers.Count; i++)
-            {
-                Destroy(Towers[i].gameObject);
-            }
-
-            Towers.Clear();
-            ActiveTowers = 0;
         }
 
         public void ReEvaluate()

@@ -25,6 +25,11 @@ namespace AnarchyBros
             return new Vector3(v2d.x, v2d.y, from.z);
         }
 
+        public static Vector3 Multiply(Vector3 v, float mult)
+        {
+            return new Vector3(v.x * mult, v.y * mult, v.z);
+        }
+
         public static bool IsPositionEqual(Vector2 a, Vector2 b)
         {
             return Mathf.Approximately(a.x, b.x) && Mathf.Approximately(a.y, b.y);

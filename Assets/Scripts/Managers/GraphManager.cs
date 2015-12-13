@@ -44,19 +44,19 @@ namespace AnarchyBros
         void Start()
         {
             GameObject instance = Instantiate(EdgePrefab);
-            instance.name = "Ref Edge";
+            instance.name = "Ref. Edge";
             instance.GetComponent<Collider2D>().enabled = false;
             instance.transform.parent = transform;
             _refEdge = instance.GetComponent<Edge>();
 
             instance = Instantiate(SpotPrefab);
-            instance.name = "Ref Source";
+            instance.name = "Ref. Source";
             instance.GetComponent<Collider2D>().enabled = false;
             instance.transform.parent = transform;
             _refSource = instance.GetComponent<Spot>();
 
             instance = Instantiate(SpotPrefab);
-            instance.name = "Ref Target";
+            instance.name = "Ref. Target";
             instance.GetComponent<Collider2D>().enabled = false;
             instance.transform.parent = transform;
             _refTarget = instance.GetComponent<Spot>();
@@ -339,21 +339,6 @@ namespace AnarchyBros
             }
 
             return false;
-        }
-
-        public Edge GetHitEdge(Spot a, Vector2 pos)
-        {
-            Spot b = GetHitSpot(pos);
-
-            for (int i = 0; i < Edges.Count; i++)
-            {
-                if (Edges[i].GetNeighbor(a) == b)
-                {
-                    return Edges[i];
-                }
-            }
-
-            return null;
         }
 
         public Edge GetHitEdge(Spot a, Spot b)
@@ -748,7 +733,7 @@ namespace AnarchyBros
 
             while (unvisited.Count > 0)
             {
-                GraphSpot node = unvisited[GetNextGraphSpot(unvisited)];
+                GraphSpot node = unvisited[GetNextBest(unvisited)];
                 unvisited.Remove(node);
 
                 for (int i = 0; i < node.Neighbors.Count; i++)
@@ -771,7 +756,7 @@ namespace AnarchyBros
             }
         }
 
-        int GetNextGraphSpot(List<GraphSpot> graph)
+        int GetNextBest(List<GraphSpot> graph)
         {
             float min = float.MaxValue;
             int index = 0;

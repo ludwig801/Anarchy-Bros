@@ -34,10 +34,14 @@ namespace AnarchyBros
 
         void MoveTowardsObjective()
         {
+            if (Tools2D.IsPositionEqual(transform.position, Objective.transform.position))
+            {
+                return;
+            }
+
             if (Tools2D.IsPositionEqual(transform.position, MoveTo.transform.position))
             {
                 CurrentSpot = MoveTo;
-                if(CurrentEdge != null) CurrentEdge.GetComponent<SpriteRenderer>().color = Color.black;
                 CurrentEdge = null;
             }
 
@@ -50,7 +54,6 @@ namespace AnarchyBros
             else if (CurrentEdge != null)
             {
                 MoveTo = GraphManager.Instance.GetBestSpot(transform.position, CurrentEdge.A, CurrentEdge.B, Objective);
-                CurrentEdge.GetComponent<SpriteRenderer>().color = Color.red;
             }
 
             Vector2 delta = Tools2D.Subtract(MoveTo.transform.position, transform.position);

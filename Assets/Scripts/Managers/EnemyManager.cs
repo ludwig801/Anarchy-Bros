@@ -51,6 +51,7 @@ namespace AnarchyBros
             {
                 Enemy e = GetEnemy();
                 e.transform.position = spawnSpot.transform.position;
+                e.name = "Enemy";
                 e.CurrentSpot = spawnSpot;
                 e.CurrentEdge = null;
                 e.MoveTo = e.CurrentSpot;
@@ -58,6 +59,25 @@ namespace AnarchyBros
                 e.gameObject.SetActive(true);
                 ActiveEnemies++;
             }
+        }
+
+        void DestroyAllEnemies()
+        {
+            for (int i = 0; i < Enemies.Count; i++)
+            {
+                Destroy(Enemies[i].gameObject);
+            }
+
+            Enemies.Clear();
+            ActiveEnemies = 0;
+        }
+
+        bool GenerateObjective(out Tower finalObjective, out Spot spawnSpot)
+        {
+            spawnSpot = GraphManager.Instance.GetRandomSpot(SpotTypes.EnemySpawn);
+            finalObjective = TowerManager.Instance.GetRandomTower();
+
+            return (finalObjective != null && spawnSpot != null);
         }
 
         Enemy GetEnemy()
@@ -79,14 +99,6 @@ namespace AnarchyBros
             return e;
         }
 
-        bool GenerateObjective(out Tower finalObjective, out Spot spawnSpot)
-        {
-            spawnSpot = GraphManager.Instance.GetRandomSpot(SpotTypes.EnemySpawn);
-            finalObjective = TowerManager.Instance.GetRandomTower();
-
-            return (finalObjective != null && spawnSpot != null);
-        }
-
         public Tower GetNewObjective()
         {
             return TowerManager.Instance.GetRandomTower();
@@ -95,17 +107,6 @@ namespace AnarchyBros
         public void OnEnemyKill()
         {
             ActiveEnemies--;
-        }
-
-        void DestroyAllEnemies()
-        {
-            for (int i = 0; i < Enemies.Count; i++)
-            {
-                Destroy(Enemies[i].gameObject);
-            }
-
-            Enemies.Clear();
-            ActiveEnemies = 0;
         }
 
         public void ReEvaluate()

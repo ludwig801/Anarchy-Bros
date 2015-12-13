@@ -30,12 +30,18 @@ namespace AnarchyBros
 
             UpdateObjective();
 
+            if (Objective == null)
+            {
+                Kill();
+                return;
+            }
+
             MoveTowardsObjective();
         }
 
         void UpdateObjective()
         {
-            if (!Objective.IsAlive)
+            if (Objective == null || !Objective.IsAlive)
             {
                 Objective = EnemyManager.Instance.GetNewObjective();
             }
@@ -48,11 +54,6 @@ namespace AnarchyBros
                 CurrentSpot = GraphManager.Instance.GetHitSpot(MoveTo.transform.position);
                 CurrentEdge = null;
             }
-
-            //if ((CurrentSpot == null && CurrentEdge == null) || (Objective.CurrentSpot == null && Objective.CurrentEdge == null))
-            //{
-            //    return;
-            //}
 
             if (CurrentSpot != null)
             {
@@ -101,6 +102,7 @@ namespace AnarchyBros
 
             if (Health <= 0f)
             {
+                Debug.Log("Enemy Died");
                 Kill();
             }
         }
