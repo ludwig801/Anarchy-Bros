@@ -9,16 +9,25 @@ namespace AnarchyBros
         public Spot MoveTo;
         public Spot CurrentSpot;
         public Edge CurrentEdge;
-        public float Speed, Attack, Health;
+        public float Speed, Attack, Health, DeathSpeed;
+        public Color ColorDying, ColorDead;
 
+        PieceBehavior _pieceBehavior;
+        SpriteRenderer _renderer;
         float _initialHealth;
+        bool _dying, _animateDefault;
 
         void Start()
         {
             CurrentSpot = GraphManager.Instance.GetHitSpot(transform.position);
             CurrentEdge = null;
             transform.position = Tools2D.Convert(transform.position, MoveTo.transform.position);
+
+            _pieceBehavior = GetComponent<PieceBehavior>();
+            _animateDefault = _pieceBehavior.Animate;
+            _renderer = GetComponent<SpriteRenderer>();
             _initialHealth = Health;
+            _dying = false;
         }
 
         void Update()
@@ -28,9 +37,29 @@ namespace AnarchyBros
                 return;
             }
 
+            _pieceBehavior.Animate = false;
+
+            if (_dying)
+            {
+                if (Tools.AreColorsEqual(_renderer.color, ColorDead))
+                {
+                    Debug.Log("Died");
+                    Health = _initialHealth;
+                    _dying = false;
+                    _pieceBehavior.Animate = _animateDefault;
+                    _renderer.color = _pieceBehavior.ColorDefault;
+                    gameObject.SetActive(false);
+                    EnemyManager.Instance.OnEnemyKill();
+                }
+
+                _renderer.color = Color.Lerp(_renderer.color, ColorDead, Time.deltaTime * DeathSpeed);
+
+                return;
+            }
+
             UpdateObjective();
 
-            if (Objective == null)
+            if (Objective == null || !Objective.gameObject.activeSelf)
             {
                 Kill();
                 return;
@@ -41,9 +70,13 @@ namespace AnarchyBros
 
         void UpdateObjective()
         {
-            if (Objective == null || !Objective.IsAlive)
+            if (Objective == null)
             {
                 Objective = EnemyManager.Instance.GetNewObjective();
+                if (!Objective.IsAlive)
+                {
+                    Objective = null;
+                }
             }
         }
 
@@ -102,16 +135,18 @@ namespace AnarchyBros
 
             if (Health <= 0f)
             {
-                Debug.Log("Enemy Died");
                 Kill();
             }
         }
 
         public void Kill()
         {
-            gameObject.SetActive(false);
-            Health = _initialHealth;
-            EnemyManager.Instance.OnEnemyKill();
+            _dying = true;
+            _pieceBehavior.Animate = false;
+            _renderer.color = ColorDying;
+            //gameObject.SetActive(false);
+            //Health = _initialHealth;
+            //EnemyManager.Instance.OnEnemyKill();
         }
     }
 }

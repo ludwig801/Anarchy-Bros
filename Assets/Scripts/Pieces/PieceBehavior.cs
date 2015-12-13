@@ -37,7 +37,7 @@ namespace AnarchyBros
                 else if (ScaleOnMouseOver)
                 {
                     transform.localScale = Tools2D.MoveTowards(transform.localScale, _mouseOver ? _highlightScale : _startScale, Time.deltaTime * AnimationsSpeed);
-                }              
+                }
             }
         }
 

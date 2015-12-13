@@ -6,15 +6,15 @@ namespace AnarchyBros
     {
         public static bool AreColorsEqual(Color colorA, Color colorB)
         {
-            float r = Mathf.Abs(colorA.r - colorB.r);
-            float g = Mathf.Abs(colorA.g - colorB.g);
-            float b = Mathf.Abs(colorA.b - colorB.b);
-            float a = Mathf.Abs(colorA.a - colorB.a);
+            return Approximately(colorA.r, colorB.r) &&
+                Approximately(colorA.g, colorB.g) &&
+                Approximately(colorA.b, colorB.b) &&
+                Approximately(colorA.a, colorB.a);
+        }
 
-            return Mathf.Approximately(r, 0) &&
-                Mathf.Approximately(g, 0) &&
-                Mathf.Approximately(b, 0) &&
-                Mathf.Approximately(a, 0);
+        public static bool Approximately(float a, float b, float tolerance = 0.01f)
+        {
+            return (Mathf.Abs(a - b) < tolerance);
         }
     }
 }
