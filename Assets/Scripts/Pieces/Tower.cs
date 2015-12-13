@@ -7,8 +7,20 @@ namespace AnarchyBros
     public class Tower : MonoBehaviour, IKillable, IPointerClickHandler
     {
         public float Speed, Health;
-        public Spot Objective, LocalObjective, LastSpot;
+        public Spot Objective, MoveTo, CurrentSpot;
+        public Edge CurrenteEdge;
         public bool IsAlive { get { return Health > 0f; } }
+
+        float _initialHealth;
+
+        void Start()
+        {
+            CurrentSpot = GraphManager.Instance.GetHitSpot(transform.position);
+            CurrentSpot.Tower = this;
+            CurrenteEdge = null;
+            transform.position = MoveTo.transform.position;
+            _initialHealth = Health;
+        }
 
         void Update()
         {
@@ -17,44 +29,38 @@ namespace AnarchyBros
                 return;
             }
 
-            if (Objective == null)
+            MoveTowardsObjective();
+        }
+
+        void MoveTowardsObjective()
+        {
+            if (Tools2D.IsPositionEqual(transform.position, MoveTo.transform.position))
             {
-                Debug.LogWarning("CurrentSpot is null! [Pawn at " + transform.position + "]");
+                CurrentSpot = MoveTo;
+                CurrenteEdge = null;
+            }
+
+            if (CurrentSpot == Objective)
+            {
                 return;
             }
 
-            if (LastSpot == null)
+            if (CurrentSpot != null)
             {
-                LastSpot = LocalObjective;
+                MoveTo = GraphManager.Instance.GetNextSpot(CurrentSpot, Objective);
+                CurrenteEdge = GraphManager.Instance.GetHitEdge(CurrentSpot, MoveTo);
+                CurrentSpot = null;
             }
 
-            if (Objective.Tower != this)
+            if (CurrenteEdge != null)
             {
-                Objective.Tower = this;
+                MoveTo = GraphManager.Instance.GetNextSpot(CurrenteEdge.A, CurrenteEdge.B, Objective);
             }
 
-            if (Mathf.Approximately(Vector2.Distance(transform.position, LocalObjective.transform.position), 0f))
-            {
-                LastSpot = LocalObjective;
-
-                if (!Tools2D.IsPositionEqual(LocalObjective.transform.position, Objective.transform.position))
-                {
-                    LocalObjective = GraphManager.Instance.NextStep(LocalObjective, Objective);
-                }
-                else
-                {
-                    LocalObjective = Objective;
-                }
-            }
-            else
-            {
-                LocalObjective = GraphManager.Instance.NextStep(LastSpot, Objective);
-            }
-
-            Vector2 delta = Tools2D.Subtract(LocalObjective.transform.position, transform.position);
+            Vector2 delta = Tools2D.Subtract(MoveTo.transform.position, transform.position);
             float angle = (delta.x < 0f) ? Vector2.Angle(Vector2.up, delta) : 360f - Vector2.Angle(Vector2.up, delta);
             transform.rotation = Quaternion.Euler(0, 0, angle);
-            transform.position = Tools2D.MoveTowards(transform.position, LocalObjective.transform.position, Time.deltaTime * Speed);
+            transform.position = Tools2D.MoveTowards(transform.position, MoveTo.transform.position, Time.deltaTime * Speed);
         }
 
         public void TakeDamage(float amount)
@@ -69,7 +75,9 @@ namespace AnarchyBros
 
         public void Kill()
         {
-            Debug.Log("The tower died");
+            gameObject.SetActive(false);
+            Health = _initialHealth;
+            TowerManager.Instance.OnTowerKill();
         }
 
         public void OnPointerClick(PointerEventData eventData)

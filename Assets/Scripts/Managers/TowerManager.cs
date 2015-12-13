@@ -95,7 +95,7 @@ namespace AnarchyBros
 
             AssignSpot(tower, spot);
             tower.transform.position = Tools2D.Convert(tower.transform.position, spot.transform.position);
-            tower.LocalObjective = spot;
+            tower.MoveTo = spot;
             ActiveTowers++;
         }
 
@@ -171,14 +171,33 @@ namespace AnarchyBros
             }
         }
 
-        public void ReEvaluate()
+        public void OnTowerKill()
         {
-            GetTowers();
+            ActiveTowers--;
+        }
 
+        public void DestroyAllTowers()
+        {
             for (int i = 0; i < Towers.Count; i++)
             {
-                Towers[i].Objective = GraphManager.Instance.GetHitSpot<Spot>(Towers[i].transform.position);
-                Towers[i].gameObject.SetActive(GameManager.Instance.IsCurrentState(GameStates.Play));
+                Destroy(Towers[i].gameObject);
+            }
+
+            Towers.Clear();
+            ActiveTowers = 0;
+        }
+
+        public void ReEvaluate()
+        {
+            switch (GameManager.Instance.CurrentState)
+            {
+                case GameStates.Edit:
+                    DestroyAllTowers();
+                    break;
+
+                case GameStates.Place:
+                    DestroyAllTowers();
+                    break;
             }
         }
     }

@@ -171,9 +171,12 @@ namespace AnarchyBros
                 }
             }
 
-            if (SpotsAreNeighbors(nodeA, nodeB))
+            for (int i = 0; i < Edges.Count; i++)
             {
-                return;
+                if (Edges[i].GetNeighbor(nodeA) == nodeB)
+                {
+                    return;
+                }
             }
 
             CreateEdge(nodeA, nodeB);
@@ -242,7 +245,7 @@ namespace AnarchyBros
             return e;
         }
 
-        public void RemoveSpot(Spot spot)
+        void RemoveSpot(Spot spot)
         {
             for (int i = 0; i < Edges.Count; i++)
             {
@@ -270,7 +273,7 @@ namespace AnarchyBros
             Destroy(spot.gameObject);
         }
 
-        public void RemoveEdge(Edge edge)
+        void RemoveEdge(Edge edge)
         {
             edge.A.Edges.Remove(edge);
             edge.B.Edges.Remove(edge);
@@ -278,7 +281,7 @@ namespace AnarchyBros
             Destroy(edge.gameObject);
         }
 
-        public bool GetHitSpot(Vector2 pos, out Spot hit)
+        bool GetHitSpot(Vector2 pos, out Spot hit)
         {
             hit = null;
             for (int i = 0; i < Spots.Count; i++)
@@ -293,20 +296,7 @@ namespace AnarchyBros
             return false;
         }
 
-        public T GetHitSpot<T>(Vector2 pos)
-        {
-            for (int i = 0; i < Spots.Count; i++)
-            {
-                if (Spots[i].Collider.OverlapPoint(pos))
-                {
-                    return Spots[i].GetComponent<T>();
-                }
-            }
-
-            return default(T);
-        }
-
-        public bool GetHitEdge(Vector2 pos, out Edge hit)
+        bool GetHitEdge(Vector2 pos, out Edge hit)
         {
             hit = null;
             for (int i = 0; i < Edges.Count; i++)
@@ -321,17 +311,30 @@ namespace AnarchyBros
             return false;
         }
 
-        public bool SpotsAreNeighbors(Spot a, Spot b)
+        public Edge GetHitEdge(Spot a, Spot b)
         {
             for (int i = 0; i < Edges.Count; i++)
             {
                 if (Edges[i].GetNeighbor(a) == b)
                 {
-                    return true;
+                    return Edges[i];
                 }
             }
 
-            return false;
+            return null;
+        }
+
+        public Spot GetHitSpot(Vector2 pos)
+        {
+            for (int i = 0; i < Spots.Count; i++)
+            {
+                if (Spots[i].Collider.OverlapPoint(pos))
+                {
+                    return Spots[i];
+                }
+            }
+
+            return null;
         }
 
         public void OnGroundClick(BaseEventData baseData)
@@ -501,8 +504,8 @@ namespace AnarchyBros
             for (int i = 0; i < newGraph.Edges.Count; i++)
             {
                 IOManager.IOEdge edge = newGraph.Edges[i];
-                Spot a = GetHitSpot<Spot>(edge.a.ToVector2);
-                Spot b = GetHitSpot<Spot>(edge.b.ToVector2);
+                Spot a = GetHitSpot(edge.a.ToVector2);
+                Spot b = GetHitSpot(edge.b.ToVector2);
 
                 CreateEdge(a, b);
             }
@@ -608,13 +611,11 @@ namespace AnarchyBros
             return null;
         }
 
-        #region PathEval
-
-        public Spot NextStep(Spot current, Spot objective)
+        public Spot GetNextSpot(Spot current, Spot objective)
         {
             if (current == objective)
             {
-                return current;
+                return objective;
             }
 
             int target = objective.Index;
@@ -633,6 +634,36 @@ namespace AnarchyBros
 
             return Spots[best];
         }
+
+        public Spot GetNextSpot(Spot a, Spot b, Spot objective)
+        {
+            return (_distancesMatrix[a.Index, objective.Index] < _distancesMatrix[b.Index, objective.Index]) ? a : b;
+        }
+
+        public void MoveTowardsObjective(Tower tower)
+        {
+            if (Tools2D.IsPositionEqual(tower.transform.position, tower.MoveTo.transform.position))
+            {
+                tower.CurrentSpot = tower.MoveTo;
+                return;
+            }
+
+            if (tower.CurrentSpot != null)
+            {
+                tower.MoveTo = GetNextSpot(tower.CurrentSpot, tower.Objective);
+                tower.CurrenteEdge = GetHitEdge(tower.CurrentSpot, tower.MoveTo);
+                tower.CurrentSpot = null;
+            }
+
+            if (tower.CurrenteEdge != null)
+            {
+                tower.MoveTo = GetNextSpot(tower.CurrenteEdge.A, tower.CurrenteEdge.B, tower.Objective);
+                tower.CurrenteEdge = GetHitEdge(tower.CurrentSpot, tower.MoveTo);
+                tower.CurrentSpot = null;
+            }
+        }
+
+        #region PathEval
 
         void CalcDistances(int sourceIndex, List<GraphSpot> graph)
         {

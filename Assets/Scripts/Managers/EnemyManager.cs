@@ -45,15 +45,17 @@ namespace AnarchyBros
         void Spawn()
         {
             Spot objective;
-            Spot localObjective;
+            Spot spawnSpot;
 
-            if (GenerateObjective(out objective, out localObjective))
+            if (GenerateObjective(out objective, out spawnSpot))
             {
                 Enemy e = GetEnemy();
-                e.gameObject.SetActive(true);
-                e.transform.position = localObjective.transform.position;
-                e.LocalObjective = localObjective;
+                e.transform.position = spawnSpot.transform.position;
+                e.CurrentSpot = spawnSpot;
+                e.CurrenteEdge = null;
+                e.MoveTo = e.CurrentSpot;
                 e.Objective = objective;
+                e.gameObject.SetActive(true);
                 ActiveEnemies++;
             }
         }
@@ -77,12 +79,12 @@ namespace AnarchyBros
             return e;
         }
 
-        bool GenerateObjective(out Spot finalObjective, out Spot localObjective)
+        bool GenerateObjective(out Spot finalObjective, out Spot spawnSpot)
         {
             Spot enemySpot = GraphManager.Instance.GetRandomSpot(SpotTypes.EnemySpawn);
             Spot towerSpot = GraphManager.Instance.GetRandomSpot(SpotTypes.TowerSpot);
 
-            localObjective = enemySpot;
+            spawnSpot = enemySpot;
             finalObjective = towerSpot;
 
             if (enemySpot == null || towerSpot == null)
@@ -112,6 +114,7 @@ namespace AnarchyBros
             }
 
             Enemies.Clear();
+            ActiveEnemies = 0;
         }
 
         public void ReEvaluate()
@@ -119,6 +122,10 @@ namespace AnarchyBros
             switch (GameManager.Instance.CurrentState)
             {
                 case GameStates.Edit:
+                    DestroyAllEnemies();
+                    break;
+
+                case GameStates.Place:
                     DestroyAllEnemies();
                     break;
             }
