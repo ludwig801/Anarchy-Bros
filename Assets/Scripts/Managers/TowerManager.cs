@@ -53,12 +53,12 @@ namespace AnarchyBros
 
         void AssignSpot(Tower tower, Spot spot)
         {
-            if (tower.Spot != null)
+            if (tower.Objective != null)
             {
-                tower.Spot.Tower = null;
+                tower.Objective.Tower = null;
             }
-            tower.Spot = spot;
-            tower.Spot.Tower = tower;
+            tower.Objective = spot;
+            tower.Objective.Tower = tower;
         }
 
         int GetTowerIndex(Tower tower)
@@ -101,10 +101,10 @@ namespace AnarchyBros
 
         void RemoveTower(Tower tower)
         {
-            if (tower.Spot != null)
+            if (tower.Objective != null)
             {
-                tower.Spot.Tower = null;
-                tower.Spot = null;
+                tower.Objective.Tower = null;
+                tower.Objective = null;
             }
 
             tower.gameObject.SetActive(false);
@@ -128,14 +128,14 @@ namespace AnarchyBros
         {
             if (GameManager.Instance.IsCurrentState(GameStates.Place))
             {
-                if (node.Type == Spot.NodeType.TowerSpot && ActiveTowers < MaxTowerCount)
+                if (node.Type == SpotTypes.TowerSpot && ActiveTowers < MaxTowerCount)
                 {
                     PlaceTower(node);
                 }
             }
             else if(GameManager.Instance.IsCurrentState(GameStates.Play))
             {
-                if (node.Type == Spot.NodeType.TowerSpot)
+                if (node.Type == SpotTypes.TowerSpot)
                 {
                     if (_selected >= 0)
                     {
@@ -177,7 +177,7 @@ namespace AnarchyBros
 
             for (int i = 0; i < Towers.Count; i++)
             {
-                Towers[i].Spot = GraphManager.Instance.GetHitSpot<Spot>(Towers[i].transform.position);
+                Towers[i].Objective = GraphManager.Instance.GetHitSpot<Spot>(Towers[i].transform.position);
                 Towers[i].gameObject.SetActive(GameManager.Instance.IsCurrentState(GameStates.Play));
             }
         }

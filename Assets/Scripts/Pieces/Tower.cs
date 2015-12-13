@@ -7,7 +7,7 @@ namespace AnarchyBros
     public class Tower : MonoBehaviour, IKillable, IPointerClickHandler
     {
         public float Speed, Health;
-        public Spot Spot, LocalObjective;
+        public Spot Objective, LocalObjective, LastSpot;
         public bool IsAlive { get { return Health > 0f; } }
 
         void Update()
@@ -17,23 +17,38 @@ namespace AnarchyBros
                 return;
             }
 
-            if (Spot == null)
+            if (Objective == null)
             {
                 Debug.LogWarning("CurrentSpot is null! [Pawn at " + transform.position + "]");
                 return;
             }
 
-            if (Spot.Tower != this)
+            if (LastSpot == null)
             {
-                Spot.Tower = this;
+                LastSpot = LocalObjective;
+            }
+
+            if (Objective.Tower != this)
+            {
+                Objective.Tower = this;
             }
 
             if (Mathf.Approximately(Vector2.Distance(transform.position, LocalObjective.transform.position), 0f))
             {
-                if (!Tools2D.IsPositionEqual(LocalObjective.transform.position, Spot.transform.position))
+                LastSpot = LocalObjective;
+
+                if (!Tools2D.IsPositionEqual(LocalObjective.transform.position, Objective.transform.position))
                 {
-                    LocalObjective = GraphManager.Instance.NextStep(LocalObjective, Spot);
+                    LocalObjective = GraphManager.Instance.NextStep(LocalObjective, Objective);
                 }
+                else
+                {
+                    LocalObjective = Objective;
+                }
+            }
+            else
+            {
+                LocalObjective = GraphManager.Instance.NextStep(LastSpot, Objective);
             }
 
             Vector2 delta = Tools2D.Subtract(LocalObjective.transform.position, transform.position);

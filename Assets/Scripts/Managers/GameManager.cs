@@ -39,6 +39,7 @@ namespace AnarchyBros
         {
             _currentState = GameStates.Edit;
             TowerManager.Instance.ReEvaluate();
+            EnemyManager.Instance.ReEvaluate();
             UIManager.Instance.ReEvaluate();
         }
 

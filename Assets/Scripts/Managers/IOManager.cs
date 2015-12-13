@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 using System;
+using AnarchyBros.Enums;
 
 namespace AnarchyBros
 {
@@ -81,7 +82,7 @@ namespace AnarchyBros
         [Serializable]
         public class IOSpot
         {
-            public Spot.NodeType Type;
+            public SpotTypes Type;
             public Point Position;
         }
 

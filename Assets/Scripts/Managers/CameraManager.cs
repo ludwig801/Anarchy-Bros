@@ -67,8 +67,6 @@ namespace AnarchyBros
             Ground.transform.localScale = new Vector3(width, height, 0);
 
             MainCamera.orthographicSize = Scale * 10;
-
-            GraphManager.Instance.OnScaleChanged();
         }
     }
 }

@@ -8,11 +8,10 @@ namespace AnarchyBros
     {
         public static EnemyManager Instance { get; private set; }
 
-        public Transform EnemiesObj, SpawnSpotsObj;
+        public Transform EnemiesObj;
         public GameObject EnemyPrefab;
         public float SpawnTime;
         public int MaxEnemyCount, ActiveEnemies;
-        public List<Spot> EnemySpawns;
         public List<Enemy> Enemies;
 
         float _deltaTime;
@@ -27,7 +26,6 @@ namespace AnarchyBros
         {
             Enemies = new List<Enemy>();
             ActiveEnemies = 0;
-            GetSpots();
         }
 
         void Update()
@@ -41,23 +39,6 @@ namespace AnarchyBros
                     Spawn();
                     _deltaTime = 0f;
                 }
-            }
-        }
-
-        void GetSpots()
-        {
-            if (EnemySpawns == null)
-            {
-                EnemySpawns = new List<Spot>();
-            }
-            else
-            {
-                EnemySpawns.Clear();
-            }
-
-            for (int i = 0; i < SpawnSpotsObj.childCount; i++)
-            {
-                EnemySpawns.Add(SpawnSpotsObj.GetChild(i).GetComponent<Spot>());
             }
         }
 
@@ -96,39 +77,18 @@ namespace AnarchyBros
             return e;
         }
 
-        bool GenerateObjective(out Spot objective, out Spot localObjective)
+        bool GenerateObjective(out Spot finalObjective, out Spot localObjective)
         {
-            if (EnemySpawns.Count <= 0)
+            Spot enemySpot = GraphManager.Instance.GetRandomSpot(SpotTypes.EnemySpawn);
+            Spot towerSpot = GraphManager.Instance.GetRandomSpot(SpotTypes.TowerSpot);
+
+            localObjective = enemySpot;
+            finalObjective = towerSpot;
+
+            if (enemySpot == null || towerSpot == null)
             {
-                objective = null;
-                localObjective = null;
                 return false;
             }
-
-            int randSpawnSpot = Random.Range(0, EnemySpawns.Count);
-            int randTowerSpot = Random.Range(0, TowerManager.Instance.Towers.Count);
-
-            int count = 0, iter = 0, i = 0;
-
-            while (count <= randTowerSpot && iter < GraphManager.Instance.Spots.Count * 2)
-            {
-                Spot n = GraphManager.Instance.Spots[i];
-                if (n.Type == Spot.NodeType.TowerSpot && n.Occupied)
-                {
-                    count++;
-                    if (count > randTowerSpot)
-                    {
-                        break;
-                    }
-                }
-
-                iter++;
-                i++;
-                i %= GraphManager.Instance.Spots.Count;
-            }
-
-            objective = GraphManager.Instance.Spots[i];
-            localObjective = EnemySpawns[randSpawnSpot];
 
             return true;
         }
@@ -144,9 +104,24 @@ namespace AnarchyBros
             ActiveEnemies--;
         }
 
+        void DestroyAllEnemies()
+        {
+            for (int i = 0; i < Enemies.Count; i++)
+            {
+                Destroy(Enemies[i].gameObject);
+            }
+
+            Enemies.Clear();
+        }
+
         public void ReEvaluate()
         {
-            GetSpots();
+            switch (GameManager.Instance.CurrentState)
+            {
+                case GameStates.Edit:
+                    DestroyAllEnemies();
+                    break;
+            }
         }
     }
 }
