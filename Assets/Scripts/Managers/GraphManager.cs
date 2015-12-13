@@ -184,10 +184,10 @@ namespace AnarchyBros
 
         void SplitEdge(Edge edge, Spot spliter)
         {
-            Spot oldA = edge.A;
+            Spot spotA = edge.A;
             edge.SetNodes(spliter, edge.B);
 
-            Edges.Add(CreateEdge(spliter, oldA));
+            CreateEdge(spliter, spotA);
         }
 
         Spot CreateSpot(Vector2 worldPos, SpotTypes type)
@@ -275,9 +275,9 @@ namespace AnarchyBros
 
         void RemoveEdge(Edge edge)
         {
-            edge.A.Edges.Remove(edge);
-            edge.B.Edges.Remove(edge);
             Edges.Remove(edge);
+            edge.A.Edges.Remove(edge);
+            edge.B.Edges.Remove(edge); 
             Destroy(edge.gameObject);
         }
 
@@ -309,6 +309,21 @@ namespace AnarchyBros
             }
 
             return false;
+        }
+
+        public Edge GetHitEdge(Spot a, Vector2 pos)
+        {
+            Spot b = GetHitSpot(pos);
+
+            for (int i = 0; i < Edges.Count; i++)
+            {
+                if (Edges[i].GetNeighbor(a) == b)
+                {
+                    return Edges[i];
+                }
+            }
+
+            return null;
         }
 
         public Edge GetHitEdge(Spot a, Spot b)
@@ -529,6 +544,16 @@ namespace AnarchyBros
 
         public void ReEvaluate()
         {
+            switch (GameManager.Instance.CurrentState)
+            {
+                case GameStates.Place:
+                    //_targetObj.SetActive(false);
+                    break;
+
+                case GameStates.Play:
+                    _targetObj.SetActive(false);
+                    break;
+            }
             if (GameManager.Instance.IsCurrentState(GameStates.Play))
             {
                 _distancesMatrix = new float[Spots.Count, Spots.Count];
@@ -547,8 +572,7 @@ namespace AnarchyBros
                     CalcDistances(i, graph);
                 }
 
-                //
-                _targetObj.SetActive(false);
+                graph.Clear();
             }
         }
 
@@ -611,7 +635,7 @@ namespace AnarchyBros
             return null;
         }
 
-        public Spot GetNextSpot(Spot current, Spot objective)
+        public Spot GetBestSpot(Spot current, Spot objective)
         {
             if (current == objective)
             {
@@ -635,32 +659,11 @@ namespace AnarchyBros
             return Spots[best];
         }
 
-        public Spot GetNextSpot(Spot a, Spot b, Spot objective)
+        public Spot GetBestSpot(Vector2 currentPos, Spot a, Spot b, Spot objective)
         {
-            return (_distancesMatrix[a.Index, objective.Index] < _distancesMatrix[b.Index, objective.Index]) ? a : b;
-        }
-
-        public void MoveTowardsObjective(Tower tower)
-        {
-            if (Tools2D.IsPositionEqual(tower.transform.position, tower.MoveTo.transform.position))
-            {
-                tower.CurrentSpot = tower.MoveTo;
-                return;
-            }
-
-            if (tower.CurrentSpot != null)
-            {
-                tower.MoveTo = GetNextSpot(tower.CurrentSpot, tower.Objective);
-                tower.CurrenteEdge = GetHitEdge(tower.CurrentSpot, tower.MoveTo);
-                tower.CurrentSpot = null;
-            }
-
-            if (tower.CurrenteEdge != null)
-            {
-                tower.MoveTo = GetNextSpot(tower.CurrenteEdge.A, tower.CurrenteEdge.B, tower.Objective);
-                tower.CurrenteEdge = GetHitEdge(tower.CurrentSpot, tower.MoveTo);
-                tower.CurrentSpot = null;
-            }
+            float distA = Vector2.Distance(currentPos, a.transform.position) + _distancesMatrix[a.Index, objective.Index];
+            float distB = Vector2.Distance(currentPos, b.transform.position) + _distancesMatrix[b.Index, objective.Index];
+            return (distA < distB) ? a : b;
         }
 
         #region PathEval
@@ -684,7 +687,7 @@ namespace AnarchyBros
                     Spot neighbor = node.GetNeighbor(j);
                     for (int w = 0; w < unvisited.Count; w++)
                     {
-                        if (unvisited[w].position == (Vector2)neighbor.transform.position)
+                        if (Tools2D.IsPositionEqual(unvisited[w].position, neighbor.transform.position))
                         {
                             unvisited[i].Neighbors.Add(unvisited[w]);
                         }

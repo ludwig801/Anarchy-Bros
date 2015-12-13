@@ -11,10 +11,8 @@ namespace AnarchyBros
 
         public Transform TowersObj;
         public GameObject TowerPrefab;
-        public int MaxTowerCount, ActiveTowers;
+        public int SelectedTower, MaxTowerCount, ActiveTowers;
         public List<Tower> Towers;
-
-        int _selected;
 
         void Awake()
         {
@@ -23,7 +21,7 @@ namespace AnarchyBros
 
         void Start()
         {
-            _selected = int.MinValue;
+            SelectedTower = int.MinValue;
 
             Towers = new List<Tower>();
             ActiveTowers = 0;
@@ -124,6 +122,24 @@ namespace AnarchyBros
             return null;
         }
 
+        public Tower GetRandomTower()
+        {
+            int rand = Random.Range(0, ActiveTowers);
+            for (int i = 0; i < Towers.Count; i++)
+            {
+                if (Towers[i].gameObject.activeSelf)
+                {
+                    if (rand <= 0)
+                    {
+                        return Towers[i];
+                    }
+                    rand--;
+                }
+            }
+
+            return null;
+        }
+
         public void OnNodeClicked(Spot node)
         {
             if (GameManager.Instance.IsCurrentState(GameStates.Place))
@@ -137,20 +153,20 @@ namespace AnarchyBros
             {
                 if (node.Type == SpotTypes.TowerSpot)
                 {
-                    if (_selected >= 0)
+                    if (SelectedTower >= 0)
                     {
                         if (node.Occupied)
                         {
-                            _selected = GetTowerIndex(node.Tower);
+                            SelectedTower = GetTowerIndex(node.Tower);
                         }
                         else
                         {
-                            AssignSpot(Towers[_selected], node);
+                            AssignSpot(Towers[SelectedTower], node);
                         }
                     }
                     else
                     {
-                        _selected = GetTowerIndex(node.Tower);
+                        SelectedTower = GetTowerIndex(node.Tower);
                     }
                 }
             }           
@@ -160,7 +176,7 @@ namespace AnarchyBros
         {
             if (GameManager.Instance.IsCurrentState(GameStates.Play))
             {
-                _selected = GetTowerIndex(tower);
+                SelectedTower = GetTowerIndex(tower);
             }
             else if (GameManager.Instance.IsCurrentState(GameStates.Place))
             {

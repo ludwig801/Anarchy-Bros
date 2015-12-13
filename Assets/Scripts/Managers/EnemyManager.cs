@@ -44,7 +44,7 @@ namespace AnarchyBros
 
         void Spawn()
         {
-            Spot objective;
+            Tower objective;
             Spot spawnSpot;
 
             if (GenerateObjective(out objective, out spawnSpot))
@@ -52,7 +52,7 @@ namespace AnarchyBros
                 Enemy e = GetEnemy();
                 e.transform.position = spawnSpot.transform.position;
                 e.CurrentSpot = spawnSpot;
-                e.CurrenteEdge = null;
+                e.CurrentEdge = null;
                 e.MoveTo = e.CurrentSpot;
                 e.Objective = objective;
                 e.gameObject.SetActive(true);
@@ -79,26 +79,17 @@ namespace AnarchyBros
             return e;
         }
 
-        bool GenerateObjective(out Spot finalObjective, out Spot spawnSpot)
+        bool GenerateObjective(out Tower finalObjective, out Spot spawnSpot)
         {
-            Spot enemySpot = GraphManager.Instance.GetRandomSpot(SpotTypes.EnemySpawn);
-            Spot towerSpot = GraphManager.Instance.GetRandomSpot(SpotTypes.TowerSpot);
+            spawnSpot = GraphManager.Instance.GetRandomSpot(SpotTypes.EnemySpawn);
+            finalObjective = TowerManager.Instance.GetRandomTower();
 
-            spawnSpot = enemySpot;
-            finalObjective = towerSpot;
-
-            if (enemySpot == null || towerSpot == null)
-            {
-                return false;
-            }
-
-            return true;
+            return (finalObjective != null && spawnSpot != null);
         }
 
-        public bool GenerateObjective(Spot currentSpot, out Spot newObjective)
+        public Tower GetNewObjective()
         {
-            Spot localObjective;
-            return GenerateObjective(out newObjective, out localObjective);
+            return TowerManager.Instance.GetRandomTower();
         }
 
         public void OnEnemyKill()

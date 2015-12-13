@@ -5,8 +5,10 @@ namespace AnarchyBros
 {
     public class Enemy : MonoBehaviour, IKillable
     {
-        public Spot Objective, MoveTo, CurrentSpot;
-        public Edge CurrenteEdge;
+        public Tower Objective;
+        public Spot MoveTo;
+        public Spot CurrentSpot;
+        public Edge CurrentEdge;
         public float Speed, Attack, Health;
 
         float _initialHealth;
@@ -14,8 +16,8 @@ namespace AnarchyBros
         void Start()
         {
             CurrentSpot = GraphManager.Instance.GetHitSpot(transform.position);
-            CurrenteEdge = null;
-            transform.position = MoveTo.transform.position;
+            CurrentEdge = null;
+            transform.position = Tools2D.Convert(transform.position, MoveTo.transform.position);
             _initialHealth = Health;
         }
 
@@ -26,41 +28,55 @@ namespace AnarchyBros
                 return;
             }
 
-            if (!Objective.Occupied)
-            {
-                if (!EnemyManager.Instance.GenerateObjective(CurrentSpot, out Objective))
-                {
-                    Kill();
-                    return;
-                }
-            }
+            UpdateObjective();
 
             MoveTowardsObjective();
+        }
+
+        void UpdateObjective()
+        {
+            if (!Objective.IsAlive)
+            {
+                Objective = EnemyManager.Instance.GetNewObjective();
+            }
         }
 
         void MoveTowardsObjective()
         {
             if (Tools2D.IsPositionEqual(transform.position, MoveTo.transform.position))
             {
-                CurrentSpot = MoveTo;
-                CurrenteEdge = null;
+                CurrentSpot = GraphManager.Instance.GetHitSpot(MoveTo.transform.position);
+                CurrentEdge = null;
             }
 
-            if (CurrentSpot == Objective)
-            {
-                return;
-            }
+            //if ((CurrentSpot == null && CurrentEdge == null) || (Objective.CurrentSpot == null && Objective.CurrentEdge == null))
+            //{
+            //    return;
+            //}
 
             if (CurrentSpot != null)
             {
-                MoveTo = GraphManager.Instance.GetNextSpot(CurrentSpot, Objective);
-                CurrenteEdge = GraphManager.Instance.GetHitEdge(CurrentSpot, MoveTo);
+                if (Objective.CurrentSpot != null)
+                {
+                    MoveTo = GraphManager.Instance.GetBestSpot(CurrentSpot, Objective.CurrentSpot);
+                }
+                else if (Objective.CurrentEdge != null)
+                {
+                    MoveTo = GraphManager.Instance.GetBestSpot(CurrentSpot, Objective.MoveTo);
+                }
+                CurrentEdge = GraphManager.Instance.GetHitEdge(CurrentSpot, MoveTo);
                 CurrentSpot = null;
             }
-
-            if (CurrenteEdge != null)
+            else if (CurrentEdge != null)
             {
-                MoveTo = GraphManager.Instance.GetNextSpot(CurrenteEdge.A, CurrenteEdge.B, Objective);
+                if (Objective.CurrentSpot != null)
+                {
+                    MoveTo = GraphManager.Instance.GetBestSpot(transform.position, CurrentEdge.A, CurrentEdge.B, Objective.CurrentSpot);
+                }
+                else if (Objective.CurrentEdge != null)
+                {
+                    MoveTo = GraphManager.Instance.GetBestSpot(transform.position, CurrentEdge.A, CurrentEdge.B, Objective.MoveTo);
+                }
             }
 
             Vector2 delta = Tools2D.Subtract(MoveTo.transform.position, transform.position);

@@ -8,8 +8,8 @@ namespace AnarchyBros
     {
         public float Speed, Health;
         public Spot Objective, MoveTo, CurrentSpot;
-        public Edge CurrenteEdge;
-        public bool IsAlive { get { return Health > 0f; } }
+        public Edge CurrentEdge;
+        public bool IsAlive { get { return Health > 0f && gameObject.activeSelf; } }
 
         float _initialHealth;
 
@@ -17,7 +17,7 @@ namespace AnarchyBros
         {
             CurrentSpot = GraphManager.Instance.GetHitSpot(transform.position);
             CurrentSpot.Tower = this;
-            CurrenteEdge = null;
+            CurrentEdge = null;
             transform.position = MoveTo.transform.position;
             _initialHealth = Health;
         }
@@ -37,24 +37,20 @@ namespace AnarchyBros
             if (Tools2D.IsPositionEqual(transform.position, MoveTo.transform.position))
             {
                 CurrentSpot = MoveTo;
-                CurrenteEdge = null;
-            }
-
-            if (CurrentSpot == Objective)
-            {
-                return;
+                if(CurrentEdge != null) CurrentEdge.GetComponent<SpriteRenderer>().color = Color.black;
+                CurrentEdge = null;
             }
 
             if (CurrentSpot != null)
             {
-                MoveTo = GraphManager.Instance.GetNextSpot(CurrentSpot, Objective);
-                CurrenteEdge = GraphManager.Instance.GetHitEdge(CurrentSpot, MoveTo);
+                MoveTo = GraphManager.Instance.GetBestSpot(CurrentSpot, Objective);
+                CurrentEdge = GraphManager.Instance.GetHitEdge(CurrentSpot, MoveTo);
                 CurrentSpot = null;
             }
-
-            if (CurrenteEdge != null)
+            else if (CurrentEdge != null)
             {
-                MoveTo = GraphManager.Instance.GetNextSpot(CurrenteEdge.A, CurrenteEdge.B, Objective);
+                MoveTo = GraphManager.Instance.GetBestSpot(transform.position, CurrentEdge.A, CurrentEdge.B, Objective);
+                CurrentEdge.GetComponent<SpriteRenderer>().color = Color.red;
             }
 
             Vector2 delta = Tools2D.Subtract(MoveTo.transform.position, transform.position);

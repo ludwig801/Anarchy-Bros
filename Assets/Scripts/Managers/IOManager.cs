@@ -44,6 +44,8 @@ namespace AnarchyBros
                 toSave.Edges.Add(gameEdge);
             }
 
+            Debug.Log("SAVE: " + toSave.Spots.Count + " spots & " + toSave.Edges.Count);
+
             BinaryFormatter bf = new BinaryFormatter();
             FileStream file = File.Create(Application.dataPath + "/GraphData.sav");
             bf.Serialize(file, toSave);
@@ -58,6 +60,8 @@ namespace AnarchyBros
                 FileStream file = File.Open(Application.dataPath + "/GraphData.sav", FileMode.Open);
                 GameGraph graph = (GameGraph)bf.Deserialize(file);
                 file.Close();
+
+                Debug.Log("LOAD: " + graph.Spots.Count + " spots & " + graph.Edges.Count);
 
                 GraphManager.Instance.RebuildGraph(graph);
 
