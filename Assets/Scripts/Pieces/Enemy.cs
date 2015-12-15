@@ -7,27 +7,25 @@ namespace AnarchyBros
     {
         public Tower Objective;
         public Spot MoveTo;
-        public Spot CurrentSpot;
-        public Edge CurrentEdge;
+        public Spot Spot;
+        public Edge Edge;
         public float Speed, Attack, Health, DeathSpeed;
-        public Color ColorDying, ColorDead;
+        public Color ColorDefault, ColorDying, ColorDead;
 
-        PieceBehavior _pieceBehavior;
+        public bool IsAlive { get { return (Health > 0f) && gameObject.activeSelf; } }
+
         SpriteRenderer _renderer;
-        float _initialHealth;
-        bool _dying, _animateDefault;
+        float _initialHealth, _invInitialHealth, _deltaTime;
 
         void Start()
         {
-            CurrentSpot = GraphManager.Instance.GetHitSpot(transform.position);
-            CurrentEdge = null;
+            Spot = MapManager.Instance.SpotAt(transform.position);
+            Edge = null;
             transform.position = Tools2D.Convert(transform.position, MoveTo.transform.position);
 
-            _pieceBehavior = GetComponent<PieceBehavior>();
-            _animateDefault = _pieceBehavior.Animate;
             _renderer = GetComponent<SpriteRenderer>();
             _initialHealth = Health;
-            _dying = false;
+            _invInitialHealth = 1f / _initialHealth;
         }
 
         void Update()
@@ -37,85 +35,72 @@ namespace AnarchyBros
                 return;
             }
 
-            _pieceBehavior.Animate = false;
+            _deltaTime += Time.deltaTime;
 
-            if (_dying)
+            _renderer.color = Color.Lerp(ColorDefault, ColorDying, (_initialHealth - Health) * _invInitialHealth);
+
+            if (!IsAlive)
             {
-                if (Tools.AreColorsEqual(_renderer.color, ColorDead))
+                _renderer.color = ColorDead;
+
+                if (_deltaTime >= DeathSpeed)
                 {
-                    Debug.Log("Died");
+                    Spot = null;
+                    Edge = null;
                     Health = _initialHealth;
-                    _dying = false;
-                    _pieceBehavior.Animate = _animateDefault;
-                    _renderer.color = _pieceBehavior.ColorDefault;
+                    _renderer.color = ColorDefault;
                     gameObject.SetActive(false);
                     EnemyManager.Instance.OnEnemyKill();
                 }
-
-                _renderer.color = Color.Lerp(_renderer.color, ColorDead, Time.deltaTime * DeathSpeed);
-
                 return;
             }
 
-            UpdateObjective();
-
-            if (Objective == null || !Objective.gameObject.activeSelf)
+            if (Objective == null || !Objective.IsAlive)
             {
-                Kill();
-                return;
+                if (!EnemyManager.Instance.GetNewObjective(out Objective))
+                {
+                    Kill();
+                    return;
+                }
             }
 
             MoveTowardsObjective();
-        }
-
-        void UpdateObjective()
-        {
-            if (Objective == null)
-            {
-                Objective = EnemyManager.Instance.GetNewObjective();
-                if (!Objective.IsAlive)
-                {
-                    Objective = null;
-                }
-            }
         }
 
         void MoveTowardsObjective()
         {
             if (Tools2D.IsPositionEqual(transform.position, MoveTo.transform.position))
             {
-                CurrentSpot = GraphManager.Instance.GetHitSpot(MoveTo.transform.position);
-                CurrentEdge = null;
+                Spot = MapManager.Instance.SpotAt(MoveTo.transform.position);
+                Edge = null;
             }
 
-            if (CurrentSpot != null)
+            if (Spot != null)
             {
-                if (Objective.CurrentSpot != null)
+                if (Objective.Spot != null)
                 {
-                    MoveTo = GraphManager.Instance.GetBestSpot(CurrentSpot, Objective.CurrentSpot);
+                    MoveTo = MapManager.Instance.NextStep(Spot, Objective.Spot);
                 }
-                else if (Objective.CurrentEdge != null)
+                else if (Objective.Edge != null)
                 {
-                    MoveTo = GraphManager.Instance.GetBestSpot(CurrentSpot, Objective.MoveTo);
+                    MoveTo = MapManager.Instance.NextStep(Spot, Objective.MoveTo);
                 }
-                CurrentEdge = GraphManager.Instance.GetHitEdge(CurrentSpot, MoveTo);
-                CurrentSpot = null;
+                Edge = MapManager.Instance.EdgeAt(Spot, MoveTo);
+                Spot = null;
             }
-            else if (CurrentEdge != null)
+            else if (Edge != null)
             {
-                if (Objective.CurrentSpot != null)
+                if (Objective.Spot != null)
                 {
-                    MoveTo = GraphManager.Instance.GetBestSpot(transform.position, CurrentEdge.A, CurrentEdge.B, Objective.CurrentSpot);
+                    MoveTo = MapManager.Instance.NextStep(transform.position, Edge, Objective.Spot);
                 }
-                else if (Objective.CurrentEdge != null)
+                else if (Objective.Edge != null)
                 {
-                    MoveTo = GraphManager.Instance.GetBestSpot(transform.position, CurrentEdge.A, CurrentEdge.B, Objective.MoveTo);
+                    MoveTo = MapManager.Instance.NextStep(transform.position, Edge, Objective.MoveTo);
                 }
             }
 
-            Vector2 delta = Tools2D.Subtract(MoveTo.transform.position, transform.position);
-            float angle = (delta.x < 0f) ? Vector2.Angle(Vector2.up, delta) : 360f - Vector2.Angle(Vector2.up, delta);
-            transform.rotation = Quaternion.Euler(0, 0, angle);
+            transform.rotation = Tools2D.LookAt(transform.position, MoveTo.transform.position);
             transform.position = Tools2D.MoveTowards(transform.position, MoveTo.transform.position, Time.deltaTime * Speed);
         }
 
@@ -124,8 +109,11 @@ namespace AnarchyBros
             if (data.tag == "Tower")
             {
                 Tower p = data.gameObject.GetComponent<Tower>();
-                p.TakeDamage(Attack);
-                TakeDamage(Health);
+                if (p.IsAlive)
+                {
+                    p.TakeDamage(Attack);
+                    TakeDamage(Health);
+                }
             }
         }
 
@@ -136,17 +124,13 @@ namespace AnarchyBros
             if (Health <= 0f)
             {
                 Kill();
+                _deltaTime = 0;
             }
         }
 
         public void Kill()
         {
-            _dying = true;
-            _pieceBehavior.Animate = false;
-            _renderer.color = ColorDying;
-            //gameObject.SetActive(false);
-            //Health = _initialHealth;
-            //EnemyManager.Instance.OnEnemyKill();
+            Health = 0;
         }
     }
 }

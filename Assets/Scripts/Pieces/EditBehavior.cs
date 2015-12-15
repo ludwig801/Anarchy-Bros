@@ -3,10 +3,10 @@ using UnityEngine.EventSystems;
 
 namespace AnarchyBros
 {
-    public class PieceBehavior : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler
+    public class EditBehavior : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler
     {
         public Color ColorDefault, ColorMouseOver;
-        public bool Animate, ScaleOnMouseOver, ScaleOnClick;
+        public bool ScaleOnMouseOver, ScaleOnClick;
         public float AnimationsSpeed, MouseOverScale, ClickScale;
 
         bool _mouseOver, _clicking;
@@ -23,21 +23,18 @@ namespace AnarchyBros
 
         void Update()
         {
-            if (Animate)
+            _renderer.color = Color.Lerp(_renderer.color, _mouseOver ? ColorMouseOver : ColorDefault, Time.deltaTime * AnimationsSpeed);
+
+            _highlightScale = MouseOverScale * _startScale;
+            _clickScale = ClickScale * _startScale;
+
+            if (ScaleOnClick && _clicking)
             {
-                _renderer.color = Color.Lerp(_renderer.color, _mouseOver ? ColorMouseOver : ColorDefault, Time.deltaTime * AnimationsSpeed);
-
-                _highlightScale = MouseOverScale * _startScale;
-                _clickScale = ClickScale * _startScale;
-
-                if (ScaleOnClick && _clicking)
-                {
-                    transform.localScale = Tools2D.MoveTowards(transform.localScale, _clickScale, Time.deltaTime * AnimationsSpeed);
-                }
-                else if (ScaleOnMouseOver)
-                {
-                    transform.localScale = Tools2D.MoveTowards(transform.localScale, _mouseOver ? _highlightScale : _startScale, Time.deltaTime * AnimationsSpeed);
-                }
+                transform.localScale = Tools2D.MoveTowards(transform.localScale, _clickScale, Time.deltaTime * AnimationsSpeed);
+            }
+            else if (ScaleOnMouseOver)
+            {
+                transform.localScale = Tools2D.MoveTowards(transform.localScale, _mouseOver ? _highlightScale : _startScale, Time.deltaTime * AnimationsSpeed);
             }
         }
 

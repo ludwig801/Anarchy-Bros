@@ -12,6 +12,7 @@ namespace AnarchyBros
         public Tower Tower;
         public bool Occupied { get { return Tower != null; } }
         public List<Edge> Edges;
+
         public Collider2D Collider
         {
             get
@@ -49,14 +50,14 @@ namespace AnarchyBros
 
         public Spot GetNeighbor(int index)
         {
-            return Edges[index].GetNeighbor(this);
+            return Edges[index].Neighbor(this);
         }
 
         public void OnPointerClick(PointerEventData eventData)
         {
             if (!_justScrolled)
             {
-                GraphManager.Instance.OnSpotClick(eventData, this);
+                MapManager.Instance.OnSpotClick(eventData, this);
             }
             _justScrolled = false;
         }
@@ -71,12 +72,12 @@ namespace AnarchyBros
             Vector2 newPos = Camera.main.ScreenToWorldPoint(eventData.position);
             transform.position = new Vector3(newPos.x, newPos.y, transform.position.z);
 
-            GraphManager.Instance.OnSpotDrag(eventData, this);
+            MapManager.Instance.OnSpotDrag(eventData, this);
         }
 
         public void OnEndDrag(PointerEventData eventData)
         {
-            GraphManager.Instance.OnSpotDrag(eventData, this);
+            MapManager.Instance.OnSpotDrag(eventData, this);
         }
     }
 }

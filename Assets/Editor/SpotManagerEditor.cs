@@ -1,14 +1,14 @@
 ﻿using UnityEditor;
 using AnarchyBros;
 
-[CustomEditor(typeof(GraphManager))]
-public class GraphManagerEditor : Editor
+[CustomEditor(typeof(MapManager))]
+public class MapManagerEditor : Editor
 {
     public override void OnInspectorGUI()
     {
         base.OnInspectorGUI();
 
-        GraphManager script = (GraphManager)target;
+        MapManager script = (MapManager)target;
 
         EditorGUILayout.LabelField("Is Targeting", script.Targeting.ToString());
     }

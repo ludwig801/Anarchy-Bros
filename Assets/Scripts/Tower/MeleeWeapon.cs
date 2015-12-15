@@ -6,6 +6,7 @@ namespace AnarchyBros
     {
         public float Damage, Range, AttackDelay, FadeSpeed;
         public Color ColorAttack, ColorFaded;
+        public bool Enabled;
 
         SpriteRenderer _renderer;
         float _deltaTime;
@@ -40,12 +41,17 @@ namespace AnarchyBros
 
         public void OnTriggerEnter2D(Collider2D data)
         {
+            if (!Enabled)
+            {
+                return;
+            }
+
             if (data.tag == "Enemy")
             {
                 if (_deltaTime >= AttackDelay)
                 {
                     Attack(data.GetComponent<Enemy>());
-                    _deltaTime = 0f;
+                    _deltaTime = 0;
                 }
             }
         }

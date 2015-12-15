@@ -18,9 +18,8 @@
 
     public enum SpotTypes
     {
-        Any = -1,
         Connection = 0,
         TowerSpot = 1,
-        EnemySpawn = 2
+        EnemySpot = 2
     }
 }

@@ -5,23 +5,22 @@ using AnarchyBros.Enums;
 
 namespace AnarchyBros
 {
-    public class GraphManager : MonoBehaviour
+    public class MapManager : MonoBehaviour
     {
-        public static GraphManager Instance { get; private set; }
+        public static MapManager Instance { get; private set; }
 
-        public Transform SpotsObj, EdgesObj;
+        public Transform ObjGraph, ObjGround;
         public GameObject TowerSpotPrefab, EnemySpawnPrefab, EdgePrefab, SpotPrefab, TargetPrefab;
-        public List<Spot> Spots;
-        public List<Edge> Edges;
         public SpotTypes CurrentMode;
+        public Graph Graph;
+        public int EnemySpotCount, TowerSpotCount;
+
 
         GameObject _targetObj;
-        Vector2 _source, _target;
+        Vector2 _source, _target, _mapBottomLeft, _mapTopRight;
         Edge _refEdge;
         Spot _refSource, _refTarget;
         bool _targeting;
-        float[,] _distancesMatrix;
-        int _enemySpots, _towerSpots;
 
         public bool Targeting
         {
@@ -43,36 +42,36 @@ namespace AnarchyBros
 
         void Start()
         {
+            // Reference Edges
             GameObject instance = Instantiate(EdgePrefab);
             instance.name = "Ref. Edge";
             instance.GetComponent<Collider2D>().enabled = false;
             instance.transform.parent = transform;
             _refEdge = instance.GetComponent<Edge>();
-
+            // Reference Source
             instance = Instantiate(SpotPrefab);
             instance.name = "Ref. Source";
             instance.GetComponent<Collider2D>().enabled = false;
             instance.transform.parent = transform;
             _refSource = instance.GetComponent<Spot>();
-
+            // Reference Target
             instance = Instantiate(SpotPrefab);
             instance.name = "Ref. Target";
             instance.GetComponent<Collider2D>().enabled = false;
             instance.transform.parent = transform;
             _refTarget = instance.GetComponent<Spot>();
-
+            // Target Object
             _targetObj = Instantiate(TargetPrefab);
             _targetObj.SetActive(false);
             _targetObj.name = "Target";
             _targetObj.transform.parent = transform;
 
-            _enemySpots = 0;
-            _towerSpots = 0;
 
-            GetSpots();
+            Graph = ObjGraph.GetComponent<Graph>();
+            EnemySpotCount = Graph.GetSpotCountOfType(SpotTypes.EnemySpot);
+            TowerSpotCount = Graph.GetSpotCountOfType(SpotTypes.EnemySpot);
 
             Targeting = false;
-
             CurrentMode = SpotTypes.Connection;
         }
 
@@ -93,7 +92,7 @@ namespace AnarchyBros
                         }
                         break;
 
-                    case SpotTypes.EnemySpawn:
+                    case SpotTypes.EnemySpot:
                         _targetObj.SetActive(true);
                         _targetObj.transform.position = Tools2D.Convert(_targetObj.transform.position, Camera.main.ScreenToWorldPoint(Input.mousePosition));
                         break;
@@ -107,94 +106,55 @@ namespace AnarchyBros
             else
             {
                 Targeting = false;
-            }
-        }
-
-        void GetSpots()
-        {
-            if (Spots == null)
-            {
-                Spots = new List<Spot>();
-            }
-            else
-            {
-                Spots.Clear();
-            }
-
-            for (int i = 0; i < SpotsObj.childCount; i++)
-            {
-                Spot n = SpotsObj.GetChild(i).GetComponent<Spot>();
-                Spots.Add(n);
-
-                switch (n.Type)
-                {
-                    case SpotTypes.TowerSpot:
-                        _towerSpots++;
-                        break;
-
-                    case SpotTypes.EnemySpawn:
-                        _enemySpots++;
-                        break;
-
-                    default:
-                        break;
-                }
-            }
-
-            for (int i = 0; i < EdgesObj.childCount; i++)
-            {
-                Edge e = EdgesObj.GetChild(i).GetComponent<Edge>();
-                Edges.Add(e);
+                _mapBottomLeft = ObjGround.transform.position - 0.5f * ObjGround.transform.localScale;
+                _mapTopRight = ObjGround.transform.position + 0.5f * ObjGround.transform.localScale;
             }
         }
 
         void CreateLink(Vector2 source)
         {
-            Spot node;
-            Edge hitEdge;
-
-            if (!GetHitSpot(source, out node))
+            Spot spot;
+            if (SpotAt(source) == null)
             {
-                node = CreateSpot(source, CurrentMode);
-                if (GetHitEdge(source, out hitEdge))
+                spot = CreateSpot(source, CurrentMode);
+                Edge hitEdge;
+
+                if (EdgeAt(source, out hitEdge))
                 {
-                    SplitEdge(hitEdge, node);
+                    SplitEdge(hitEdge, spot);
                 }
             }
         }
 
         void CreateLink(Vector2 source, Vector2 target)
         {
-            Spot nodeA, nodeB;
+            Spot spotA, spotB;
             Edge hitEdge;
 
-            if (!GetHitSpot(source, out nodeA))
+            if (!SpotAt(source, out spotA))
             {
-                nodeA = CreateSpot(source, CurrentMode);
-                if (GetHitEdge(source, out hitEdge))
+                spotA = CreateSpot(source, CurrentMode);
+                if (EdgeAt(source, out hitEdge))
                 {
-                    SplitEdge(hitEdge, nodeA);
+                    SplitEdge(hitEdge, spotA);
                 }
             }
 
-            if (!GetHitSpot(target, out nodeB))
+            if (!SpotAt(target, out spotB))
             {
-                nodeB = CreateSpot(target, CurrentMode);
-                if (GetHitEdge(target, out hitEdge))
+                spotB = CreateSpot(target, CurrentMode);
+                if (EdgeAt(target, out hitEdge))
                 {
-                    SplitEdge(hitEdge, nodeB);
+                    SplitEdge(hitEdge, spotB);
                 }
             }
 
-            for (int i = 0; i < Edges.Count; i++)
+            if (Graph.AreNeighbors(spotA, spotB))
             {
-                if (Edges[i].GetNeighbor(nodeA) == nodeB)
-                {
-                    return;
-                }
+                return;
             }
 
-            CreateEdge(nodeA, nodeB);
+            CreateEdge(spotA, spotB);
         }
 
         void SplitEdge(Edge hitEdge, Spot spliterSpot)
@@ -205,7 +165,7 @@ namespace AnarchyBros
             hitEdge.SetNodes(spliterSpot, hitEdge.B);
             spliterSpot.AddEdge(hitEdge);
 
-            CreateEdge(spliterSpot, GetHitSpot(spotA));
+            CreateEdge(spliterSpot, SpotAt(spotA));
         }
 
         Spot CreateSpot(Vector2 worldPos, SpotTypes type)
@@ -222,13 +182,13 @@ namespace AnarchyBros
                 case SpotTypes.TowerSpot:
                     obj = Instantiate(TowerSpotPrefab);
                     obj.name = "Tower Spot";
-                    _towerSpots++;
+                    TowerSpotCount++;
                     break;
 
-                case SpotTypes.EnemySpawn:
+                case SpotTypes.EnemySpot:
                     obj = Instantiate(EnemySpawnPrefab);
                     obj.name = "Enemy Spot";
-                    _enemySpots++;
+                    EnemySpotCount++;
                     break;
 
                 default:
@@ -239,12 +199,11 @@ namespace AnarchyBros
 
             obj.layer = LayerMask.NameToLayer("Spots");
             obj.transform.position = worldPos;
-            obj.transform.parent = SpotsObj;
 
             Spot n = obj.GetComponent<Spot>();
             n.Type = type;
 
-            Spots.Add(n);
+            Graph.AddSpot(n);
             return n;
         }
 
@@ -267,104 +226,48 @@ namespace AnarchyBros
         Edge CreateEdge(Spot a, Spot b)
         {
             GameObject obj = Instantiate(EdgePrefab);
-            obj.transform.parent = EdgesObj;
             obj.name = "Edge";
 
             Edge e = obj.GetComponent<Edge>();
             e.SetNodes(a, b);
-            Edges.Add(e);
-            a.AddEdge(e);
-            b.AddEdge(e);
+            Graph.AddEdge(e);
 
             return e;
         }
 
-        void RemoveSpot(Spot spot)
+        void RemoveSpot(Spot s)
         {
-            for (int i = spot.Edges.Count - 1; i >= 0; i--)
-            {
-                RemoveEdge(spot.Edges[i]);
-            }
-
-            switch (spot.Type)
-            {
-                case SpotTypes.EnemySpawn:
-                    _enemySpots--;
-                    break;
-
-                case SpotTypes.TowerSpot:
-                    _towerSpots--;
-                    break;
-
-                default: break;
-            }
-
-            Spots.Remove(spot);
-            Destroy(spot.gameObject);
+            Graph.RemoveSpot(s);
+            EnemySpotCount = Graph.GetSpotCountOfType(SpotTypes.EnemySpot);
+            TowerSpotCount = Graph.GetSpotCountOfType(SpotTypes.EnemySpot);
         }
 
-        void RemoveEdge(Edge edge)
+        void RemoveEdge(Edge e)
         {
-            Edges.Remove(edge);
-            edge.A.RemoveEdge(edge);
-            edge.B.RemoveEdge(edge);
-            Destroy(edge.gameObject);
+            Graph.RemoveEdge(e);
         }
 
-        bool GetHitSpot(Vector2 pos, out Spot hit)
+        bool SpotAt(Vector2 pos, out Spot hit)
         {
-            hit = null;
-            for (int i = 0; i < Spots.Count; i++)
-            {
-                if (Spots[i].Collider.OverlapPoint(pos))
-                {
-                    hit = Spots[i];
-                    return true;
-                }
-            }
+            hit = Graph.SpotOverlaping(pos);
 
-            return false;
+            return (hit != null);
         }
 
-        bool GetHitEdge(Vector2 pos, out Edge hit)
+        bool EdgeAt(Vector2 pos, out Edge hit)
         {
-            hit = null;
-            for (int i = 0; i < Edges.Count; i++)
-            {
-                if (Edges[i].Collider.OverlapPoint(pos))
-                {
-                    hit = Edges[i];
-                    return true;
-                }
-            }
-
-            return false;
+            hit = Graph.EdgeOverlaping(pos);
+            return (hit != null);
         }
 
-        public Edge GetHitEdge(Spot a, Spot b)
+        public Edge EdgeAt(Spot a, Spot b)
         {
-            for (int i = 0; i < Edges.Count; i++)
-            {
-                if (Edges[i].GetNeighbor(a) == b)
-                {
-                    return Edges[i];
-                }
-            }
-
-            return null;
+            return Graph.EdgeConnecting(a, b);
         }
 
-        public Spot GetHitSpot(Vector2 pos)
+        public Spot SpotAt(Vector2 pos)
         {
-            for (int i = 0; i < Spots.Count; i++)
-            {
-                if (Spots[i].Collider.OverlapPoint(pos))
-                {
-                    return Spots[i];
-                }
-            }
-
-            return null;
+            return Graph.SpotOverlaping(pos);
         }
 
         public void OnGroundClick(BaseEventData baseData)
@@ -392,9 +295,9 @@ namespace AnarchyBros
                         }
                         break;
 
-                    case SpotTypes.EnemySpawn:
+                    case SpotTypes.EnemySpot:
                         Targeting = false;
-                        CreateSpot(eventData.pointerCurrentRaycast.worldPosition, SpotTypes.EnemySpawn);
+                        CreateSpot(eventData.pointerCurrentRaycast.worldPosition, SpotTypes.EnemySpot);
                         break;
 
                     case SpotTypes.TowerSpot:
@@ -443,9 +346,9 @@ namespace AnarchyBros
                             ReplaceSpot(spot, SpotTypes.TowerSpot);
                             break;
 
-                        case SpotTypes.EnemySpawn:
+                        case SpotTypes.EnemySpot:
                             Targeting = false;
-                            ReplaceSpot(spot, SpotTypes.EnemySpawn);
+                            ReplaceSpot(spot, SpotTypes.EnemySpot);
                             break;
                     }
                 }
@@ -457,7 +360,7 @@ namespace AnarchyBros
                             RemoveSpot(spot);
                             break;
 
-                        case SpotTypes.EnemySpawn:
+                        case SpotTypes.EnemySpot:
                             ReplaceSpot(spot, SpotTypes.Connection);
                             break;
 
@@ -484,10 +387,7 @@ namespace AnarchyBros
                 return;
             }
 
-            for (int i = 0; i < Edges.Count; i++)
-            {
-                Edges[i].ReEvaluate();
-            }
+            Graph.UpdateEdges();
         }
 
         public void OnEdgeClick(PointerEventData eventData, Edge edge)
@@ -520,7 +420,7 @@ namespace AnarchyBros
                         CreateLink(_source);
                         break;
 
-                    case SpotTypes.EnemySpawn:
+                    case SpotTypes.EnemySpot:
                         Targeting = false;
                         _source = eventData.pointerCurrentRaycast.worldPosition;
                         CreateLink(_source);
@@ -553,8 +453,8 @@ namespace AnarchyBros
             for (int i = 0; i < newGraph.Edges.Count; i++)
             {
                 IOManager.IOEdge edge = newGraph.Edges[i];
-                Spot a = GetHitSpot(edge.a.ToVector2);
-                Spot b = GetHitSpot(edge.b.ToVector2);
+                Spot a = SpotAt(edge.a.ToVector2);
+                Spot b = SpotAt(edge.b.ToVector2);
 
                 CreateEdge(a, b);
             }
@@ -562,233 +462,102 @@ namespace AnarchyBros
 
         public void DestroyGraph()
         {
-            for (int i = 0; i < SpotsObj.childCount; i++)
-            {
-                RemoveSpot(SpotsObj.GetChild(i).GetComponent<Spot>());
-            }
-
-            for (int i = 0; i < EdgesObj.childCount; i++)
-            {
-                Destroy(EdgesObj.GetChild(i).gameObject);
-            }
-
-            Spots.Clear();
-            Edges.Clear();
+            Graph.Clear();
         }
 
-        public void ReEvaluate()
+        public void OnGameStateChanged(GameStates newState)
         {
-            switch (GameManager.Instance.CurrentState)
+            Graph.OnGameStateChanged(newState);
+
+            if (newState == GameStates.Play)
             {
-                case GameStates.Place:
-                    //_targetObj.SetActive(false);
-                    break;
-
-                case GameStates.Play:
-                    _targetObj.SetActive(false);
-                    break;
-            }
-            if (GameManager.Instance.IsCurrentState(GameStates.Play))
-            {
-                _distancesMatrix = new float[Spots.Count, Spots.Count];
-                List<GraphSpot> graph = new List<GraphSpot>();
-
-                for (int i = 0; i < Spots.Count; i++)
-                {
-                    Spot n = Spots[i];
-                    n.Index = i;
-                    GraphSpot gNode = new GraphSpot(n.transform.position, float.MaxValue);
-                    graph.Add(gNode);
-                }
-
-                for (int i = 0; i < Spots.Count; i++)
-                {
-                    CalcDistances(i, graph);
-                }
-
-                graph.Clear();
+                _targetObj.SetActive(false);
+                Graph.ReCalculateDistances();
             }
         }
 
-        public Spot GetRandomSpot(SpotTypes type = SpotTypes.Any)
+        public Spot GetRandomSpot(SpotTypes type)
         {
-            int rand;
+            int rand = int.MinValue;
             switch (type)
             {
                 case SpotTypes.Connection:
-                    rand = Random.Range(0, Spots.Count - (_enemySpots + _towerSpots));
-                    for (int i = 0; i < Spots.Count; i++)
-                    {
-                        if (Spots[i].Type == SpotTypes.Connection)
-                        {
-                            if (rand <= 0)
-                            {
-                                return Spots[i];
-                            }
-                            rand--;
-                        }
-                    }
+                    rand = Random.Range(0, Graph.SpotCount - (EnemySpotCount + TowerSpotCount));
                     break;
 
-                case SpotTypes.EnemySpawn:
-                    rand = Random.Range(0, _enemySpots);
-                    for (int i = 0; i < Spots.Count; i++)
-                    {
-                        if (Spots[i].Type == SpotTypes.EnemySpawn)
-                        {
-                            if (rand <= 0)
-                            {
-                                return Spots[i];
-                            }
-                            rand--;
-                        }
-                    }
+                case SpotTypes.EnemySpot:
+                    rand = Random.Range(0, EnemySpotCount);
                     break;
 
                 case SpotTypes.TowerSpot:
-                    rand = Random.Range(0, _towerSpots);
-                    for (int i = 0; i < Spots.Count; i++)
-                    {
-                        if (Spots[i].Type == SpotTypes.TowerSpot)
-                        {
-                            if (rand <= 0)
-                            {
-                                return Spots[i];
-                            }
-                            rand--;
-                        }
-                    }
+                    rand = Random.Range(0, TowerSpotCount);
                     break;
-
-                default:
-                    rand = Random.Range(0, Spots.Count);
-                    return Spots[rand];
-                    //break;
             }
 
-            return null;
+            return Graph.RandomSpot(rand, type);
         }
 
-        public Spot GetBestSpot(Spot current, Spot objective)
+        public Spot NextStep(Spot current, Spot objective)
         {
             if (current == objective)
             {
                 return objective;
             }
 
-            int target = objective.Index;
-            float min = float.MaxValue;
-            int best = 0;
+            return Graph.NextStep(current, objective);
+        }
 
-            for (int i = 0; i < current.Edges.Count; i++)
+        public Spot NextStep(Vector2 currentPos, Edge e, Spot objective)
+        {
+            float distA = Vector2.Distance(currentPos, e.A.transform.position) + Graph.DistanceBetween(e.A, objective);
+            float distB = Vector2.Distance(currentPos, e.B.transform.position) + Graph.DistanceBetween(e.B, objective);
+            return (distA < distB) ? e.A : e.B;
+        }
+
+        public float DistanceBetween(Tower t, Enemy e)
+        {
+            if (t.Spot != null)
             {
-                int neighbor = current.GetNeighbor(i).Index;
-                if (_distancesMatrix[neighbor, target] < min)
+                if (e.Spot != null)
                 {
-                    min = _distancesMatrix[neighbor, target];
-                    best = neighbor;
+                    return Graph.DistanceBetween(t.Spot, e.Spot);
+                }
+                else if(e.Edge != null)
+                {
+                    float d1 = Vector2.Distance(e.transform.position, e.Edge.A.transform.position);
+                    float d2 = Vector2.Distance(e.transform.position, e.Edge.B.transform.position);
+                    return Mathf.Min(Graph.DistanceBetween(t.Spot, e.Edge.A) + d1, Graph.DistanceBetween(t.Spot, e.Edge.B) + d2);
+                }
+            }
+            else if(t.Edge != null)
+            {
+                if (e.Spot != null)
+                {
+                    float d1 = Vector2.Distance(t.transform.position, t.Edge.A.transform.position);
+                    float d2 = Vector2.Distance(t.transform.position, t.Edge.B.transform.position);
+                    return Mathf.Min(Graph.DistanceBetween(t.Edge.A, e.Spot) + d1, Graph.DistanceBetween(t.Edge.B, e.Spot) + d2);
+                }
+                else if (e.Edge != null)
+                {
+                    float d1 = Vector2.Distance(t.transform.position, t.Edge.A.transform.position);
+                    float d2 = Vector2.Distance(t.transform.position, t.Edge.B.transform.position);
+                    float d3 = Vector2.Distance(e.transform.position, e.Edge.A.transform.position);
+                    float d4 = Vector2.Distance(e.transform.position, e.Edge.B.transform.position);
+                    float d5 = Mathf.Min(Graph.DistanceBetween(t.Edge.A, e.Edge.A) + d1 + d2, Graph.DistanceBetween(t.Edge.B, e.Edge.A) + d2 + d3);
+                    float d6 = Mathf.Min(Graph.DistanceBetween(t.Edge.B, e.Edge.A) + d2 + d3, Graph.DistanceBetween(t.Edge.B, e.Edge.B) + d2 + d4);
+                    return Mathf.Min(d5, d6); ;
                 }
             }
 
-            return Spots[best];
+            return float.MaxValue;
         }
 
-        public Spot GetBestSpot(Vector2 currentPos, Spot a, Spot b, Spot objective)
+        public bool OutOfMap(Vector2 position, Vector2 margin)
         {
-            float distA = Vector2.Distance(currentPos, a.transform.position) + _distancesMatrix[a.Index, objective.Index];
-            float distB = Vector2.Distance(currentPos, b.transform.position) + _distancesMatrix[b.Index, objective.Index];
-            return (distA < distB) ? a : b;
+            Vector2 objBottomLeft = position - margin;
+            Vector2 objTopRight = position + margin;
+
+            return Tools2D.NotInside(objBottomLeft, objTopRight, _mapBottomLeft, _mapTopRight);
         }
-
-        #region PathEval
-
-        void CalcDistances(int sourceIndex, List<GraphSpot> graph)
-        {
-            List<GraphSpot> unvisited = new List<GraphSpot>();
-
-            for (int i = 0; i < graph.Count; i++)
-            {
-                unvisited.Add(graph[i]);
-                graph[i].Dist = int.MaxValue;
-            }
-
-            for (int i = 0; i < Spots.Count; i++)
-            {
-                Spot node = Spots[i];
-
-                for (int j = 0; j < node.Edges.Count; j++)
-                {
-                    Spot neighbor = node.GetNeighbor(j);
-                    for (int w = 0; w < unvisited.Count; w++)
-                    {
-                        if (Tools2D.IsPositionEqual(unvisited[w].position, neighbor.transform.position))
-                        {
-                            unvisited[i].Neighbors.Add(unvisited[w]);
-                        }
-                    }
-                }
-            }
-
-            unvisited[sourceIndex].Dist = 0;
-
-            while (unvisited.Count > 0)
-            {
-                GraphSpot node = unvisited[GetNextBest(unvisited)];
-                unvisited.Remove(node);
-
-                for (int i = 0; i < node.Neighbors.Count; i++)
-                {
-                    GraphSpot neighbor = node.Neighbors[i];
-                    if (unvisited.Contains(neighbor))
-                    {
-                        float d = node.Dist + Vector2.Distance(neighbor.position, node.position);
-                        if (d <= neighbor.Dist)
-                        {
-                            neighbor.Dist = d;
-                        }
-                    }
-                }
-            }
-
-            for (int i = 0; i < graph.Count; i++)
-            {
-                _distancesMatrix[sourceIndex, i] = graph[i].Dist;
-            }
-        }
-
-        int GetNextBest(List<GraphSpot> graph)
-        {
-            float min = float.MaxValue;
-            int index = 0;
-
-            for (int i = 0; i < graph.Count; i++)
-            {
-                if (graph[i].Dist <= min)
-                {
-                    min = graph[i].Dist;
-                    index = i;
-                }
-            }
-
-            return index;
-        }
-
-        class GraphSpot
-        {
-            public Vector2 position;
-            public float Dist;
-
-            public List<GraphSpot> Neighbors;
-
-            public GraphSpot(Vector2 pos, float dist)
-            {
-                position = pos;
-                Dist = dist;
-
-                Neighbors = new List<GraphSpot>();
-            }
-        }
-
-        #endregion
     }
 }

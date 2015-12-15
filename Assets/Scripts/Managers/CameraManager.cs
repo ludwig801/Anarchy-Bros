@@ -50,11 +50,11 @@ namespace AnarchyBros
             float width = (MainCamera.orthographicSize * Screen.width) / Screen.height;
             float height = MainCamera.orthographicSize;
 
-            Vector2 min = Ground.transform.position - 0.5f * Ground.transform.localScale + new Vector3(width, height, 0);
-            Vector2 max = Ground.transform.position + 0.5f * Ground.transform.localScale - new Vector3(width, height, 0);
+            Vector2 bottomLeft = Ground.transform.position - 0.5f * Ground.transform.localScale + new Vector3(width, height, 0);
+            Vector2 topRight = Ground.transform.position + 0.5f * Ground.transform.localScale - new Vector3(width, height, 0);
 
-            _moveCameraTo.x = Mathf.Max(min.x, Mathf.Min(max.x, _moveCameraTo.x));
-            _moveCameraTo.y = Mathf.Max(min.y, Mathf.Min(max.y, _moveCameraTo.y));
+            _moveCameraTo.x = Mathf.Max(bottomLeft.x, Mathf.Min(topRight.x, _moveCameraTo.x));
+            _moveCameraTo.y = Mathf.Max(bottomLeft.y, Mathf.Min(topRight.y, _moveCameraTo.y));
         }
 
         public void OnMapSizeChanged(float newVal)

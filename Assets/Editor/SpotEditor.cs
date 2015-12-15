@@ -2,7 +2,7 @@
 using AnarchyBros;
 
 [CustomEditor(typeof(Spot))]
-public class NodeEditor : Editor
+public class SpotEditor : Editor
 {
     public override void OnInspectorGUI()
     {

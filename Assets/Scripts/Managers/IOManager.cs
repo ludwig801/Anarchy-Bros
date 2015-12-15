@@ -22,8 +22,8 @@ namespace AnarchyBros
 
         public void SaveGraph()
         {
-            List<Spot> spots = GraphManager.Instance.Spots;
-            List<Edge> edges = GraphManager.Instance.Edges;
+            List<Spot> spots = MapManager.Instance.Graph.Spots;
+            List<Edge> edges = MapManager.Instance.Graph.Edges;
             GameGraph toSave = new GameGraph();
 
             for (int i = 0; i < spots.Count; i++)
@@ -63,7 +63,7 @@ namespace AnarchyBros
 
                 Debug.Log("LOAD: " + graph.Spots.Count + " spots & " + graph.Edges.Count);
 
-                GraphManager.Instance.RebuildGraph(graph);
+                MapManager.Instance.RebuildGraph(graph);
 
                 graph.Spots.Clear();
                 graph.Edges.Clear();

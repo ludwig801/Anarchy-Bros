@@ -33,15 +33,6 @@ namespace AnarchyBros
 
         void GetTowers()
         {
-            if (Towers == null)
-            {
-                Towers = new List<Tower>();
-            }
-            else
-            {
-                Towers.Clear();
-            }
-
             for (int i = 0; i < TowersObj.childCount; i++)
             {
                 Tower tower = TowersObj.GetChild(i).GetComponent<Tower>();
@@ -66,6 +57,7 @@ namespace AnarchyBros
             if (ActiveTowers < Towers.Count)
             {
                 tower = GetTower();
+                tower.Reborn();
                 tower.gameObject.SetActive(true);
             }
             else
@@ -75,6 +67,7 @@ namespace AnarchyBros
                 instance.transform.parent = TowersObj;
 
                 tower = instance.GetComponent<Tower>();
+                tower.Reborn();
                 Towers.Add(tower);
             }
 
@@ -138,7 +131,7 @@ namespace AnarchyBros
             int rand = Random.Range(0, ActiveTowers);
             for (int i = 0; i < Towers.Count; i++)
             {
-                if (Towers[i].gameObject.activeSelf)
+                if (Towers[i].IsAlive)
                 {
                     if (rand <= 0)
                     {
@@ -203,9 +196,9 @@ namespace AnarchyBros
             ActiveTowers--;
         }
 
-        public void ReEvaluate()
+        public void OnGameStateChanged(GameStates newState)
         {
-            switch (GameManager.Instance.CurrentState)
+            switch (newState)
             {
                 case GameStates.Edit:
                     DestroyAllTowers();
@@ -213,6 +206,13 @@ namespace AnarchyBros
 
                 case GameStates.Place:
                     DestroyAllTowers();
+                    break;
+
+                case GameStates.Play:
+                    for (int i = 0; i < Towers.Count; i++)
+                    {
+                        Towers[i].GetComponent<EditBehavior>().enabled = false;
+                    }
                     break;
             }
         }

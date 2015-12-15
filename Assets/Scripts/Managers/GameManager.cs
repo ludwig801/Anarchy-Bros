@@ -22,45 +22,37 @@ namespace AnarchyBros
         public void Play()
         {
             _currentState = GameStates.Play;
-            GraphManager.Instance.ReEvaluate();
-            EnemyManager.Instance.ReEvaluate();
-            TowerManager.Instance.ReEvaluate();
-            UIManager.Instance.ReEvaluate();
+            MapManager.Instance.OnGameStateChanged(_currentState);
+            EnemyManager.Instance.OnGameStateChanged(_currentState);
+            TowerManager.Instance.OnGameStateChanged(_currentState);
+            UIManager.Instance.OnGameStateChanged(_currentState);
         }
 
         public void Stop()
         {
             _currentState = GameStates.Stop;
-            TowerManager.Instance.ReEvaluate();
-            UIManager.Instance.ReEvaluate();
+            TowerManager.Instance.OnGameStateChanged(_currentState);
+            UIManager.Instance.OnGameStateChanged(_currentState);
         }
 
         public void Edit()
         {
             _currentState = GameStates.Edit;
-            TowerManager.Instance.ReEvaluate();
-            EnemyManager.Instance.ReEvaluate();
-            UIManager.Instance.ReEvaluate();
+            TowerManager.Instance.OnGameStateChanged(_currentState);
+            EnemyManager.Instance.OnGameStateChanged(_currentState);
+            UIManager.Instance.OnGameStateChanged(_currentState);
         }
 
         public void Place()
         {
             _currentState = GameStates.Place;
-            TowerManager.Instance.ReEvaluate();
-            UIManager.Instance.ReEvaluate();
+            TowerManager.Instance.OnGameStateChanged(_currentState);
+            UIManager.Instance.OnGameStateChanged(_currentState);
         }
 
         public bool IsCurrentState(GameStates state)
         {
             return _currentState == state;
-        }
-
-        public GameStates CurrentState
-        {
-            get
-            {
-                return _currentState;
-            }
         }
     }
 }

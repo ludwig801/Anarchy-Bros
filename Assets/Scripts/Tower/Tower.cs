@@ -7,30 +7,27 @@ namespace AnarchyBros
     public class Tower : MonoBehaviour, IKillable, IPointerClickHandler
     {
         public float Speed, Health, DeathSpeed;
-        public Spot Objective, MoveTo, CurrentSpot;
-        public Edge CurrentEdge;
-        public Color ColorHurt, ColorDying, ColorDead;
+        public Spot Objective, MoveTo, Spot;
+        public Edge Edge;
+        public Color ColorDefault, ColorDying, ColorDead;
         public MeleeWeapon MeleeWeapon;
+        public RangeWeapon RangeWeapon;
 
-        public bool IsAlive { get { return Health > 0f && gameObject.activeSelf; } }
+        public bool IsAlive { get { return (Health > 0f) && gameObject.activeSelf; } }
 
-        PieceBehavior _pieceBehavior;
         SpriteRenderer _renderer;
-        bool _animateDefault, _dying, _hurt;
-        float _initialHealth;
+        float _initialHealth, _invInitialHealth, _deltaTime;
 
         void Start()
         {
-            _pieceBehavior = GetComponent<PieceBehavior>();
             _renderer = GetComponent<SpriteRenderer>();
-            CurrentSpot = GraphManager.Instance.GetHitSpot(transform.position);
-            CurrentSpot.Tower = this;
-            CurrentEdge = null;
+            Spot = MapManager.Instance.SpotAt(transform.position);
+            Spot.Tower = this;
+            Edge = null;
             transform.position = MoveTo.transform.position;
             _initialHealth = Health;
-            _animateDefault = _pieceBehavior.Animate;
-            _dying = false;
-            _hurt = false;
+            _invInitialHealth = 1f / _initialHealth;
+            _deltaTime = 0;
         }
 
         void Update()
@@ -40,34 +37,26 @@ namespace AnarchyBros
                 return;
             }
 
-            _pieceBehavior.Animate = false;
-
-            if (_hurt)
+            if (RangeWeapon != null)
             {
-                if (Tools.AreColorsEqual(_renderer.color, ColorDead))
-                {
-                    _hurt = false;
-                    _renderer.color = _pieceBehavior.ColorDefault;
-                }
-
-                _renderer.color = Color.Lerp(_renderer.color, _pieceBehavior.ColorDefault, Time.deltaTime * DeathSpeed);
-                return;
+                RangeWeapon.EnemyTarget = EnemyManager.Instance.GetNearestEnemy(this);
             }
 
-            if (_dying)
+            _renderer.color = Color.Lerp(ColorDefault, ColorDying, (_initialHealth - Health) * _invInitialHealth);
+
+            _deltaTime += Time.deltaTime;
+
+            if (!IsAlive)
             {
-                if (Tools.AreColorsEqual(_renderer.color, ColorDead))
+                _renderer.color = ColorDead;
+                if (_deltaTime >= DeathSpeed)
                 {
-                    Debug.Log("Died");
-                    _dying = false;
-                    _pieceBehavior.Animate = _animateDefault;
-                    _renderer.color = _pieceBehavior.ColorDefault;
+                    Debug.Log("Tower Died");
+                    _renderer.color = ColorDefault;
                     Health = _initialHealth;
                     gameObject.SetActive(false);
                     TowerManager.Instance.OnTowerKill();
                 }
-
-                _renderer.color = Color.Lerp(_renderer.color, ColorDead, Time.deltaTime * DeathSpeed);
                 return;
             }
 
@@ -83,25 +72,35 @@ namespace AnarchyBros
 
             if (Tools2D.IsPositionEqual(transform.position, MoveTo.transform.position))
             {
-                CurrentSpot = MoveTo;
-                CurrentEdge = null;
+                Spot = MoveTo;
+                Edge = null;
             }
 
-            if (CurrentSpot != null)
+            if (Spot != null)
             {
-                MoveTo = GraphManager.Instance.GetBestSpot(CurrentSpot, Objective);
-                CurrentEdge = GraphManager.Instance.GetHitEdge(CurrentSpot, MoveTo);
-                CurrentSpot = null;
+                MoveTo = MapManager.Instance.NextStep(Spot, Objective);
+                Edge = MapManager.Instance.EdgeAt(Spot, MoveTo);
+                Spot = null;
             }
-            else if (CurrentEdge != null)
+            else if (Edge != null)
             {
-                MoveTo = GraphManager.Instance.GetBestSpot(transform.position, CurrentEdge.A, CurrentEdge.B, Objective);
+                MoveTo = MapManager.Instance.NextStep(transform.position, Edge, Objective);
             }
 
-            Vector2 delta = Tools2D.Subtract(MoveTo.transform.position, transform.position);
-            float angle = (delta.x < 0f) ? Vector2.Angle(Vector2.up, delta) : 360f - Vector2.Angle(Vector2.up, delta);
-            transform.rotation = Quaternion.Euler(0, 0, angle);
+            transform.rotation = Tools2D.LookAt(transform.position, MoveTo.transform.position);
             transform.position = Tools2D.MoveTowards(transform.position, MoveTo.transform.position, Time.deltaTime * Speed);
+        }
+
+        public void Reborn()
+        {
+            if (MeleeWeapon != null)
+            {
+                MeleeWeapon.Enabled = true;
+            }
+            if (RangeWeapon != null)
+            {
+                RangeWeapon.Enabled = true;
+            }
         }
 
         public void TakeDamage(float amount)
@@ -110,27 +109,22 @@ namespace AnarchyBros
 
             if (!IsAlive)
             {
-                if (!_dying) // don't kill an already dying man
-                {
-                    Kill();
-                }
-            }
-            else
-            {
-                _hurt = true;
-                _renderer.color = ColorHurt;
+                Kill();
+                _deltaTime = 0;
             }
         }
 
         public void Kill()
         {
-            _hurt = false;
-            _dying = true;
-            _renderer.color = ColorDying;
-            MeleeWeapon.gameObject.SetActive(false);
-            //gameObject.SetActive(false);
-            //Health = _initialHealth;
-            //TowerManager.Instance.OnTowerKill();
+            Health = 0;
+            if (MeleeWeapon != null)
+            {
+                MeleeWeapon.Enabled = false;
+            }
+            if (RangeWeapon != null)
+            {
+                RangeWeapon.Enabled = false;
+            }
         }
 
         public void OnPointerClick(PointerEventData eventData)

@@ -12,6 +12,7 @@ namespace AnarchyBros
         public GameObject EnemyPrefab;
         public float SpawnTime;
         public int MaxEnemyCount, ActiveEnemies;
+        public bool TargetsAreRandom;
         public List<Enemy> Enemies;
 
         float _deltaTime;
@@ -24,7 +25,6 @@ namespace AnarchyBros
 
         void Start()
         {
-            Enemies = new List<Enemy>();
             ActiveEnemies = 0;
         }
 
@@ -52,9 +52,9 @@ namespace AnarchyBros
                 Enemy e = GetEnemy();
                 e.transform.position = spawnSpot.transform.position;
                 e.name = "Enemy";
-                e.CurrentSpot = spawnSpot;
-                e.CurrentEdge = null;
-                e.MoveTo = e.CurrentSpot;
+                e.Spot = spawnSpot;
+                e.Edge = null;
+                e.MoveTo = e.Spot;
                 e.Objective = objective;
                 e.gameObject.SetActive(true);
                 ActiveEnemies++;
@@ -74,7 +74,7 @@ namespace AnarchyBros
 
         bool GenerateObjective(out Tower finalObjective, out Spot spawnSpot)
         {
-            spawnSpot = GraphManager.Instance.GetRandomSpot(SpotTypes.EnemySpawn);
+            spawnSpot = MapManager.Instance.GetRandomSpot(SpotTypes.EnemySpot);
             finalObjective = TowerManager.Instance.GetRandomTower();
 
             return (finalObjective != null && spawnSpot != null);
@@ -99,9 +99,31 @@ namespace AnarchyBros
             return e;
         }
 
-        public Tower GetNewObjective()
+        public bool GetNewObjective(out Tower newObjective)
         {
-            return TowerManager.Instance.GetRandomTower();
+            newObjective = TowerManager.Instance.GetRandomTower();
+            return (newObjective != null);
+        }
+
+        public Enemy GetNearestEnemy(Tower t)
+        {
+            float minDist = float.MaxValue;
+            Enemy best = null;
+
+            for (int i = 0; i < Enemies.Count; i++)
+            {
+                if (Enemies[i].IsAlive)
+                {
+                    float d = MapManager.Instance.DistanceBetween(t, Enemies[i]);
+                    if (d < minDist)
+                    {
+                        minDist = d;
+                        best = Enemies[i];
+                    }
+                }
+            }
+
+            return best;
         }
 
         public void OnEnemyKill()
@@ -109,9 +131,9 @@ namespace AnarchyBros
             ActiveEnemies--;
         }
 
-        public void ReEvaluate()
+        public void OnGameStateChanged(GameStates newState)
         {
-            switch (GameManager.Instance.CurrentState)
+            switch (newState)
             {
                 case GameStates.Edit:
                     DestroyAllEnemies();
@@ -119,6 +141,13 @@ namespace AnarchyBros
 
                 case GameStates.Place:
                     DestroyAllEnemies();
+                    break;
+
+                case GameStates.Play:
+                    for (int i = 0; i < Enemies.Count; i++)
+                    {
+                        Enemies[i].GetComponent<EditBehavior>().enabled = false;
+                    }
                     break;
             }
         }

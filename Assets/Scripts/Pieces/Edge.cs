@@ -14,7 +14,7 @@ namespace AnarchyBros
             Collider = GetComponent<Collider2D>();
         }
 
-        public Spot GetNeighbor(Spot n)
+        public Spot Neighbor(Spot n)
         {
             return (n == A) ? B : (n == B) ? A : null;
         }
@@ -55,10 +55,10 @@ namespace AnarchyBros
 
         public void OnPointerClick(PointerEventData eventData)
         {
-            GraphManager.Instance.OnEdgeClick(eventData, this);
+            MapManager.Instance.OnEdgeClick(eventData, this);
         }
 
-        public void ReEvaluate()
+        public void UpdateSprite()
         {
             SetVertices(A.transform.position, B.transform.position);
         }

@@ -7,9 +7,5 @@ public class GameManagerEditor : Editor
     public override void OnInspectorGUI()
     {
         base.OnInspectorGUI();
-
-        GameManager script = (GameManager)target;
-
-        EditorGUILayout.LabelField("Current State", script.CurrentState.ToString());
     }
 }
