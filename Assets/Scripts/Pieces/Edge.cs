@@ -1,17 +1,40 @@
-﻿using UnityEngine;
+﻿using AnarchyBros.Enums;
+using UnityEngine;
 using UnityEngine.EventSystems;
 
 namespace AnarchyBros
 {
     public class Edge : MonoBehaviour, IPointerClickHandler
     {
+        public Color ColorInEditor, ColorInGame;
         public Spot A { get; private set; }
         public Spot B { get; private set; }
-        public Collider2D Collider { get; private set; }
+        public Collider2D Collider
+        {
+            get
+            {
+                if (_collider == null)
+                {
+                    _collider = GetComponent<Collider2D>();
+                }
+
+                return _collider;
+            }
+        }
+
+        SpriteRenderer _renderer;
+        Color _colorTo;
+        Collider2D _collider;
 
         void Start()
         {
-            Collider = GetComponent<Collider2D>();
+            _renderer = GetComponent<SpriteRenderer>();
+            OnGameStateChanged(GameManager.Instance.CurrentState);
+        }
+
+        void Update()
+        {
+            _renderer.color = Color.Lerp(_renderer.color, _colorTo, Time.deltaTime * 8f);
         }
 
         public Spot Neighbor(Spot n)
@@ -58,9 +81,27 @@ namespace AnarchyBros
             MapManager.Instance.OnEdgeClick(eventData, this);
         }
 
-        public void UpdateSprite()
+        public void OnSpotsPositionChanged()
         {
             SetVertices(A.transform.position, B.transform.position);
+        }
+
+        public void OnGameStateChanged(GameStates newState)
+        {
+            switch (newState)
+            {
+                case GameStates.Edit:
+                    _colorTo = ColorInEditor;
+                    break;
+
+                case GameStates.Place:
+                    _colorTo = ColorInEditor;
+                    break;
+
+                case GameStates.Play:
+                    _colorTo = ColorInGame;
+                    break;
+            }
         }
     }
 }

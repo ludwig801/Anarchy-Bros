@@ -7,35 +7,41 @@ namespace AnarchyBros
 {
     public class Spot : MonoBehaviour, IPointerClickHandler, IDragHandler, IBeginDragHandler, IEndDragHandler
     {
-        public int Index;
+        public Color ColorInEditor, ColorInGame;
+        public int Index { get; set; }
         public SpotTypes Type;
         public Tower Tower;
         public bool Occupied { get { return Tower != null; } }
         public List<Edge> Edges;
-
         public Collider2D Collider
         {
             get
             {
-                _col = (_col == null) ? GetComponent<Collider2D>() : _col;
-                return _col;
+                if (_collider == null)
+                {
+                    _collider = GetComponent<Collider2D>();
+                }
+
+                return _collider;
             }
         }
 
-        Collider2D _col;
+        MapManager _mapManager;
+        SpriteRenderer _renderer;
+        Color _colorTo;
+        Collider2D _collider;
         bool _justScrolled;
 
         void Start()
         {
-            Tower = null;
+            _mapManager = MapManager.Instance;
+            _renderer = GetComponent<SpriteRenderer>();
+            OnGameStateChanged(GameManager.Instance.CurrentState);
         }
 
         void Update()
         {
-            if (Edges == null)
-            {
-                Debug.Log("null edges");
-            }
+            _renderer.color = Color.Lerp(_renderer.color, _colorTo, Time.deltaTime * 8f);
         }
 
         public void AddEdge(Edge e)
@@ -57,7 +63,7 @@ namespace AnarchyBros
         {
             if (!_justScrolled)
             {
-                MapManager.Instance.OnSpotClick(eventData, this);
+                _mapManager.OnSpotClick(eventData, this);
             }
             _justScrolled = false;
         }
@@ -72,12 +78,30 @@ namespace AnarchyBros
             Vector2 newPos = Camera.main.ScreenToWorldPoint(eventData.position);
             transform.position = new Vector3(newPos.x, newPos.y, transform.position.z);
 
-            MapManager.Instance.OnSpotDrag(eventData, this);
+            _mapManager.OnSpotDrag(eventData, this);
         }
 
         public void OnEndDrag(PointerEventData eventData)
         {
-            MapManager.Instance.OnSpotDrag(eventData, this);
+            _mapManager.OnSpotDrag(eventData, this);
+        }
+
+        public void OnGameStateChanged(GameStates newState)
+        {
+            switch (newState)
+            {
+                case GameStates.Edit:
+                    _colorTo = ColorInEditor;
+                    break;
+
+                case GameStates.Place:
+                    _colorTo = ColorInEditor;
+                    break;
+
+                case GameStates.Play:
+                    _colorTo = ColorInGame;
+                    break;
+            }
         }
     }
 }

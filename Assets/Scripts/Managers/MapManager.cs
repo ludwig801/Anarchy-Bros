@@ -14,14 +14,6 @@ namespace AnarchyBros
         public SpotTypes CurrentMode;
         public Graph Graph;
         public int EnemySpotCount, TowerSpotCount;
-
-
-        GameObject _targetObj;
-        Vector2 _source, _target, _mapBottomLeft, _mapTopRight;
-        Edge _refEdge;
-        Spot _refSource, _refTarget;
-        bool _targeting;
-
         public bool Targeting
         {
             get { return _targeting; }
@@ -35,6 +27,14 @@ namespace AnarchyBros
             }
         }
 
+        GameManager _gameManager;
+        TowerManager _towerManager;
+        GameObject _targetObj;
+        Vector2 _source, _target, _mapBottomLeft, _mapTopRight;
+        Edge _refEdge;
+        Spot _refSource, _refTarget;
+        bool _targeting;
+
         void Awake()
         {
             Instance = this;
@@ -42,6 +42,9 @@ namespace AnarchyBros
 
         void Start()
         {
+            _gameManager = GameManager.Instance;
+            _towerManager = TowerManager.Instance;
+
             // Reference Edges
             GameObject instance = Instantiate(EdgePrefab);
             instance.name = "Ref. Edge";
@@ -66,7 +69,6 @@ namespace AnarchyBros
             _targetObj.name = "Target";
             _targetObj.transform.parent = transform;
 
-
             Graph = ObjGraph.GetComponent<Graph>();
             EnemySpotCount = Graph.GetSpotCountOfType(SpotTypes.EnemySpot);
             TowerSpotCount = Graph.GetSpotCountOfType(SpotTypes.EnemySpot);
@@ -77,7 +79,7 @@ namespace AnarchyBros
 
         void Update()
         {
-            if (GameManager.Instance.IsCurrentState(GameStates.Edit))
+            if (_gameManager.IsCurrentState(GameStates.Edit))
             {
                 switch (CurrentMode)
                 {
@@ -254,7 +256,7 @@ namespace AnarchyBros
             return (hit != null);
         }
 
-        bool EdgeAt(Vector2 pos, out Edge hit)
+        public bool EdgeAt(Vector2 pos, out Edge hit)
         {
             hit = Graph.EdgeOverlaping(pos);
             return (hit != null);
@@ -262,12 +264,12 @@ namespace AnarchyBros
 
         public Edge EdgeAt(Spot a, Spot b)
         {
-            return Graph.EdgeConnecting(a, b);
+            return (Graph != null) ? Graph.EdgeConnecting(a, b) : null;
         }
 
         public Spot SpotAt(Vector2 pos)
         {
-            return Graph.SpotOverlaping(pos);
+            return (Graph != null) ? Graph.SpotOverlaping(pos) : null;
         }
 
         public void OnGroundClick(BaseEventData baseData)
@@ -314,80 +316,83 @@ namespace AnarchyBros
 
         public void OnSpotClick(PointerEventData eventData, Spot spot)
         {
-            if (GameManager.Instance.IsCurrentState(GameStates.Edit))
+            _towerManager.OnSpotClicked(spot);
+
+            switch (_gameManager.CurrentState)
             {
-                if (eventData.button == PointerEventData.InputButton.Left)
-                {
-                    //Debug.Log("Clicked spot of type: " + spot.Type.ToString() + " while in mode: + " + CurrentMode.ToString());
-                    switch (CurrentMode)
+                case GameStates.Edit:
+                    if (eventData.button == PointerEventData.InputButton.Left)
                     {
-                        case SpotTypes.Connection:
-                            if (Targeting)
-                            {
-                                _target = spot.transform.position;
-                                CreateLink(_source, _target);
+                        switch (CurrentMode)
+                        {
+                            case SpotTypes.Connection:
+                                if (Targeting)
+                                {
+                                    _target = spot.transform.position;
+                                    CreateLink(_source, _target);
 
-                                // For continuos targeting
-                                _source = _target;
-                                // For one time targeting
-                                // Targeting = false;
-                            }
-                            else
-                            {
-                                //spot = ReplaceSpot(spot, SpotTypes.TowerSpot);
-                                Targeting = true;
-                                _source = spot.transform.position;
-                                _target = _source;
-                            }
-                            break;
+                                    //      For continuos targeting
+                                    _source = _target;
+                                    //      For one time targeting
+                                    // Targeting = false;
+                                }
+                                else
+                                {
+                                    Targeting = true;
+                                    _source = spot.transform.position;
+                                    _target = _source;
+                                }
+                                break;
 
-                        case SpotTypes.TowerSpot:
-                            Targeting = false;
-                            ReplaceSpot(spot, SpotTypes.TowerSpot);
-                            break;
+                            case SpotTypes.TowerSpot:
+                                Targeting = false;
+                                ReplaceSpot(spot, SpotTypes.TowerSpot);
+                                break;
 
-                        case SpotTypes.EnemySpot:
-                            Targeting = false;
-                            ReplaceSpot(spot, SpotTypes.EnemySpot);
-                            break;
+                            case SpotTypes.EnemySpot:
+                                Targeting = false;
+                                ReplaceSpot(spot, SpotTypes.EnemySpot);
+                                break;
+                        }
                     }
-                }
-                else if (eventData.button == PointerEventData.InputButton.Right)
-                {
-                    switch (spot.Type)
+                    else if (eventData.button == PointerEventData.InputButton.Right)
                     {
-                        case SpotTypes.Connection:
-                            RemoveSpot(spot);
-                            break;
+                        switch (spot.Type)
+                        {
+                            case SpotTypes.Connection:
+                                RemoveSpot(spot);
+                                break;
 
-                        case SpotTypes.EnemySpot:
-                            ReplaceSpot(spot, SpotTypes.Connection);
-                            break;
+                            case SpotTypes.EnemySpot:
+                                ReplaceSpot(spot, SpotTypes.Connection);
+                                break;
 
-                        case SpotTypes.TowerSpot:
-                            ReplaceSpot(spot, SpotTypes.Connection);
-                            break;
+                            case SpotTypes.TowerSpot:
+                                ReplaceSpot(spot, SpotTypes.Connection);
+                                break;
+                        }
                     }
-                }
-            }
-            else if (GameManager.Instance.IsCurrentState(GameStates.Place))
-            {
-                TowerManager.Instance.OnNodeClicked(spot);
-            }
-            else if (GameManager.Instance.IsCurrentState(GameStates.Play))
-            {
-                TowerManager.Instance.OnNodeClicked(spot);
+                    break;
+
+                case GameStates.Place:
+                    break;
+
+                case GameStates.Play:
+                    break;
+
+                case GameStates.Pause:
+                    break;
             }
         }
 
         public void OnSpotDrag(PointerEventData eventData, Spot node)
         {
-            if (!GameManager.Instance.IsCurrentState(GameStates.Edit))
+            if (!_gameManager.IsCurrentState(GameStates.Edit))
             {
                 return;
             }
 
-            Graph.UpdateEdges();
+            Graph.OnSpotsPositionChanged();
         }
 
         public void OnEdgeClick(PointerEventData eventData, Edge edge)
@@ -467,12 +472,22 @@ namespace AnarchyBros
 
         public void OnGameStateChanged(GameStates newState)
         {
-            Graph.OnGameStateChanged(newState);
-
-            if (newState == GameStates.Play)
+            if (Graph != null)
             {
-                _targetObj.SetActive(false);
-                Graph.ReCalculateDistances();
+                Graph.OnGameStateChanged(newState);
+            }
+
+            switch (newState)
+            {
+                case GameStates.Edit:
+                    break;
+
+                case GameStates.Place:
+                    break;
+
+                case GameStates.Play:
+                    _targetObj.SetActive(false);
+                    break;
             }
         }
 

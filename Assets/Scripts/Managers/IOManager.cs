@@ -61,7 +61,7 @@ namespace AnarchyBros
                 GameGraph graph = (GameGraph)bf.Deserialize(file);
                 file.Close();
 
-                Debug.Log("LOAD: " + graph.Spots.Count + " spots & " + graph.Edges.Count);
+                //Debug.Log("LOAD: " + graph.Spots.Count + " spots & " + graph.Edges.Count);
 
                 MapManager.Instance.RebuildGraph(graph);
 

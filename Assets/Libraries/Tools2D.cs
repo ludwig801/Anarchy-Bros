@@ -47,6 +47,14 @@ namespace AnarchyBros
             return Quaternion.Euler(0, 0, angle);
         }
 
+        public static Quaternion LookAt(Vector2 direction)
+        {
+            Vector2 delta = direction.normalized;
+            float angle = (delta.x < 0f) ? Vector2.Angle(Vector2.up, delta) : 360f - Vector2.Angle(Vector2.up, delta);
+            return Quaternion.Euler(0, 0, angle);
+        }
+
+
         public static bool NotInside(Vector2 aBottomLeft, Vector2 aTopRight, Vector2 bBottomleft, Vector2 bTopRight)
         {
             return (aTopRight.x < bBottomleft.x) || (aTopRight.y < bBottomleft.y) || (aBottomLeft.x > bTopRight.x) || (aBottomLeft.y > bTopRight.y);

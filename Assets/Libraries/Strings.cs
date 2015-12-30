@@ -1,4 +1,6 @@
-﻿namespace AnarchyBros.Enums
+﻿using System.Collections.Generic;
+
+namespace AnarchyBros.Enums
 {
     public enum GameStates
     {
@@ -22,4 +24,28 @@
         TowerSpot = 1,
         EnemySpot = 2
     }
+
+    public abstract class Tags
+    {
+        public enum Tag
+        {
+            Tower,
+            Enemy
+        }
+
+        static Dictionary<Tag, string> dictionary = new Dictionary<Tag, string>
+        {
+            { Tag.Tower, "Tower" },
+            { Tag.Enemy, "Enemy" }
+        };
+
+        public static string GetStringTag(Tag tagIdentifier)
+        {
+            string result = "";
+            dictionary.TryGetValue(tagIdentifier, out result);
+            return result;
+        }
+    }
+
+    
 }

@@ -73,16 +73,16 @@
     <Compile Include="Assets\Scripts\Managers\MapManager.cs" />
     <Compile Include="Assets\Scripts\Managers\TowerManager.cs" />
     <Compile Include="Assets\Scripts\Managers\UIManager.cs" />
+    <Compile Include="Assets\Scripts\Pieces\Bullet.cs" />
     <Compile Include="Assets\Scripts\Pieces\Edge.cs" />
     <Compile Include="Assets\Scripts\Pieces\EditBehavior.cs" />
     <Compile Include="Assets\Scripts\Pieces\Enemy.cs" />
     <Compile Include="Assets\Scripts\Pieces\Graph.cs" />
+    <Compile Include="Assets\Scripts\Pieces\MeleeWeapon.cs" />
+    <Compile Include="Assets\Scripts\Pieces\RangeWeapon.cs" />
     <Compile Include="Assets\Scripts\Pieces\Spot.cs" />
     <Compile Include="Assets\Scripts\Pieces\TargetBehavior.cs" />
-    <Compile Include="Assets\Scripts\Tower\Bullet.cs" />
-    <Compile Include="Assets\Scripts\Tower\MeleeWeapon.cs" />
-    <Compile Include="Assets\Scripts\Tower\RangeWeapon.cs" />
-    <Compile Include="Assets\Scripts\Tower\Tower.cs" />
+    <Compile Include="Assets\Scripts\Pieces\Tower.cs" />
     <Compile Include="Assets\Scripts\UI\HidePanelBehavior.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\SyntaxTree\UnityVS\2015\UnityVS.CSharp.targets" />

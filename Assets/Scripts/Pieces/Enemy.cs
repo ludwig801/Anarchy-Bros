@@ -1,29 +1,49 @@
 ﻿using AnarchyBros.Enums;
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace AnarchyBros
 {
     public class Enemy : MonoBehaviour, IKillable
     {
+        public Transform SpriteObj, ColliderObj;
+        public GameObject MeleeWeapon;
         public Tower Objective;
-        public Spot MoveTo;
-        public Spot Spot;
+        public Spot MoveTo, Spot;
         public Edge Edge;
-        public float Speed, Attack, Health, DeathSpeed;
+        public float Speed, Health, DeathSpeed;
         public Color ColorDefault, ColorDying, ColorDead;
+        public Vector2 Direction;
+        public Tags.Tag CollisionTag;
 
-        public bool IsAlive { get { return (Health > 0f) && gameObject.activeSelf; } }
-
-        SpriteRenderer _renderer;
+        MeleeWeapon _meleeWeapon;
+        List<SpriteRenderer> _renderers;
+        SpriteRenderer _colliderRenderer;
         float _initialHealth, _invInitialHealth, _deltaTime;
 
         void Start()
         {
+            if(MoveTo == null)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+            _meleeWeapon = (Instantiate(MeleeWeapon, transform.position, Quaternion.identity) as GameObject).GetComponent<MeleeWeapon>();
+            _meleeWeapon.name = MeleeWeapon.name;
+            _meleeWeapon.transform.parent = transform;
+
             Spot = MapManager.Instance.SpotAt(transform.position);
             Edge = null;
             transform.position = Tools2D.Convert(transform.position, MoveTo.transform.position);
 
-            _renderer = GetComponent<SpriteRenderer>();
+            _renderers = new List<SpriteRenderer>();
+            for (int i = 0; i < SpriteObj.childCount; i++)
+            {
+                _renderers.Add(SpriteObj.GetChild(i).GetComponent<SpriteRenderer>());
+            }
+            _colliderRenderer = ColliderObj.GetComponent<SpriteRenderer>();
+
             _initialHealth = Health;
             _invInitialHealth = 1f / _initialHealth;
         }
@@ -37,25 +57,26 @@ namespace AnarchyBros
 
             _deltaTime += Time.deltaTime;
 
-            _renderer.color = Color.Lerp(ColorDefault, ColorDying, (_initialHealth - Health) * _invInitialHealth);
+            SetRenderersColor(Color.Lerp(ColorDefault, ColorDying, (_initialHealth - Health) * _invInitialHealth));
 
-            if (!IsAlive)
+            if (!IsAlive())
             {
-                _renderer.color = ColorDead;
+                SetRenderersColor(Color.Lerp(ColorDying, ColorDead, _deltaTime / DeathSpeed));
 
                 if (_deltaTime >= DeathSpeed)
                 {
                     Spot = null;
                     Edge = null;
                     Health = _initialHealth;
-                    _renderer.color = ColorDefault;
+                    SetRenderersColor(ColorDefault);
                     gameObject.SetActive(false);
                     EnemyManager.Instance.OnEnemyKill();
+                    _deltaTime = 0;
                 }
                 return;
             }
 
-            if (Objective == null || !Objective.IsAlive)
+            if (Objective == null || !Objective.IsAlive())
             {
                 if (!EnemyManager.Instance.GetNewObjective(out Objective))
                 {
@@ -67,11 +88,20 @@ namespace AnarchyBros
             MoveTowardsObjective();
         }
 
+        void SetRenderersColor(Color newColor)
+        {
+            //for (int i = 0; i < _renderers.Count; i++)
+            //{
+            //    _renderers[i].color = newColor;
+            //} 
+            _colliderRenderer.color = newColor;
+        }
+
         void MoveTowardsObjective()
         {
             if (Tools2D.IsPositionEqual(transform.position, MoveTo.transform.position))
             {
-                Spot = MapManager.Instance.SpotAt(MoveTo.transform.position);
+                Spot = MoveTo;
                 Edge = null;
             }
 
@@ -85,6 +115,7 @@ namespace AnarchyBros
                 {
                     MoveTo = MapManager.Instance.NextStep(Spot, Objective.MoveTo);
                 }
+
                 Edge = MapManager.Instance.EdgeAt(Spot, MoveTo);
                 Spot = null;
             }
@@ -100,21 +131,9 @@ namespace AnarchyBros
                 }
             }
 
-            transform.rotation = Tools2D.LookAt(transform.position, MoveTo.transform.position);
+            Direction = (MoveTo.transform.position - transform.position).normalized;
+            transform.rotation = Tools2D.LookAt(Direction);
             transform.position = Tools2D.MoveTowards(transform.position, MoveTo.transform.position, Time.deltaTime * Speed);
-        }
-
-        public void OnTriggerEnter2D(Collider2D data)
-        {
-            if (data.tag == "Tower")
-            {
-                Tower p = data.gameObject.GetComponent<Tower>();
-                if (p.IsAlive)
-                {
-                    p.TakeDamage(Attack);
-                    TakeDamage(Health);
-                }
-            }
         }
 
         public void TakeDamage(float amount)
@@ -124,13 +143,18 @@ namespace AnarchyBros
             if (Health <= 0f)
             {
                 Kill();
-                _deltaTime = 0;
             }
         }
 
         public void Kill()
         {
             Health = 0;
+            _deltaTime = 0;
+        }
+
+        public bool IsAlive()
+        {
+            return ((Health > 0f) && gameObject.activeSelf);
         }
     }
 }

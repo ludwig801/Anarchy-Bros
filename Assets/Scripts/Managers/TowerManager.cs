@@ -9,10 +9,12 @@ namespace AnarchyBros
     {
         public static TowerManager Instance { get; private set; }
 
-        public Transform TowersObj;
+        public Transform TowersObj, BulletsObj;
         public GameObject TowerPrefab;
         public int SelectedTower, MaxTowerCount, ActiveTowers;
         public List<Tower> Towers;
+
+        GameManager _gameManager;
 
         void Awake()
         {
@@ -21,6 +23,8 @@ namespace AnarchyBros
 
         void Start()
         {
+            _gameManager = GameManager.Instance;
+
             SelectedTower = int.MinValue;
 
             Towers = new List<Tower>();
@@ -68,6 +72,7 @@ namespace AnarchyBros
 
                 tower = instance.GetComponent<Tower>();
                 tower.Reborn();
+                tower.Bullets = BulletsObj;
                 Towers.Add(tower);
             }
 
@@ -94,6 +99,17 @@ namespace AnarchyBros
             for (int i = 0; i < Towers.Count; i++)
             {
                 Destroy(Towers[i].gameObject);
+            }
+
+            Towers.Clear();
+            ActiveTowers = 0;
+        }
+
+        void DestroyAllBullets()
+        {
+            for (int i = 0; i < BulletsObj.childCount; i++)
+            {
+                Destroy(BulletsObj.GetChild(i).gameObject);
             }
 
             Towers.Clear();
@@ -131,7 +147,7 @@ namespace AnarchyBros
             int rand = Random.Range(0, ActiveTowers);
             for (int i = 0; i < Towers.Count; i++)
             {
-                if (Towers[i].IsAlive)
+                if (Towers[i].IsAlive())
                 {
                     if (rand <= 0)
                     {
@@ -144,50 +160,87 @@ namespace AnarchyBros
             return null;
         }
 
-        public void OnNodeClicked(Spot node)
+        public void OnSpotClicked(Spot node)
         {
-            if (GameManager.Instance.IsCurrentState(GameStates.Place))
+            switch (_gameManager.CurrentState)
             {
-                if (node.Type == SpotTypes.TowerSpot && ActiveTowers < MaxTowerCount)
-                {
-                    PlaceTower(node);
-                }
-            }
-            else if(GameManager.Instance.IsCurrentState(GameStates.Play))
-            {
-                if (node.Type == SpotTypes.TowerSpot)
-                {
-                    if (SelectedTower >= 0)
+                case GameStates.Edit:
+                    break;
+
+                case GameStates.Place:
+                    if (node.Type == SpotTypes.TowerSpot && ActiveTowers < MaxTowerCount)
                     {
-                        if (node.Occupied)
+                        PlaceTower(node);
+                    }
+                    break;
+
+                case GameStates.Play:
+                    if (node.Type == SpotTypes.TowerSpot)
+                    {
+                        if (SelectedTower >= 0 && SelectedTower < Towers.Count)
                         {
-                            SelectedTower = GetTowerIndex(node.Tower);
+                            if (node.Occupied)
+                            {
+                                SelectedTower = GetTowerIndex(node.Tower);
+                                _gameManager.Pause();
+                            }
+                            else
+                            {
+                                AssignSpot(Towers[SelectedTower], node);
+                            }
                         }
                         else
                         {
-                            AssignSpot(Towers[SelectedTower], node);
+                            SelectedTower = GetTowerIndex(node.Tower);
                         }
                     }
-                    else
+                    break;
+
+                case GameStates.Pause:
+                    if (node.Type == SpotTypes.TowerSpot)
                     {
-                        SelectedTower = GetTowerIndex(node.Tower);
+                        if (SelectedTower >= 0 && SelectedTower < Towers.Count)
+                        {
+                            if (node.Occupied)
+                            {
+                                SelectedTower = GetTowerIndex(node.Tower);
+                            }
+                            else
+                            {
+                                AssignSpot(Towers[SelectedTower], node);
+                            }
+                        }
+                        else
+                        {
+                            SelectedTower = GetTowerIndex(node.Tower);
+                        }
                     }
-                }
-            }           
+                    break;
+            }       
         }
 
         public void OnTowerClicked(PointerEventData eventData, Tower tower)
         {
-            if (GameManager.Instance.IsCurrentState(GameStates.Play))
+            switch (_gameManager.CurrentState)
             {
-                SelectedTower = GetTowerIndex(tower);
-            }
-            else if (GameManager.Instance.IsCurrentState(GameStates.Place))
-            {
-                if (eventData.button == PointerEventData.InputButton.Right)
-                {
-                    RemoveTower(tower);
-                }
+                case GameStates.Edit:
+                    break;
+
+                case GameStates.Place:
+                    if (eventData.button == PointerEventData.InputButton.Right)
+                    {
+                        RemoveTower(tower);
+                    }
+                    break;
+
+                case GameStates.Play:
+                    SelectedTower = GetTowerIndex(tower);
+                    _gameManager.Pause();
+                    break;
+
+                case GameStates.Pause:
+                    _gameManager.Play();
+                    break;
             }
         }
 
@@ -202,17 +255,15 @@ namespace AnarchyBros
             {
                 case GameStates.Edit:
                     DestroyAllTowers();
+                    DestroyAllBullets();
                     break;
 
                 case GameStates.Place:
                     DestroyAllTowers();
+                    DestroyAllBullets();
                     break;
 
                 case GameStates.Play:
-                    for (int i = 0; i < Towers.Count; i++)
-                    {
-                        Towers[i].GetComponent<EditBehavior>().enabled = false;
-                    }
                     break;
             }
         }

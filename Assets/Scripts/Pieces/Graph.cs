@@ -35,28 +35,26 @@ namespace AnarchyBros
 
         public void OnGameStateChanged(GameStates newState)
         {
+            for (int i = 0; i < Edges.Count; i++)
+            {
+                Edges[i].OnGameStateChanged(newState);
+            }
+
+            for (int i = 0; i < Spots.Count; i++)
+            {
+                Spots[i].OnGameStateChanged(newState);
+            }
+
             switch (newState)
             {
                 case GameStates.Edit:
-                    for (int i = 0; i < Spots.Count; i++)
-                    {
-                        Spots[i].GetComponent<EditBehavior>().enabled = true;
-                    }
-                    for (int i = 0; i < Edges.Count; i++)
-                    {
-                        Edges[i].GetComponent<EditBehavior>().enabled = true;
-                    }
+                    break;
+
+                case GameStates.Place:
                     break;
 
                 case GameStates.Play:
-                    for (int i = 0; i < Spots.Count; i++)
-                    {
-                        Spots[i].GetComponent<EditBehavior>().enabled = false;
-                    }
-                    for (int i = 0; i < Edges.Count; i++)
-                    {
-                        Edges[i].GetComponent<EditBehavior>().enabled = false;
-                    }
+                    ReCalculateDistances();
                     break;
             }
         }
@@ -182,11 +180,11 @@ namespace AnarchyBros
             Destroy(e.gameObject);
         }
 
-        public void UpdateEdges()
+        public void OnSpotsPositionChanged()
         {
             for (int i = 0; i < Edges.Count; i++)
             {
-                Edges[i].UpdateSprite();
+                Edges[i].OnSpotsPositionChanged();
             }
         }
 
