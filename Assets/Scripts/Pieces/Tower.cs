@@ -11,7 +11,7 @@ namespace AnarchyBros
         public Spot Objective, MoveTo, Spot;
         public Edge Edge;
         public Color ColorDefault, ColorDying, ColorDead;
-        public Transform Bullets, ColliderObj;
+        public Transform ColliderObj;
         public bool MeleeWeaponActive, RangeWeaponActive;
         public bool HasMeleeWeapon { get { return _meleeWeapon != null; } }
         public bool HasRangeWeapon { get { return _rangeWeapon != null; } }
@@ -62,8 +62,18 @@ namespace AnarchyBros
                 GameObject obj = Instantiate(RangeWeaponPrefab, transform.position, Quaternion.identity) as GameObject;
                 obj.transform.parent = transform;
                 obj.name = RangeWeaponPrefab.name;
+
+                GameObject bulletCan = GameObject.FindGameObjectWithTag("Bullets");
+                if (bulletCan == null)
+                {
+                    GameObject x = new GameObject();
+                    x.name = "Bullets";
+                    x.tag = "Bullets";
+                    bulletCan = x;
+                }
+
                 _rangeWeapon = obj.GetComponent<RangeWeapon>();
-                _rangeWeapon.BulletsObj = Bullets;
+                _rangeWeapon.BulletCan = bulletCan.transform;
             }
         }
 
@@ -181,6 +191,27 @@ namespace AnarchyBros
         public bool IsAlive()
         {
             return ((Health > 0f) && gameObject.activeSelf);
+        }
+
+        public Collider2D GetCollider()
+        {
+            return _collider;
+        }
+
+        public void OnTriggerEnter2D(Collider2D other)
+        {
+            if (HasMeleeWeapon)
+            {
+                _meleeWeapon.OnCollisionStart(other);
+            }
+        }
+
+        public void OnTriggerExit2D(Collider2D other)
+        {
+            if (HasMeleeWeapon)
+            {
+                _meleeWeapon.OnCollisionEnd(other);
+            }
         }
     }
 }

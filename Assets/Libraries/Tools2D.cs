@@ -37,7 +37,7 @@ namespace AnarchyBros
 
         public static bool IsPositionEqual(Vector2 a, Vector2 b)
         {
-            return Mathf.Approximately(a.x, b.x) && Mathf.Approximately(a.y, b.y);
+            return Mathf.Abs(a.x - b.x) < 0.25f && Mathf.Abs(a.y - b.y) < 0.25f;
         }
 
         public static Quaternion LookAt(Vector2 position, Vector2 target)

@@ -7,7 +7,7 @@ namespace AnarchyBros
     public class RangeWeapon : MonoBehaviour
     {
         public GameObject BulletPrefab, TargetPrefab;
-        public Transform GunPoint, GunSprite, BulletsObj;
+        public Transform GunPoint, GunSprite, BulletCan;
         public int RoundsPerMinute, MagazineSize;
         public float ReloadTime, BulletSpeed, Damage;
         public Tower Tower;
@@ -148,7 +148,7 @@ namespace AnarchyBros
             bullet.Direction = (Tools2D.Subtract(_aimTarget, GunPoint.position)).normalized;
             bullet.Speed = BulletSpeed;
             bullet.Damage = Damage;
-            bullet.transform.parent = BulletsObj;
+            bullet.transform.parent = BulletCan;
             bullet.gameObject.SetActive(true);
         }
 

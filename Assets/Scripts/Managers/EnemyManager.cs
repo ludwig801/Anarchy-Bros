@@ -67,6 +67,7 @@ namespace AnarchyBros
                 e.MoveTo = e.Spot;
                 e.Objective = objective;
                 e.gameObject.SetActive(true);
+                e.Reborn();
                 ActiveEnemies++;
             }
         }

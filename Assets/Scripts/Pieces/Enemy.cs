@@ -15,11 +15,14 @@ namespace AnarchyBros
         public Color ColorDefault, ColorDying, ColorDead;
         public Vector2 Direction;
         public Tags.Tag CollisionTag;
+        public bool HasMeleeWeapon { get { return _meleeWeapon != null; } }
 
         MeleeWeapon _meleeWeapon;
         List<SpriteRenderer> _renderers;
         SpriteRenderer _colliderRenderer;
         float _initialHealth, _invInitialHealth, _deltaTime;
+        Collider2D _collider;
+        bool _isAttacking;
 
         void Start()
         {
@@ -29,9 +32,12 @@ namespace AnarchyBros
                 return;
             }
 
-            _meleeWeapon = (Instantiate(MeleeWeapon, transform.position, Quaternion.identity) as GameObject).GetComponent<MeleeWeapon>();
-            _meleeWeapon.name = MeleeWeapon.name;
-            _meleeWeapon.transform.parent = transform;
+            if (MeleeWeapon != null)
+            {
+                _meleeWeapon = (Instantiate(MeleeWeapon, transform.position, Quaternion.identity) as GameObject).GetComponent<MeleeWeapon>();
+                _meleeWeapon.name = MeleeWeapon.name;
+                _meleeWeapon.transform.parent = transform;
+            }
 
             Spot = MapManager.Instance.SpotAt(transform.position);
             Edge = null;
@@ -43,9 +49,11 @@ namespace AnarchyBros
                 _renderers.Add(SpriteObj.GetChild(i).GetComponent<SpriteRenderer>());
             }
             _colliderRenderer = ColliderObj.GetComponent<SpriteRenderer>();
+            _collider = ColliderObj.GetComponent<Collider2D>();
 
             _initialHealth = Health;
             _invInitialHealth = 1f / _initialHealth;
+            _isAttacking = false;
         }
 
         void Update()
@@ -99,6 +107,8 @@ namespace AnarchyBros
 
         void MoveTowardsObjective()
         {
+            if (_isAttacking) return;
+
             if (Tools2D.IsPositionEqual(transform.position, MoveTo.transform.position))
             {
                 Spot = MoveTo;
@@ -146,15 +156,60 @@ namespace AnarchyBros
             }
         }
 
+        public void Reborn()
+        {
+            if (_collider != null)
+            {
+                _collider.enabled = true;
+            }
+        }
+
         public void Kill()
         {
             Health = 0;
             _deltaTime = 0;
+            _collider.enabled = false;
+            _isAttacking = false;
         }
 
         public bool IsAlive()
         {
             return ((Health > 0f) && gameObject.activeSelf);
+        }
+
+        public Collider2D GetCollider()
+        {
+            return _collider;
+        }
+
+        public void OnTriggerEnter2D(Collider2D other)
+        {
+            if (other.tag != Tags.GetStringTag(CollisionTag)) return;
+
+            _isAttacking = true;
+
+            if (HasMeleeWeapon)
+            {
+                _meleeWeapon.OnCollisionStart(other);
+            }
+        }
+
+        public void OnTriggerExit2D(Collider2D other)
+        {
+            if (other.tag != Tags.GetStringTag(CollisionTag)) return;
+
+            if (HasMeleeWeapon)
+            {
+                _meleeWeapon.OnCollisionEnd(other);
+                if (_meleeWeapon.Targets.Count <= 0)
+                {
+                    _isAttacking = false;
+                }
+            }
+            else
+            {
+                _isAttacking = false;
+            }
         }
     }
 }

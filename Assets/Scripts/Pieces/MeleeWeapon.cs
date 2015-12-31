@@ -1,5 +1,6 @@
 ﻿using AnarchyBros.Enums;
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace AnarchyBros
 {
@@ -7,47 +8,87 @@ namespace AnarchyBros
     {
         public float Damage, AttackDelay, FadeSpeed;
         public Tags.Tag CollisionTag;
+        public List<IKillable> Targets;
+        public List<Collider2D> TargetsColliders;
         float _deltaTime;
 
         void Start()
         {
             _deltaTime = 0;
+            Targets = new List<IKillable>();
+            TargetsColliders = new List<Collider2D>();
         }
 
         void Update()
         {
             _deltaTime += Time.deltaTime;
-        }
 
-        void Attack(IKillable x)
-        {
-            x.TakeDamage(Damage);
-        }
+            RemoveDeadTargets();
 
-        public void OnTriggerEnter2D(Collider2D data)
-        {
-            OnCollisionWith(data);
-        }
+            if (Targets.Count <= 0) return;
 
-        public void OnTriggerStay2D(Collider2D data)
-        {
-            OnCollisionWith(data);
-        }
-
-        public void OnCollisionWith(Collider2D data)
-        {
-            if (data.tag != Tags.GetStringTag(CollisionTag))
+            if (_deltaTime >= AttackDelay)
             {
-                return;
+                IKillable target = Targets[0];
+
+                if (target != null && target.IsAlive())
+                {
+                    target.TakeDamage(Damage);
+                    _deltaTime = 0;
+                }
+            }
+        }
+
+        public void OnCollisionStart(Collider2D other)
+        {
+            if (other.tag != Tags.GetStringTag(CollisionTag)) return;
+            if (HasTarget(other)) return;
+
+            IKillable x = other.transform.parent.GetComponent<IKillable>();
+            Targets.Add(x);
+            TargetsColliders.Add(other);
+        }
+
+        public void OnCollisionEnd(Collider2D other)
+        {
+            RemoveTarget(other);
+        }
+
+        bool HasTarget(Collider2D other)
+        {
+            for (int i = 0; i < Targets.Count; i++)
+            {
+                if (Targets[i].GetCollider() == other)
+                {
+                    return true;
+                }
             }
 
-            IKillable x = data.transform.parent.GetComponent<IKillable>();
-            if (x != null && x.IsAlive())
+            return false;
+        }
+
+        void RemoveDeadTargets()
+        {
+            for (int i = 0; i < Targets.Count; i++)
             {
-                if (_deltaTime >= AttackDelay)
+                if (!Targets[i].IsAlive())
                 {
-                    Attack(x);
-                    _deltaTime = 0;
+                    Targets.RemoveAt(i);
+                    TargetsColliders.RemoveAt(i);
+                    i--;
+                }
+            }
+        }
+
+        void RemoveTarget(Collider2D data)
+        {
+            for (int i = 0; i < Targets.Count; i++)
+            {
+                if (Targets[i].GetCollider() == data)
+                {
+                    Targets.RemoveAt(i);
+                    TargetsColliders.RemoveAt(i);
+                    return;
                 }
             }
         }

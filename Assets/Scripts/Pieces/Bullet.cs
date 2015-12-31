@@ -31,14 +31,23 @@ namespace AnarchyBros
             }
         }
 
-        void OnTriggerEnter2D(Collider2D data)
+        void OnTriggerEnter2D(Collider2D other)
         {
-            if (data.tag != Tags.GetStringTag(CollisionTag))
-            {
-                return;
-            }
+            if (other.tag != Tags.GetStringTag(CollisionTag)) return;
 
-            IKillable x = data.transform.parent.GetComponent<IKillable>();
+            IKillable x = other.transform.parent.GetComponent<IKillable>();
+            if (x != null && x.IsAlive())
+            {
+                x.TakeDamage(Damage);
+                Kill();
+            }
+        }
+
+        void OnTriggerStay2D(Collider2D other)
+        {
+            if (other.tag != Tags.GetStringTag(CollisionTag)) return;
+
+            IKillable x = other.transform.parent.GetComponent<IKillable>();
             if (x != null && x.IsAlive())
             {
                 x.TakeDamage(Damage);
@@ -49,6 +58,7 @@ namespace AnarchyBros
         void Kill()
         {
             gameObject.SetActive(false);
+            transform.position = new Vector3(100, 100, transform.position.z);
         }
     }
 }

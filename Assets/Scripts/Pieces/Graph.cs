@@ -22,13 +22,15 @@ namespace AnarchyBros
         {
             for (int i = 0; i < ObjSpots.childCount; i++)
             {
-                Spot n = ObjSpots.GetChild(i).GetComponent<Spot>();
-                Spots.Add(n);
+                Spot s = ObjSpots.GetChild(i).GetComponent<Spot>();
+                s.OnGameStateChanged(GameManager.Instance.CurrentState);
+                Spots.Add(s);
             }
 
             for (int i = 0; i < ObjEdges.childCount; i++)
             {
                 Edge e = ObjEdges.GetChild(i).GetComponent<Edge>();
+                e.OnGameStateChanged(GameManager.Instance.CurrentState);
                 Edges.Add(e);
             }
         }

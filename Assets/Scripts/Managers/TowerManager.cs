@@ -9,7 +9,7 @@ namespace AnarchyBros
     {
         public static TowerManager Instance { get; private set; }
 
-        public Transform TowersObj, BulletsObj;
+        public Transform TowersObj;
         public GameObject TowerPrefab;
         public int SelectedTower, MaxTowerCount, ActiveTowers;
         public List<Tower> Towers;
@@ -72,7 +72,6 @@ namespace AnarchyBros
 
                 tower = instance.GetComponent<Tower>();
                 tower.Reborn();
-                tower.Bullets = BulletsObj;
                 Towers.Add(tower);
             }
 
@@ -99,17 +98,6 @@ namespace AnarchyBros
             for (int i = 0; i < Towers.Count; i++)
             {
                 Destroy(Towers[i].gameObject);
-            }
-
-            Towers.Clear();
-            ActiveTowers = 0;
-        }
-
-        void DestroyAllBullets()
-        {
-            for (int i = 0; i < BulletsObj.childCount; i++)
-            {
-                Destroy(BulletsObj.GetChild(i).gameObject);
             }
 
             Towers.Clear();
@@ -255,12 +243,10 @@ namespace AnarchyBros
             {
                 case GameStates.Edit:
                     DestroyAllTowers();
-                    DestroyAllBullets();
                     break;
 
                 case GameStates.Place:
                     DestroyAllTowers();
-                    DestroyAllBullets();
                     break;
 
                 case GameStates.Play:
