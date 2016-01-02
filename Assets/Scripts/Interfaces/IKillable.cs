@@ -4,7 +4,7 @@ public interface IKillable
 {
     void TakeDamage(float amount);
 
-    void Kill();
+    void Die();
 
     void Reborn();
 

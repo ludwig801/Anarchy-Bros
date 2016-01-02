@@ -29,6 +29,7 @@ namespace AnarchyBros
             TowerManager.Instance.OnGameStateChanged(_currentState);
             EnemyManager.Instance.OnGameStateChanged(_currentState);
             UIManager.Instance.OnGameStateChanged(_currentState);
+            Time.timeScale = 1f;
         }
 
         public void Pause()
@@ -38,6 +39,7 @@ namespace AnarchyBros
             TowerManager.Instance.OnGameStateChanged(_currentState);
             EnemyManager.Instance.OnGameStateChanged(_currentState);
             UIManager.Instance.OnGameStateChanged(_currentState);
+            Time.timeScale = 0f;
         }
 
         public void Stop()

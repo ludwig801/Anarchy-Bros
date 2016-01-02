@@ -54,6 +54,12 @@ namespace AnarchyBros
             RemoveTarget(other);
         }
 
+        public void RemoveAllTargets()
+        {
+            Targets.Clear();
+            TargetsColliders.Clear();
+        }
+
         bool HasTarget(Collider2D other)
         {
             for (int i = 0; i < Targets.Count; i++)

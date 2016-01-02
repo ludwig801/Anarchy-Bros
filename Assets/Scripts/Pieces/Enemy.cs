@@ -16,13 +16,14 @@ namespace AnarchyBros
         public Vector2 Direction;
         public Tags.Tag CollisionTag;
         public bool HasMeleeWeapon { get { return _meleeWeapon != null; } }
+        public Animator Anim;
+        public bool IsAttacking;
 
         MeleeWeapon _meleeWeapon;
         List<SpriteRenderer> _renderers;
         SpriteRenderer _colliderRenderer;
         float _initialHealth, _invInitialHealth, _deltaTime;
         Collider2D _collider;
-        bool _isAttacking;
 
         void Start()
         {
@@ -53,7 +54,7 @@ namespace AnarchyBros
 
             _initialHealth = Health;
             _invInitialHealth = 1f / _initialHealth;
-            _isAttacking = false;
+            IsAttacking = false;
         }
 
         void Update()
@@ -86,9 +87,12 @@ namespace AnarchyBros
 
             if (Objective == null || !Objective.IsAlive())
             {
+                IsAttacking = false;
+                Anim.SetBool("IsAttacking", false);
+
                 if (!EnemyManager.Instance.GetNewObjective(out Objective))
                 {
-                    Kill();
+                    Die();
                     return;
                 }
             }
@@ -107,7 +111,7 @@ namespace AnarchyBros
 
         void MoveTowardsObjective()
         {
-            if (_isAttacking) return;
+            if (IsAttacking) return;
 
             if (Tools2D.IsPositionEqual(transform.position, MoveTo.transform.position))
             {
@@ -152,7 +156,7 @@ namespace AnarchyBros
 
             if (Health <= 0f)
             {
-                Kill();
+                Die();
             }
         }
 
@@ -162,14 +166,22 @@ namespace AnarchyBros
             {
                 _collider.enabled = true;
             }
+            SpriteObj.gameObject.SetActive(true);
+            Anim.enabled = true;
         }
 
-        public void Kill()
+        public void Die()
         {
+            Anim.enabled = false;
             Health = 0;
             _deltaTime = 0;
             _collider.enabled = false;
-            _isAttacking = false;
+            IsAttacking = false;
+            if (HasMeleeWeapon)
+            {
+                _meleeWeapon.RemoveAllTargets();
+            }
+            SpriteObj.gameObject.SetActive(false);
         }
 
         public bool IsAlive()
@@ -186,11 +198,16 @@ namespace AnarchyBros
         {
             if (other.tag != Tags.GetStringTag(CollisionTag)) return;
 
-            _isAttacking = true;
-
-            if (HasMeleeWeapon)
+            IKillable x = other.transform.parent.GetComponent<IKillable>();
+            if(x.IsAlive())
             {
-                _meleeWeapon.OnCollisionStart(other);
+                IsAttacking = true;
+                Anim.SetBool("IsAttacking", true);
+
+                if (HasMeleeWeapon)
+                {
+                    _meleeWeapon.OnCollisionStart(other);
+                }
             }
         }
 
@@ -203,12 +220,14 @@ namespace AnarchyBros
                 _meleeWeapon.OnCollisionEnd(other);
                 if (_meleeWeapon.Targets.Count <= 0)
                 {
-                    _isAttacking = false;
+                    IsAttacking = false;
+                    Anim.SetBool("IsAttacking", false);
                 }
             }
             else
             {
-                _isAttacking = false;
+                IsAttacking = false;
+                Anim.SetBool("IsAttacking", false);
             }
         }
     }

@@ -6,20 +6,18 @@ namespace AnarchyBros
 {
     public class Tower : MonoBehaviour, IKillable, IPointerClickHandler
     {
-        public GameObject MeleeWeaponPrefab, RangeWeaponPrefab;
+        public GameObject RangeWeaponPrefab;
         public float Speed, Health, DeathSpeed;
         public Spot Objective, MoveTo, Spot;
         public Edge Edge;
         public Color ColorDefault, ColorDying, ColorDead;
-        public Transform ColliderObj;
-        public bool MeleeWeaponActive, RangeWeaponActive;
-        public bool HasMeleeWeapon { get { return _meleeWeapon != null; } }
+        public Transform SpriteObj, ColliderObj, GunPoint, BulletCan;
         public bool HasRangeWeapon { get { return _rangeWeapon != null; } }
 
         EnemyManager _enemyManager;
         MapManager _mapManager;
         TowerManager _towerManager;
-        SpriteRenderer _renderer;
+        SpriteRenderer _colliderRenderer;
         float _initialHealth, _invInitialHealth, _deltaTime;
         MeleeWeapon _meleeWeapon;
         RangeWeapon _rangeWeapon;
@@ -27,7 +25,7 @@ namespace AnarchyBros
 
         void Start()
         {
-            _renderer = GetComponent<SpriteRenderer>();
+            _colliderRenderer = ColliderObj.GetComponent<SpriteRenderer>();
             _enemyManager = EnemyManager.Instance;
             _mapManager = MapManager.Instance;
             _towerManager = TowerManager.Instance;
@@ -47,33 +45,15 @@ namespace AnarchyBros
             _invInitialHealth = 1f / _initialHealth;
             _deltaTime = 0;
 
-            if (MeleeWeaponPrefab != null)
-            {
-                MeleeWeaponActive = true;
-                GameObject obj = Instantiate(MeleeWeaponPrefab, transform.position, Quaternion.identity) as GameObject;
-                obj.transform.parent = transform;
-                obj.name = MeleeWeaponPrefab.name;
-                _meleeWeapon = obj.GetComponent<MeleeWeapon>();
-            }
-
             if (RangeWeaponPrefab != null)
             { 
-                RangeWeaponActive = true;
                 GameObject obj = Instantiate(RangeWeaponPrefab, transform.position, Quaternion.identity) as GameObject;
                 obj.transform.parent = transform;
                 obj.name = RangeWeaponPrefab.name;
 
-                GameObject bulletCan = GameObject.FindGameObjectWithTag("Bullets");
-                if (bulletCan == null)
-                {
-                    GameObject x = new GameObject();
-                    x.name = "Bullets";
-                    x.tag = "Bullets";
-                    bulletCan = x;
-                }
-
                 _rangeWeapon = obj.GetComponent<RangeWeapon>();
-                _rangeWeapon.BulletCan = bulletCan.transform;
+                _rangeWeapon.BulletCan = BulletCan;
+                _rangeWeapon.GunPoint = GunPoint;
             }
         }
 
@@ -87,18 +67,19 @@ namespace AnarchyBros
             if (HasRangeWeapon)
             {
                 _rangeWeapon.EnemyTarget = _enemyManager.GetNearestEnemy(this);
+                transform.rotation = Quaternion.Lerp(transform.rotation, Tools2D.LookAt(GunPoint.position, _rangeWeapon.AimAt), Time.deltaTime * 2f);
             }
 
-            _renderer.color = Color.Lerp(ColorDefault, ColorDying, (_initialHealth - Health) * _invInitialHealth);
+            _colliderRenderer.color = Color.Lerp(ColorDefault, ColorDying, (_initialHealth - Health) * _invInitialHealth);
 
             _deltaTime += Time.deltaTime;
 
             if (!IsAlive())
             {
-                _renderer.color = Color.Lerp(_renderer.color, ColorDead, _deltaTime / DeathSpeed);
+                _colliderRenderer.color = Color.Lerp(_colliderRenderer.color, ColorDead, _deltaTime / DeathSpeed);
                 if (_deltaTime >= DeathSpeed)
                 {
-                    _renderer.color = ColorDefault;
+                    _colliderRenderer.color = ColorDefault;
                     Health = _initialHealth;
                     gameObject.SetActive(false);
                     _towerManager.OnTowerKill();
@@ -140,20 +121,6 @@ namespace AnarchyBros
             transform.position = Tools2D.MoveTowards(transform.position, MoveTo.transform.position, Time.deltaTime * Speed);
         }
 
-        public void Reborn()
-        {
-            if (HasMeleeWeapon)
-            {
-                _meleeWeapon.enabled = true;
-                _meleeWeapon.gameObject.SetActive(true);
-            }
-            if (HasRangeWeapon)
-            {
-                _rangeWeapon.enabled = true;
-                _rangeWeapon.gameObject.SetActive(true);
-            }
-        }
-
         public void OnPointerClick(PointerEventData eventData)
         {
             if (_collider.OverlapPoint(eventData.pointerCurrentRaycast.worldPosition))
@@ -168,19 +135,26 @@ namespace AnarchyBros
 
             if (!IsAlive())
             {
-                Kill();
+                Die();
                 _deltaTime = 0;
             }
         }
 
-        public void Kill()
+        public void Reborn()
+        {
+            if (HasRangeWeapon)
+            {
+                _rangeWeapon.enabled = true;
+                _rangeWeapon.gameObject.SetActive(true);
+            }
+            SpriteObj.gameObject.SetActive(true);
+        }
+
+        public void Die()
         {
             Health = 0;
-            if (HasMeleeWeapon)
-            {
-                _meleeWeapon.enabled = false;
-                _meleeWeapon.gameObject.SetActive(false);
-            }
+            SpriteObj.gameObject.SetActive(false);
+
             if (HasRangeWeapon)
             {
                 _rangeWeapon.enabled = false;
@@ -200,18 +174,10 @@ namespace AnarchyBros
 
         public void OnTriggerEnter2D(Collider2D other)
         {
-            if (HasMeleeWeapon)
-            {
-                _meleeWeapon.OnCollisionStart(other);
-            }
         }
 
         public void OnTriggerExit2D(Collider2D other)
         {
-            if (HasMeleeWeapon)
-            {
-                _meleeWeapon.OnCollisionEnd(other);
-            }
         }
     }
 }

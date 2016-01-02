@@ -7,27 +7,25 @@ namespace AnarchyBros
     public class RangeWeapon : MonoBehaviour
     {
         public GameObject BulletPrefab, TargetPrefab;
-        public Transform GunPoint, GunSprite, BulletCan;
+        public Transform GunPoint, BulletCan;
         public int RoundsPerMinute, MagazineSize;
+        public bool InfiniteMagazine;
         public float ReloadTime, BulletSpeed, Damage;
-        public Tower Tower;
         public Enemy EnemyTarget;
         public Color ColorDefault, ColorReloading;
         public List<Bullet> Bullets;
         public bool PredictiveShooting;
+        public Vector2 AimAt;
 
         GameManager _gameManager;
-        SpriteRenderer _renderer;
         float _shootingDelay, _deltaTime;
         int _bulletsLeft;
         bool _reloading;
-        Vector2 _aimTarget;
         SpriteRenderer _targetSprite;
 
         void Start()
         {
             _gameManager = GameManager.Instance;
-            _renderer = GunSprite.GetComponent<SpriteRenderer>();
             _shootingDelay = 60f / RoundsPerMinute;
             _deltaTime = 0;
             _bulletsLeft = MagazineSize;
@@ -57,28 +55,29 @@ namespace AnarchyBros
 
             UpdateTarget();
 
-            transform.rotation = Tools2D.LookAt(transform.position, _aimTarget);
-            _targetSprite.transform.position = _aimTarget;
+            transform.rotation = Tools2D.LookAt(transform.position, AimAt);
+            _targetSprite.transform.position = AimAt;
 
             _deltaTime += Time.deltaTime;
 
             if (_reloading)
             {
-                _renderer.color = Color.Lerp(_renderer.color, ColorReloading, Time.deltaTime * 8f);
                 _reloading = (_deltaTime < ReloadTime);
             }
             else
             {
-                _renderer.color = Color.Lerp(_renderer.color, ColorDefault, Time.deltaTime * 8f);
                 if (_deltaTime >= _shootingDelay)
                 {
                     Shoot();
 
-                    _bulletsLeft--;
-                    if (_bulletsLeft == 0)
+                    if (!InfiniteMagazine)
                     {
-                        _reloading = true;
-                        _bulletsLeft = MagazineSize;
+                        _bulletsLeft--;
+                        if (_bulletsLeft <= 0)
+                        {
+                            _reloading = true;
+                            _bulletsLeft = MagazineSize;
+                        }
                     }
 
                     _deltaTime = 0;
@@ -88,7 +87,7 @@ namespace AnarchyBros
 
         void UpdateTarget()
         {
-            _aimTarget = EnemyTarget.transform.position;
+            AimAt = EnemyTarget.transform.position;
             if (PredictiveShooting)
             {
                 Vector2 E = EnemyTarget.transform.position;
@@ -130,11 +129,11 @@ namespace AnarchyBros
                     Edge e;
                     if (MapManager.Instance.EdgeAt(P, out e) && e == EnemyTarget.Edge)
                     {
-                        _aimTarget = P;
+                        AimAt = P;
                     }
                     else
                     {
-                        _aimTarget = EnemyTarget.MoveTo.transform.position;
+                        AimAt = EnemyTarget.MoveTo.transform.position;
                     }
                 }
             }
@@ -144,8 +143,8 @@ namespace AnarchyBros
         {
             Bullet bullet = GetBullet();
             bullet.transform.position = GunPoint.position;
-            bullet.transform.rotation = Tools2D.LookAt(GunPoint.position, _aimTarget);
-            bullet.Direction = (Tools2D.Subtract(_aimTarget, GunPoint.position)).normalized;
+            bullet.transform.rotation = Tools2D.LookAt(GunPoint.position, AimAt);
+            bullet.Direction = (Tools2D.Subtract(AimAt, GunPoint.position)).normalized;
             bullet.Speed = BulletSpeed;
             bullet.Damage = Damage;
             bullet.transform.parent = BulletCan;
