@@ -19,6 +19,8 @@ namespace AnarchyBros
         public Animator Anim;
         public bool IsAttacking;
 
+        EnemyManager _enemyManager;
+        GameManager _gameManager;
         MapManager _mapManager;
         MeleeWeapon _meleeWeapon;
         List<SpriteRenderer> _renderers;
@@ -28,6 +30,8 @@ namespace AnarchyBros
 
         void Start()
         {
+            _enemyManager = EnemyManager.Instance;
+            _gameManager = GameManager.Instance;
             _mapManager = MapManager.Instance;
 
             if (MoveTo == null)
@@ -62,7 +66,7 @@ namespace AnarchyBros
 
         void Update()
         {
-            if (!GameManager.Instance.IsCurrentState(GameStates.Play))
+            if (!_gameManager.IsCurrentState(GameStates.Play))
             {
                 return;
             }
@@ -82,7 +86,7 @@ namespace AnarchyBros
                     Health = _initialHealth;
                     SetRenderersColor(ColorDefault);
                     gameObject.SetActive(false);
-                    EnemyManager.Instance.OnEnemyKill();
+                    _enemyManager.OnEnemyKill();
                     _deltaTime = 0;
                 }
                 return;
@@ -96,7 +100,7 @@ namespace AnarchyBros
                     Anim.SetBool("IsAttacking", false);
                 }
 
-                if (!EnemyManager.Instance.GetNewObjective(out Objective))
+                if (!_enemyManager.GetNewObjective(out Objective))
                 {
                     Die();
                     return;
@@ -121,6 +125,7 @@ namespace AnarchyBros
 
             if (Tools2D.IsPositionEqual(transform.position, MoveTo.transform.position))
             {
+                transform.position = MoveTo.transform.position;
                 Spot = MoveTo;
                 Edge = null;
             }
@@ -129,11 +134,11 @@ namespace AnarchyBros
             {
                 if (Objective.Spot != null)
                 {
-                    MoveTo =_mapManager.NextStep(Spot, Objective.Spot);
+                    MoveTo = _mapManager.NextStep(Spot, Objective.Spot);
                 }
                 else if (Objective.Edge != null)
                 {
-                    MoveTo =_mapManager.NextStep(Spot, Objective.MoveTo);
+                    MoveTo = _mapManager.NextStep(Spot, Objective.MoveTo);
                 }
 
                _mapManager.EdgeAt(Spot, MoveTo, out Edge);
@@ -143,11 +148,11 @@ namespace AnarchyBros
             {
                 if (Objective.Spot != null)
                 {
-                    MoveTo =_mapManager.NextStep(transform.position, Edge, Objective.Spot);
+                    MoveTo = _mapManager.NextStep(transform.position, Edge, Objective.Spot);
                 }
                 else if (Objective.Edge != null)
                 {
-                    MoveTo =_mapManager.NextStep(transform.position, Edge, Objective.MoveTo);
+                    MoveTo = _mapManager.NextStep(transform.position, Edge, Objective.MoveTo);
                 }
             }
 

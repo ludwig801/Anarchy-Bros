@@ -30,7 +30,6 @@ namespace AnarchyBros
 
         GameManager _gameManager;
         TowerManager _towerManager;
-        IOManager _ioManager;
         GameObject _targetObj;
         Vector2 _source, _target, _mapBottomLeft, _mapTopRight;
         Edge _refEdge;
@@ -46,7 +45,6 @@ namespace AnarchyBros
         {
             _gameManager = GameManager.Instance;
             _towerManager = TowerManager.Instance;
-            _ioManager = IOManager.Instance;
 
             // Reference Edges
             GameObject instance = Instantiate(EdgePrefab);
@@ -71,8 +69,6 @@ namespace AnarchyBros
             _targetObj.SetActive(false);
             _targetObj.name = "Target";
             _targetObj.transform.parent = transform;
-
-            _ioManager.LoadGraph();
 
             EnemySpotCount = GetSpotCountOfType(SpotTypes.EnemySpot);
             TowerSpotCount = GetSpotCountOfType(SpotTypes.TowerSpot);
@@ -478,7 +474,14 @@ namespace AnarchyBros
                                     }
                                     else
                                     {
-                                        RemoveSpot(spot);
+                                        if (spot.Type != SpotTypes.Connection)
+                                        {
+                                            ReplaceSpot(spot, SpotTypes.Connection);
+                                        }
+                                        else
+                                        {
+                                            RemoveSpot(spot);
+                                        }              
                                     }
                                 }
                                 break;
@@ -891,7 +894,7 @@ namespace AnarchyBros
             {
                 Spot neighbor = current.Edges[i].Neighbor(current);
                 int source = neighbor.Index;
-                float d = _distances[source, target];
+                float d = _distances[source, target] + DistanceBetween(current, neighbor);
 
                 if (d < minDist)
                 {
