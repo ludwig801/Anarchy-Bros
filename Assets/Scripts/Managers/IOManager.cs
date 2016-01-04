@@ -4,12 +4,15 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 using System;
 using AnarchyBros.Enums;
+using UnityEditor;
 
 namespace AnarchyBros
 {
     public class IOManager : MonoBehaviour
     {
         public static IOManager Instance { get; private set; }
+
+        MapManager _mapManager;
 
         void Awake()
         {
@@ -18,21 +21,22 @@ namespace AnarchyBros
 
         void Start()
         {
+            _mapManager = MapManager.Instance;
         }
 
         public void SaveGraph()
         {
-            List<Spot> spots = MapManager.Instance.Graph.Spots;
-            List<Edge> edges = MapManager.Instance.Graph.Edges;
+            List<Spot> spots = _mapManager.Spots;
+            List<Edge> edges = _mapManager.Edges;
             GameGraph toSave = new GameGraph();
 
             for (int i = 0; i < spots.Count; i++)
             {
-                IOSpot gameNode = new IOSpot();
-                gameNode.Position = new Point(spots[i].transform.position);
-                gameNode.Type = spots[i].Type;
+                IOSpot gameSpot = new IOSpot();
+                gameSpot.Position = new Point(spots[i].transform.position);
+                gameSpot.Type = spots[i].Type;
 
-                toSave.Spots.Add(gameNode);
+                toSave.Spots.Add(gameSpot);
             }
 
             for (int i = 0; i < edges.Count; i++)
@@ -44,29 +48,30 @@ namespace AnarchyBros
                 toSave.Edges.Add(gameEdge);
             }
 
-            Debug.Log("SAVE: " + toSave.Spots.Count + " spots & " + toSave.Edges.Count);
+            Debug.Log(toSave.Spots.Count + " spots + " + toSave.Edges.Count + " edges saved.");
 
             BinaryFormatter bf = new BinaryFormatter();
-            FileStream file = File.Create(Application.dataPath + "/GraphData.sav");
+            Stream file = File.Create(Application.dataPath + "/Resources/GraphData.txt");
             bf.Serialize(file, toSave);
             file.Close();
         }
 
         public void LoadGraph()
         {
-            if (File.Exists(Application.dataPath + "/GraphData.sav"))
+            if (File.Exists(Application.dataPath + "/Resources/GraphData.txt"))
             {
                 BinaryFormatter bf = new BinaryFormatter();
-                FileStream file = File.Open(Application.dataPath + "/GraphData.sav", FileMode.Open);
-                GameGraph graph = (GameGraph)bf.Deserialize(file);
-                file.Close();
+                Stream s = File.OpenRead(Application.dataPath + "/Resources/GraphData.txt");
+                GameGraph graph = (GameGraph)bf.Deserialize(s);
 
-                //Debug.Log("LOAD: " + graph.Spots.Count + " spots & " + graph.Edges.Count);
+                Debug.Log(graph.Spots.Count + " spots + " + graph.Edges.Count + " edges loaded.");
 
-                MapManager.Instance.RebuildGraph(graph);
+                _mapManager.RebuildGraph(graph);
+
+                s.Close();
 
                 graph.Spots.Clear();
-                graph.Edges.Clear();
+                graph.Edges.Clear(); 
             }
         }
 

@@ -19,6 +19,7 @@ namespace AnarchyBros
         public Animator Anim;
         public bool IsAttacking;
 
+        MapManager _mapManager;
         MeleeWeapon _meleeWeapon;
         List<SpriteRenderer> _renderers;
         SpriteRenderer _colliderRenderer;
@@ -27,7 +28,9 @@ namespace AnarchyBros
 
         void Start()
         {
-            if(MoveTo == null)
+            _mapManager = MapManager.Instance;
+
+            if (MoveTo == null)
             {
                 Destroy(gameObject);
                 return;
@@ -40,7 +43,7 @@ namespace AnarchyBros
                 _meleeWeapon.transform.parent = transform;
             }
 
-            Spot = MapManager.Instance.SpotAt(transform.position);
+            Spot =_mapManager.SpotAt(transform.position);
             Edge = null;
             transform.position = Tools2D.Convert(transform.position, MoveTo.transform.position);
 
@@ -88,7 +91,10 @@ namespace AnarchyBros
             if (Objective == null || !Objective.IsAlive())
             {
                 IsAttacking = false;
-                Anim.SetBool("IsAttacking", false);
+                if (Anim.isInitialized)
+                {
+                    Anim.SetBool("IsAttacking", false);
+                }
 
                 if (!EnemyManager.Instance.GetNewObjective(out Objective))
                 {
@@ -123,25 +129,25 @@ namespace AnarchyBros
             {
                 if (Objective.Spot != null)
                 {
-                    MoveTo = MapManager.Instance.NextStep(Spot, Objective.Spot);
+                    MoveTo =_mapManager.NextStep(Spot, Objective.Spot);
                 }
                 else if (Objective.Edge != null)
                 {
-                    MoveTo = MapManager.Instance.NextStep(Spot, Objective.MoveTo);
+                    MoveTo =_mapManager.NextStep(Spot, Objective.MoveTo);
                 }
 
-                Edge = MapManager.Instance.EdgeAt(Spot, MoveTo);
+               _mapManager.EdgeAt(Spot, MoveTo, out Edge);
                 Spot = null;
             }
             else if (Edge != null)
             {
                 if (Objective.Spot != null)
                 {
-                    MoveTo = MapManager.Instance.NextStep(transform.position, Edge, Objective.Spot);
+                    MoveTo =_mapManager.NextStep(transform.position, Edge, Objective.Spot);
                 }
                 else if (Objective.Edge != null)
                 {
-                    MoveTo = MapManager.Instance.NextStep(transform.position, Edge, Objective.MoveTo);
+                    MoveTo =_mapManager.NextStep(transform.position, Edge, Objective.MoveTo);
                 }
             }
 
@@ -202,7 +208,10 @@ namespace AnarchyBros
             if(x.IsAlive())
             {
                 IsAttacking = true;
-                Anim.SetBool("IsAttacking", true);
+                if (Anim.isInitialized)
+                {
+                    Anim.SetBool("IsAttacking", true);
+                }
 
                 if (HasMeleeWeapon)
                 {
@@ -221,13 +230,19 @@ namespace AnarchyBros
                 if (_meleeWeapon.Targets.Count <= 0)
                 {
                     IsAttacking = false;
-                    Anim.SetBool("IsAttacking", false);
+                    if (Anim.isInitialized)
+                    {
+                        Anim.SetBool("IsAttacking", false);
+                    }
                 }
             }
             else
             {
                 IsAttacking = false;
-                Anim.SetBool("IsAttacking", false);
+                if (Anim.isInitialized)
+                {
+                    Anim.SetBool("IsAttacking", false);
+                }
             }
         }
     }

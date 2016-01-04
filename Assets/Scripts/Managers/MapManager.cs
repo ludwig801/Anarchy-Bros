@@ -9,11 +9,10 @@ namespace AnarchyBros
     {
         public static MapManager Instance { get; private set; }
 
-        public Transform ObjGraph, ObjGround;
+        public Transform ObjGround, ObjSpots, ObjEdges;
         public GameObject TowerSpotPrefab, EnemySpawnPrefab, EdgePrefab, SpotPrefab, TargetPrefab;
         public SpotTypes CurrentMode;
-        public Graph Graph;
-        public int EnemySpotCount, TowerSpotCount;
+        public int SpotCount, EnemySpotCount, TowerSpotCount;
         public bool Targeting
         {
             get { return _targeting; }
@@ -26,9 +25,12 @@ namespace AnarchyBros
                 _refTarget.gameObject.SetActive(value);
             }
         }
+        public List<Spot> Spots;
+        public List<Edge> Edges;
 
         GameManager _gameManager;
         TowerManager _towerManager;
+        IOManager _ioManager;
         GameObject _targetObj;
         Vector2 _source, _target, _mapBottomLeft, _mapTopRight;
         Edge _refEdge;
@@ -44,6 +46,7 @@ namespace AnarchyBros
         {
             _gameManager = GameManager.Instance;
             _towerManager = TowerManager.Instance;
+            _ioManager = IOManager.Instance;
 
             // Reference Edges
             GameObject instance = Instantiate(EdgePrefab);
@@ -69,9 +72,11 @@ namespace AnarchyBros
             _targetObj.name = "Target";
             _targetObj.transform.parent = transform;
 
-            Graph = ObjGraph.GetComponent<Graph>();
-            EnemySpotCount = Graph.GetSpotCountOfType(SpotTypes.EnemySpot);
-            TowerSpotCount = Graph.GetSpotCountOfType(SpotTypes.EnemySpot);
+            _ioManager.LoadGraph();
+
+            EnemySpotCount = GetSpotCountOfType(SpotTypes.EnemySpot);
+            TowerSpotCount = GetSpotCountOfType(SpotTypes.TowerSpot);
+            SpotCount = Spots.Count;
 
             Targeting = false;
             CurrentMode = SpotTypes.Connection;
@@ -116,7 +121,7 @@ namespace AnarchyBros
         void CreateLink(Vector2 source)
         {
             Spot spot;
-            if (SpotAt(source) == null)
+            if (!SpotAt(source, out spot))
             {
                 spot = CreateSpot(source, CurrentMode);
                 Edge hitEdge;
@@ -151,7 +156,7 @@ namespace AnarchyBros
                 }
             }
 
-            if (Graph.AreNeighbors(spotA, spotB))
+            if (AreNeighbors(spotA, spotB))
             {
                 return;
             }
@@ -199,14 +204,13 @@ namespace AnarchyBros
                     break;
             }
 
-            obj.layer = LayerMask.NameToLayer("Spots");
-            obj.transform.position = worldPos;
+            Spot spot = obj.GetComponent<Spot>();
+            spot.transform.position = worldPos;
+            spot.Type = type;
+            spot.transform.parent = ObjSpots;
+            Spots.Add(spot);
 
-            Spot n = obj.GetComponent<Spot>();
-            n.Type = type;
-
-            Graph.AddSpot(n);
-            return n;
+            return spot;
         }
 
         Spot ReplaceSpot(Spot from, SpotTypes toType)
@@ -227,150 +231,120 @@ namespace AnarchyBros
 
         Edge CreateEdge(Spot a, Spot b)
         {
+            if (AreNeighbors(a, b))
+            {
+                return null;
+            }
+
             GameObject obj = Instantiate(EdgePrefab);
             obj.name = "Edge";
 
             Edge e = obj.GetComponent<Edge>();
+            e.transform.parent = ObjEdges;
             e.SetNodes(a, b);
-            Graph.AddEdge(e);
+            e.A.AddEdge(e);
+            e.B.AddEdge(e);
+            Edges.Add(e);
 
             return e;
         }
 
         void RemoveSpot(Spot s)
         {
-            Graph.RemoveSpot(s);
-            EnemySpotCount = Graph.GetSpotCountOfType(SpotTypes.EnemySpot);
-            TowerSpotCount = Graph.GetSpotCountOfType(SpotTypes.EnemySpot);
+            for (int i = s.Edges.Count - 1; i >= 0; i--)
+            {
+                RemoveEdge(s.Edges[i]);
+            }
+
+            switch (s.Type)
+            {
+                case SpotTypes.EnemySpot:
+                    EnemySpotCount--;
+                    break;
+
+                case SpotTypes.TowerSpot:
+                    TowerSpotCount--;
+                    break;
+
+                default:
+                    break;
+            }
+
+            Spots.Remove(s);
+            Destroy(s.gameObject);
         }
 
         void RemoveEdge(Edge e)
         {
-            Graph.RemoveEdge(e);
-        }
+            Edges.Remove(e);
+            e.A.RemoveEdge(e);
+            e.B.RemoveEdge(e);
 
-        bool SpotAt(Vector2 pos, out Spot hit)
-        {
-            hit = Graph.SpotOverlaping(pos);
-
-            return (hit != null);
+            Destroy(e.gameObject);
         }
 
         public bool EdgeAt(Vector2 pos, out Edge hit)
         {
-            hit = Graph.EdgeOverlaping(pos);
+            hit = null;
+
+            for (int i = 0; i < Edges.Count; i++)
+            {
+                if (Edges[i].Collider.OverlapPoint(pos))
+                {
+                    hit = Edges[i];
+                    break;
+                }
+            }
+
             return (hit != null);
         }
 
-        public Edge EdgeAt(Spot a, Spot b)
+        public Edge EdgeAt(Spot a, Spot b, out Edge hit)
         {
-            return (Graph != null) ? Graph.EdgeConnecting(a, b) : null;
+            hit = null;
+            for (int i = 0; i < Edges.Count; i++)
+            {
+                if (Edges[i].Neighbor(a) == b)
+                {
+                    hit = Edges[i];
+                    break;
+                }
+            }
+
+            return hit;
+        }
+
+        public bool SpotAt(Vector2 pos, out Spot hit)
+        {
+            hit = null;
+
+            for (int i = 0; i < Spots.Count; i++)
+            {
+                if (Spots[i].Collider.OverlapPoint(pos))
+                {
+                    hit = Spots[i];
+                    break;
+                }
+            }
+
+            return (hit != null);
         }
 
         public Spot SpotAt(Vector2 pos)
         {
-            return (Graph != null) ? Graph.SpotOverlaping(pos) : null;
+            Spot hit;
+            SpotAt(pos, out hit);
+            return hit;
         }
 
-        public void OnGroundClick(BaseEventData baseData)
+        public void OnSpotDrag(PointerEventData eventData, Spot node)
         {
-            PointerEventData eventData = baseData as PointerEventData;
-            if (eventData.button == PointerEventData.InputButton.Left)
-            {
-                switch (CurrentMode)
-                {
-                    case SpotTypes.Connection:
-                        if (Targeting)
-                        {
-                            _target = eventData.pointerCurrentRaycast.worldPosition;
-                            CreateLink(_source, _target);
-
-                            // For continuos targeting
-                            _source = _target;
-                            // For one time targeting
-                            // Targeting = false;
-                        }
-                        else
-                        {
-                            Targeting = true;
-                            _source = eventData.pointerCurrentRaycast.worldPosition;
-                        }
-                        break;
-
-                    case SpotTypes.EnemySpot:
-                        Targeting = false;
-                        CreateSpot(eventData.pointerCurrentRaycast.worldPosition, SpotTypes.EnemySpot);
-                        break;
-
-                    case SpotTypes.TowerSpot:
-                        Targeting = false;
-                        CreateSpot(eventData.pointerCurrentRaycast.worldPosition, SpotTypes.TowerSpot);
-                        break;
-                }
-            }
-            else if (eventData.button == PointerEventData.InputButton.Right)
-            {
-                Targeting = false;
-            }
-        }
-
-        public void OnSpotClick(PointerEventData eventData, Spot spot)
-        {
-            _towerManager.OnSpotClicked(spot);
-
             switch (_gameManager.CurrentState)
             {
                 case GameStates.Edit:
-                    if (eventData.button == PointerEventData.InputButton.Left)
+                    for (int i = 0; i < Edges.Count; i++)
                     {
-                        switch (CurrentMode)
-                        {
-                            case SpotTypes.Connection:
-                                if (Targeting)
-                                {
-                                    _target = spot.transform.position;
-                                    CreateLink(_source, _target);
-
-                                    //      For continuos targeting
-                                    _source = _target;
-                                    //      For one time targeting
-                                    // Targeting = false;
-                                }
-                                else
-                                {
-                                    Targeting = true;
-                                    _source = spot.transform.position;
-                                    _target = _source;
-                                }
-                                break;
-
-                            case SpotTypes.TowerSpot:
-                                Targeting = false;
-                                ReplaceSpot(spot, SpotTypes.TowerSpot);
-                                break;
-
-                            case SpotTypes.EnemySpot:
-                                Targeting = false;
-                                ReplaceSpot(spot, SpotTypes.EnemySpot);
-                                break;
-                        }
-                    }
-                    else if (eventData.button == PointerEventData.InputButton.Right)
-                    {
-                        switch (spot.Type)
-                        {
-                            case SpotTypes.Connection:
-                                RemoveSpot(spot);
-                                break;
-
-                            case SpotTypes.EnemySpot:
-                                ReplaceSpot(spot, SpotTypes.Connection);
-                                break;
-
-                            case SpotTypes.TowerSpot:
-                                ReplaceSpot(spot, SpotTypes.Connection);
-                                break;
-                        }
+                        Edges[i].OnSpotsPositionChanged();
                     }
                     break;
 
@@ -379,62 +353,6 @@ namespace AnarchyBros
 
                 case GameStates.Play:
                     break;
-
-                case GameStates.Pause:
-                    break;
-            }
-        }
-
-        public void OnSpotDrag(PointerEventData eventData, Spot node)
-        {
-            if (!_gameManager.IsCurrentState(GameStates.Edit))
-            {
-                return;
-            }
-
-            Graph.OnSpotsPositionChanged();
-        }
-
-        public void OnEdgeClick(PointerEventData eventData, Edge edge)
-        {
-            if (eventData.button == PointerEventData.InputButton.Left)
-            {
-                switch (CurrentMode)
-                {
-                    case SpotTypes.Connection:
-                        if (Targeting)
-                        {
-                            _target = eventData.pointerCurrentRaycast.worldPosition;
-                            CreateLink(_source, _target);
-
-                            // For continuos targeting
-                            _source = _target;
-                            // For one time targeting
-                            // Targeting = false;
-                        }
-                        else
-                        {
-                            Targeting = true;
-                            _source = eventData.pointerCurrentRaycast.worldPosition;
-                        }
-                        break;
-
-                    case SpotTypes.TowerSpot:
-                        Targeting = false;
-                        _source = eventData.pointerCurrentRaycast.worldPosition;
-                        CreateLink(_source);
-                        break;
-
-                    case SpotTypes.EnemySpot:
-                        Targeting = false;
-                        _source = eventData.pointerCurrentRaycast.worldPosition;
-                        CreateLink(_source);
-                        break;
-                }
-            }
-            else if (eventData.button == PointerEventData.InputButton.Right)
-            {
-                RemoveEdge(edge);
             }
         }
 
@@ -443,6 +361,400 @@ namespace AnarchyBros
             Targeting = false;
             CurrentMode = (SpotTypes)newMode;
         }
+
+        public void OnGameStateChanged(GameStates newState)
+        {
+            for (int i = 0; i < Edges.Count; i++)
+            {
+                Edges[i].OnGameStateChanged(newState);
+            }
+
+            for (int i = 0; i < Spots.Count; i++)
+            {
+                Spots[i].OnGameStateChanged(newState);
+            }
+
+            switch (newState)
+            {
+                case GameStates.Edit:
+                    break;
+
+                case GameStates.Place:
+                    break;
+
+                case GameStates.Play:
+                    ReCalculateDistances();
+                    _targetObj.SetActive(false);
+                    break;
+            }
+        }
+
+        public float DistanceBetween(Tower t, Enemy e)
+        {
+            if (t.Spot != null)
+            {
+                if (e.Spot != null)
+                {
+                    return DistanceBetween(t.Spot, e.Spot);
+                }
+                else if (e.Edge != null)
+                {
+                    float d1 = Tools2D.Distance(e.transform.position, e.Edge.A.transform.position);
+                    float d2 = Tools2D.Distance(e.transform.position, e.Edge.B.transform.position);
+                    return Mathf.Min(DistanceBetween(t.Spot, e.Edge.A) + d1, DistanceBetween(t.Spot, e.Edge.B) + d2);
+                }
+            }
+            else if (t.Edge != null)
+            {
+                if (e.Spot != null)
+                {
+                    float d1 = Tools2D.Distance(t.transform.position, t.Edge.A.transform.position);
+                    float d2 = Tools2D.Distance(t.transform.position, t.Edge.B.transform.position);
+                    return Mathf.Min(DistanceBetween(t.Edge.A, e.Spot) + d1, DistanceBetween(t.Edge.B, e.Spot) + d2);
+                }
+                else if (e.Edge != null)
+                {
+                    float d1 = Tools2D.Distance(t.transform.position, t.Edge.A.transform.position);
+                    float d2 = Tools2D.Distance(t.transform.position, t.Edge.B.transform.position);
+                    float d3 = Tools2D.Distance(e.transform.position, e.Edge.A.transform.position);
+                    float d4 = Tools2D.Distance(e.transform.position, e.Edge.B.transform.position);
+                    float d5 = Mathf.Min(DistanceBetween(t.Edge.A, e.Edge.A) + d1 + d2, DistanceBetween(t.Edge.B, e.Edge.A) + d2 + d3);
+                    float d6 = Mathf.Min(DistanceBetween(t.Edge.B, e.Edge.A) + d2 + d3, DistanceBetween(t.Edge.B, e.Edge.B) + d2 + d4);
+                    return Mathf.Min(d5, d6); ;
+                }
+            }
+
+            return float.MaxValue;
+        }
+
+        public bool OutOfMap(Vector2 position, Vector2 margin)
+        {
+            Vector2 objBottomLeft = position - margin;
+            Vector2 objTopRight = position + margin;
+
+            return Tools2D.NotInside(objBottomLeft, objTopRight, _mapBottomLeft, _mapTopRight);
+        }
+
+        public void OnPointerClick(BaseEventData eventData)
+        {
+            PointerEventData pEventData = eventData as PointerEventData;
+            Vector2 worldPos = pEventData.pointerCurrentRaycast.worldPosition;
+
+            bool leftBtn = pEventData.button == PointerEventData.InputButton.Left;
+            //bool rightBtn = pEventData.button == PointerEventData.InputButton.Right;
+
+            Spot spot;
+            Edge edge;
+
+            switch (_gameManager.CurrentState)
+            {
+                case GameStates.Edit:
+                    #region Edit
+                    if (SpotAt(worldPos, out spot))
+                    {
+                        switch (CurrentMode)
+                        {
+                            case SpotTypes.Connection:
+                                if (leftBtn)
+                                {
+                                    if (Targeting)
+                                    {
+                                        _target = spot.transform.position;
+                                        CreateLink(_source, _target);
+                                        _source = _target;  // For continuos targeting
+                                    }
+                                    else
+                                    {
+                                        Targeting = true;
+                                        _source = spot.transform.position;
+                                        _target = _source;
+                                    }
+                                }
+                                else
+                                {
+                                    if (Targeting)
+                                    {
+                                        Targeting = false;
+                                    }
+                                    else
+                                    {
+                                        RemoveSpot(spot);
+                                    }
+                                }
+                                break;
+
+                            case SpotTypes.EnemySpot:
+                                if (leftBtn)
+                                {
+                                    Targeting = false;
+                                    ReplaceSpot(spot, SpotTypes.EnemySpot);
+                                }
+                                else
+                                {
+                                    if (spot.Type == SpotTypes.Connection)
+                                    {
+                                        if (Targeting)
+                                        {
+                                            Targeting = false;
+                                        }
+                                        else
+                                        {
+                                            RemoveSpot(spot);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        ReplaceSpot(spot, SpotTypes.Connection);
+                                    }
+                                }
+                                break;
+
+                            case SpotTypes.TowerSpot:
+                                if (leftBtn)
+                                {
+                                    Targeting = false;
+                                    ReplaceSpot(spot, SpotTypes.TowerSpot);
+                                }
+                                else
+                                {
+                                    if (spot.Type == SpotTypes.Connection)
+                                    {
+                                        if (Targeting)
+                                        {
+                                            Targeting = false;
+                                        }
+                                        else
+                                        {
+                                            RemoveSpot(spot);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        ReplaceSpot(spot, SpotTypes.Connection);
+                                    }
+                                }
+                                break;
+                        }
+
+                        //Debug.Log("Touched spot: " + spot.Type.ToString());
+                    }
+                    else if (EdgeAt(worldPos, out edge))
+                    {
+                        switch (CurrentMode)
+                        {
+                            case SpotTypes.Connection:
+                                if (leftBtn)
+                                {
+                                    if (Targeting)
+                                    {
+                                        _target = worldPos;
+                                        CreateLink(_source, _target);
+
+                                        // For continuos targeting
+                                        _source = _target;
+                                        // For one time targeting
+                                        // Targeting = false;
+                                    }
+                                    else
+                                    {
+                                        Targeting = true;
+                                        _source = worldPos;
+                                    }
+                                }
+                                else
+                                {
+                                    if (Targeting)
+                                    {
+                                        Targeting = false;
+                                    }
+                                    else
+                                    {
+                                        RemoveEdge(edge);
+                                    }
+                                }
+                                break;
+
+                            case SpotTypes.TowerSpot:
+                                if (leftBtn)
+                                {
+                                    Targeting = false;
+                                    _source = worldPos;
+                                    CreateLink(_source);
+                                }
+                                else
+                                {
+                                    if (Targeting)
+                                    {
+                                        Targeting = false;
+                                    }
+                                    else
+                                    {
+                                        RemoveEdge(edge);
+                                    }
+                                }
+                                break;
+
+                            case SpotTypes.EnemySpot:
+                                if (leftBtn)
+                                {
+                                    Targeting = false;
+                                    _source = worldPos;
+                                    CreateLink(_source);
+                                }
+                                else
+                                {
+                                    if (Targeting)
+                                    {
+                                        Targeting = false;
+                                    }
+                                    else
+                                    {
+                                        RemoveEdge(edge);
+                                    }
+                                }
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        switch (CurrentMode)
+                        {
+                            case SpotTypes.Connection:
+                                if (leftBtn)
+                                {
+                                    if (Targeting)
+                                    {
+                                        _target = worldPos;
+                                        CreateLink(_source, _target);
+                                        _source = _target;  // For continuos targeting
+                                    }
+                                    else
+                                    {
+                                        Targeting = true;
+                                        _source = worldPos;
+                                    }
+                                }
+                                else
+                                {
+                                    Targeting = false;
+                                }
+                                break;
+
+                            case SpotTypes.EnemySpot:
+                                if (leftBtn)
+                                {
+                                    Targeting = false;
+                                    CreateSpot(worldPos, SpotTypes.EnemySpot);
+                                }
+                                else
+                                {
+                                    Targeting = false;
+                                }
+                                break;
+
+                            case SpotTypes.TowerSpot:
+                                if (leftBtn)
+                                {
+                                    Targeting = false;
+                                    CreateSpot(worldPos, SpotTypes.TowerSpot);
+                                }
+                                else
+                                {
+                                    Targeting = false;
+                                }
+                                break;
+                        }
+                    }
+                    #endregion
+                    break;
+
+                case GameStates.Place:
+                    #region Place
+                    if (SpotAt(worldPos, out spot))
+                    {
+                        _towerManager.OnSpotClicked(spot);
+                    }
+                    else if (EdgeAt(worldPos, out edge))
+                    {
+                        Debug.Log("Touched edge");
+                    }
+                    else
+                    {
+                        Debug.Log("Touched ground");
+                    }
+                    #endregion
+                    break;
+
+                case GameStates.Play:
+                    #region Play
+                    #endregion
+                    break;
+            }
+        }
+
+        public int GetSpotCountOfType(SpotTypes type)
+        {
+            int count = 0;
+            for (int i = 0; i < Spots.Count; i++)
+            {
+                if (Spots[i].Type == type)
+                {
+                    count++;
+                }
+            }
+
+            return count;
+        }
+
+        public Spot RandomSpot(SpotTypes type)
+        {
+            int rand = int.MinValue;
+            switch (type)
+            {
+                case SpotTypes.Connection:
+                    rand = Random.Range(0, SpotCount - (EnemySpotCount + TowerSpotCount));
+                    break;
+
+                case SpotTypes.EnemySpot:
+                    rand = Random.Range(0, EnemySpotCount);
+                    break;
+
+                case SpotTypes.TowerSpot:
+                    rand = Random.Range(0, TowerSpotCount);
+                    break;
+            }
+
+            Spot s = null;
+
+            if (rand < 0)
+            {
+                return s;
+            }
+
+            for (int i = 0; i < Spots.Count; i++)
+            {
+                if (Spots[i].Type == type)
+                {
+                    if (rand <= 0)
+                    {
+                        s = Spots[i];
+                        break;
+                    }
+                    rand--;
+                }
+            }
+
+            return s;
+        }
+
+        public bool AreNeighbors(Spot a, Spot b)
+        {
+            Edge hit;
+            return EdgeAt(a, b, out hit);
+        }
+
+        #region Graph
+        float[,] _distances;
 
         public void RebuildGraph(IOManager.GameGraph newGraph)
         {
@@ -467,49 +779,100 @@ namespace AnarchyBros
 
         public void DestroyGraph()
         {
-            Graph.Clear();
+            for (int i = Spots.Count - 1; i >= 0; i--)
+            {
+                RemoveSpot(Spots[i]);
+            }
+
+            for (int i = Edges.Count - 1; i >= 0; i--)
+            {
+                RemoveEdge(Edges[i]);
+            }
+
+            Spots.Clear();
+            Edges.Clear();
         }
 
-        public void OnGameStateChanged(GameStates newState)
+        public void ReCalculateDistances()
         {
-            if (Graph != null)
+            _distances = new float[Spots.Count, Spots.Count];
+            List<GraphNode> graph = new List<GraphNode>();
+
+            for (int i = 0; i < Spots.Count; i++)
             {
-                Graph.OnGameStateChanged(newState);
+                Spot n = Spots[i];
+                n.Index = i;
+                GraphNode gNode = new GraphNode(n.transform.position, float.MaxValue);
+                graph.Add(gNode);
             }
 
-            switch (newState)
+            for (int i = 0; i < Spots.Count; i++)
             {
-                case GameStates.Edit:
-                    break;
+                ReCalculateDistances(i, graph);
+            }
 
-                case GameStates.Place:
-                    break;
+            graph.Clear();
+        }
 
-                case GameStates.Play:
-                    _targetObj.SetActive(false);
-                    break;
+        void ReCalculateDistances(int sourceIndex, List<GraphNode> graph)
+        {
+            List<GraphNode> unvisited = new List<GraphNode>();
+
+            for (int i = 0; i < graph.Count; i++)
+            {
+                unvisited.Add(graph[i]);
+                graph[i].Dist = int.MaxValue;
+            }
+
+            for (int i = 0; i < Spots.Count; i++)
+            {
+                Spot node = Spots[i];
+
+                for (int j = 0; j < node.Edges.Count; j++)
+                {
+                    Spot neighbor = node.GetNeighbor(j);
+                    for (int w = 0; w < unvisited.Count; w++)
+                    {
+                        if (Tools2D.IsPositionEqual(unvisited[w].position, neighbor.transform.position))
+                        {
+                            unvisited[i].Neighbors.Add(unvisited[w]);
+                        }
+                    }
+                }
+            }
+
+            unvisited[sourceIndex].Dist = 0;
+
+            while (unvisited.Count > 0)
+            {
+                GraphNode node = unvisited[GetNextBest(unvisited)];
+                unvisited.Remove(node);
+
+                for (int i = 0; i < node.Neighbors.Count; i++)
+                {
+                    GraphNode neighbor = node.Neighbors[i];
+                    if (unvisited.Contains(neighbor))
+                    {
+                        float d = node.Dist + Vector2.Distance(neighbor.position, node.position);
+                        if (d <= neighbor.Dist)
+                        {
+                            neighbor.Dist = d;
+                        }
+                    }
+                }
+            }
+
+            for (int i = 0; i < graph.Count; i++)
+            {
+                _distances[sourceIndex, i] = graph[i].Dist;
             }
         }
 
-        public Spot GetRandomSpot(SpotTypes type)
+        public Spot NextStep(Vector2 currentPos, Edge e, Spot objective)
         {
-            int rand = int.MinValue;
-            switch (type)
-            {
-                case SpotTypes.Connection:
-                    rand = Random.Range(0, Graph.SpotCount - (EnemySpotCount + TowerSpotCount));
-                    break;
-
-                case SpotTypes.EnemySpot:
-                    rand = Random.Range(0, EnemySpotCount);
-                    break;
-
-                case SpotTypes.TowerSpot:
-                    rand = Random.Range(0, TowerSpotCount);
-                    break;
-            }
-
-            return Graph.RandomSpot(rand, type);
+            float distA = Vector2.Distance(currentPos, e.A.transform.position) + DistanceBetween(e.A, objective);
+            float distB = Vector2.Distance(currentPos, e.B.transform.position) + DistanceBetween(e.B, objective);
+            return (distA < distB) ? e.A : e.B;
         }
 
         public Spot NextStep(Spot current, Spot objective)
@@ -519,60 +882,64 @@ namespace AnarchyBros
                 return objective;
             }
 
-            return Graph.NextStep(current, objective);
-        }
+            float minDist = int.MaxValue;
+            Spot best = null;
 
-        public Spot NextStep(Vector2 currentPos, Edge e, Spot objective)
-        {
-            float distA = Vector2.Distance(currentPos, e.A.transform.position) + Graph.DistanceBetween(e.A, objective);
-            float distB = Vector2.Distance(currentPos, e.B.transform.position) + Graph.DistanceBetween(e.B, objective);
-            return (distA < distB) ? e.A : e.B;
-        }
+            int target = objective.Index;
 
-        public float DistanceBetween(Tower t, Enemy e)
-        {
-            if (t.Spot != null)
+            for (int i = 0; i < current.Edges.Count; i++)
             {
-                if (e.Spot != null)
+                Spot neighbor = current.Edges[i].Neighbor(current);
+                int source = neighbor.Index;
+                float d = _distances[source, target];
+
+                if (d < minDist)
                 {
-                    return Graph.DistanceBetween(t.Spot, e.Spot);
-                }
-                else if(e.Edge != null)
-                {
-                    float d1 = Vector2.Distance(e.transform.position, e.Edge.A.transform.position);
-                    float d2 = Vector2.Distance(e.transform.position, e.Edge.B.transform.position);
-                    return Mathf.Min(Graph.DistanceBetween(t.Spot, e.Edge.A) + d1, Graph.DistanceBetween(t.Spot, e.Edge.B) + d2);
-                }
-            }
-            else if(t.Edge != null)
-            {
-                if (e.Spot != null)
-                {
-                    float d1 = Vector2.Distance(t.transform.position, t.Edge.A.transform.position);
-                    float d2 = Vector2.Distance(t.transform.position, t.Edge.B.transform.position);
-                    return Mathf.Min(Graph.DistanceBetween(t.Edge.A, e.Spot) + d1, Graph.DistanceBetween(t.Edge.B, e.Spot) + d2);
-                }
-                else if (e.Edge != null)
-                {
-                    float d1 = Vector2.Distance(t.transform.position, t.Edge.A.transform.position);
-                    float d2 = Vector2.Distance(t.transform.position, t.Edge.B.transform.position);
-                    float d3 = Vector2.Distance(e.transform.position, e.Edge.A.transform.position);
-                    float d4 = Vector2.Distance(e.transform.position, e.Edge.B.transform.position);
-                    float d5 = Mathf.Min(Graph.DistanceBetween(t.Edge.A, e.Edge.A) + d1 + d2, Graph.DistanceBetween(t.Edge.B, e.Edge.A) + d2 + d3);
-                    float d6 = Mathf.Min(Graph.DistanceBetween(t.Edge.B, e.Edge.A) + d2 + d3, Graph.DistanceBetween(t.Edge.B, e.Edge.B) + d2 + d4);
-                    return Mathf.Min(d5, d6); ;
+                    minDist = d;
+                    best = neighbor;
                 }
             }
 
-            return float.MaxValue;
+            return best;
         }
 
-        public bool OutOfMap(Vector2 position, Vector2 margin)
+        public float DistanceBetween(Spot a, Spot b)
         {
-            Vector2 objBottomLeft = position - margin;
-            Vector2 objTopRight = position + margin;
-
-            return Tools2D.NotInside(objBottomLeft, objTopRight, _mapBottomLeft, _mapTopRight);
+            return _distances[a.Index, b.Index];
         }
+
+        int GetNextBest(List<GraphNode> graph)
+        {
+            float min = float.MaxValue;
+            int index = 0;
+
+            for (int i = 0; i < graph.Count; i++)
+            {
+                if (graph[i].Dist <= min)
+                {
+                    min = graph[i].Dist;
+                    index = i;
+                }
+            }
+
+            return index;
+        }
+
+        class GraphNode
+        {
+            public Vector2 position;
+            public float Dist;
+
+            public List<GraphNode> Neighbors;
+
+            public GraphNode(Vector2 pos, float dist)
+            {
+                position = pos;
+                Dist = dist;
+
+                Neighbors = new List<GraphNode>();
+            }
+        }
+        #endregion
     }
 }

@@ -46,7 +46,7 @@ namespace AnarchyBros
             _deltaTime = 0;
 
             if (RangeWeaponPrefab != null)
-            { 
+            {
                 GameObject obj = Instantiate(RangeWeaponPrefab, transform.position, Quaternion.identity) as GameObject;
                 obj.transform.parent = transform;
                 obj.name = RangeWeaponPrefab.name;
@@ -66,8 +66,8 @@ namespace AnarchyBros
 
             if (HasRangeWeapon)
             {
-                _rangeWeapon.EnemyTarget = _enemyManager.GetNearestEnemy(this);
-                transform.rotation = Quaternion.Lerp(transform.rotation, Tools2D.LookAt(GunPoint.position, _rangeWeapon.AimAt), Time.deltaTime * 2f);
+                _rangeWeapon.Target = _enemyManager.GetNearestEnemy(this);
+                transform.rotation = Quaternion.Lerp(transform.rotation, Tools2D.LookAt(GunPoint.position, _rangeWeapon.AimAt), Time.deltaTime * 5f);
             }
 
             _colliderRenderer.color = Color.Lerp(ColorDefault, ColorDying, (_initialHealth - Health) * _invInitialHealth);
@@ -109,7 +109,7 @@ namespace AnarchyBros
             if (Spot != null)
             {
                 MoveTo = _mapManager.NextStep(Spot, Objective);
-                Edge = _mapManager.EdgeAt(Spot, MoveTo);
+                _mapManager.EdgeAt(Spot, MoveTo, out Edge);
                 Spot = null;
             }
             else if (Edge != null)
@@ -126,7 +126,7 @@ namespace AnarchyBros
             if (_collider.OverlapPoint(eventData.pointerCurrentRaycast.worldPosition))
             {
                 _towerManager.OnTowerClicked(eventData, this);
-            }             
+            }
         }
 
         public void TakeDamage(float amount)
@@ -170,14 +170,6 @@ namespace AnarchyBros
         public Collider2D GetCollider()
         {
             return _collider;
-        }
-
-        public void OnTriggerEnter2D(Collider2D other)
-        {
-        }
-
-        public void OnTriggerExit2D(Collider2D other)
-        {
         }
     }
 }

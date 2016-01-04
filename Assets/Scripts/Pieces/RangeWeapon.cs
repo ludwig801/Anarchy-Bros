@@ -11,13 +11,14 @@ namespace AnarchyBros
         public int RoundsPerMinute, MagazineSize;
         public bool InfiniteMagazine;
         public float ReloadTime, BulletSpeed, Damage;
-        public Enemy EnemyTarget;
+        public Enemy Target;
         public Color ColorDefault, ColorReloading;
         public List<Bullet> Bullets;
         public bool PredictiveShooting;
         public Vector2 AimAt;
 
         GameManager _gameManager;
+        MapManager _mapManager;
         float _shootingDelay, _deltaTime;
         int _bulletsLeft;
         bool _reloading;
@@ -26,6 +27,8 @@ namespace AnarchyBros
         void Start()
         {
             _gameManager = GameManager.Instance;
+            _mapManager = MapManager.Instance;
+
             _shootingDelay = 60f / RoundsPerMinute;
             _deltaTime = 0;
             _bulletsLeft = MagazineSize;
@@ -45,7 +48,7 @@ namespace AnarchyBros
                 return;
             }
 
-            if (EnemyTarget == null)
+            if (Target == null)
             {
                 _targetSprite.gameObject.SetActive(false);
                 return;
@@ -87,12 +90,12 @@ namespace AnarchyBros
 
         void UpdateTarget()
         {
-            AimAt = EnemyTarget.transform.position;
+            AimAt = Target.transform.position;
             if (PredictiveShooting)
             {
-                Vector2 E = EnemyTarget.transform.position;
+                Vector2 E = Target.transform.position;
                 Vector2 B = GunPoint.position;
-                Vector2 vE = EnemyTarget.Speed * EnemyTarget.Direction;
+                Vector2 vE = Target.Speed * Target.Direction;
 
                 // Inteligent shooting: using the enemy's know velocity and the bullet's speed, predict where to should we fire.
                 float k = vE.x + vE.y;
@@ -127,13 +130,13 @@ namespace AnarchyBros
 
                     Vector2 P = new Vector2(E.x + vE.x * t, E.y + vE.y * t);
                     Edge e;
-                    if (MapManager.Instance.EdgeAt(P, out e) && e == EnemyTarget.Edge)
+                    if (_mapManager.EdgeAt(P, out e) && e == Target.Edge)
                     {
                         AimAt = P;
                     }
                     else
                     {
-                        AimAt = EnemyTarget.MoveTo.transform.position;
+                        AimAt = Target.MoveTo.transform.position;
                     }
                 }
             }

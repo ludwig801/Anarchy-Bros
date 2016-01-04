@@ -10,10 +10,16 @@ namespace AnarchyBros
         public Tags.Tag CollisionTag;
 
         GameManager _gameManager;
+        MapManager _mapManager;
+
+        float _delta;
 
         void Start()
         {
             _gameManager = GameManager.Instance;
+            _mapManager = MapManager.Instance;
+
+            _delta = 0;
         }
 
         void Update()
@@ -25,9 +31,15 @@ namespace AnarchyBros
 
             transform.position = Tools2D.MoveInDirection(transform.position, Direction, Time.deltaTime * Speed);
 
-            if (MapManager.Instance.OutOfMap(transform.position, transform.localScale))
+            _delta += Time.deltaTime;
+
+            if (_delta > 0.03f)
             {
-                Kill();
+                _delta = 0;
+                if (_mapManager.OutOfMap(transform.position, transform.localScale))
+                {
+                    Die();
+                }
             }
         }
 
@@ -39,23 +51,23 @@ namespace AnarchyBros
             if (x != null && x.IsAlive())
             {
                 x.TakeDamage(Damage);
-                Kill();
+                Die();
             }
         }
 
-        void OnTriggerStay2D(Collider2D other)
-        {
-            if (other.tag != Tags.GetStringTag(CollisionTag)) return;
+        //void OnTriggerStay2D(Collider2D other)
+        //{
+        //    if (other.tag != Tags.GetStringTag(CollisionTag)) return;
 
-            IKillable x = other.transform.parent.GetComponent<IKillable>();
-            if (x != null && x.IsAlive())
-            {
-                x.TakeDamage(Damage);
-                Kill();
-            }
-        }
+        //    IKillable x = other.transform.parent.GetComponent<IKillable>();
+        //    if (x != null && x.IsAlive())
+        //    {
+        //        x.TakeDamage(Damage);
+        //        Die();
+        //    }
+        //}
 
-        void Kill()
+        void Die()
         {
             gameObject.SetActive(false);
             transform.position = new Vector3(100, 100, transform.position.z);

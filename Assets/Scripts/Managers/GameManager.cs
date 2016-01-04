@@ -6,7 +6,7 @@ namespace AnarchyBros
     public class GameManager : MonoBehaviour
     {
         public static GameManager Instance { get; private set; }
-        public Texture2D HandCursorTexture;
+
         public GameStates CurrentState { get { return _currentState; } }
 
         GameStates _currentState;
@@ -18,55 +18,53 @@ namespace AnarchyBros
 
         void Start()
         {
-            Edit();
-            Cursor.SetCursor(HandCursorTexture, new Vector2(HandCursorTexture.width * 0.4f, HandCursorTexture.height * 0f), CursorMode.Auto);
+            ChangeState(GameStates.Edit);
         }
 
-        public void Play()
+        void Update()
         {
-            _currentState = GameStates.Play;
+            if (Input.GetKeyUp(KeyCode.Escape))
+            {
+                Application.Quit();
+            }
+        }
+
+        public void ChangeState(string newState)
+        {
+            GameStates state = GameStates.Edit;
+            bool found = false;
+            if (GameStates.Edit.ToString() == newState)
+            {
+                found = true;
+                state = GameStates.Edit;
+            }
+            else if (GameStates.Place.ToString() == newState)
+            {
+                found = true;
+                state = GameStates.Place;
+            }
+            else if (GameStates.Play.ToString() == newState)
+            {
+                found = true;
+                state = GameStates.Play;
+            }
+
+            if (found)
+            {
+                ChangeState(state);
+            }
+        }
+
+        public void ChangeState(GameStates newState)
+        {
+            _currentState = newState;
             MapManager.Instance.OnGameStateChanged(_currentState);
             TowerManager.Instance.OnGameStateChanged(_currentState);
             EnemyManager.Instance.OnGameStateChanged(_currentState);
-            UIManager.Instance.OnGameStateChanged(_currentState);
-            Time.timeScale = 1f;
-        }
-
-        public void Pause()
-        {
-            _currentState = GameStates.Pause;
-            MapManager.Instance.OnGameStateChanged(_currentState);
-            TowerManager.Instance.OnGameStateChanged(_currentState);
-            EnemyManager.Instance.OnGameStateChanged(_currentState);
-            UIManager.Instance.OnGameStateChanged(_currentState);
-            Time.timeScale = 0f;
-        }
-
-        public void Stop()
-        {
-            _currentState = GameStates.Stop;
-            MapManager.Instance.OnGameStateChanged(_currentState);
-            TowerManager.Instance.OnGameStateChanged(_currentState);
-            EnemyManager.Instance.OnGameStateChanged(_currentState);
-            UIManager.Instance.OnGameStateChanged(_currentState);
-        }
-
-        public void Edit()
-        {
-            _currentState = GameStates.Edit;
-            MapManager.Instance.OnGameStateChanged(_currentState);
-            TowerManager.Instance.OnGameStateChanged(_currentState);
-            EnemyManager.Instance.OnGameStateChanged(_currentState);
-            UIManager.Instance.OnGameStateChanged(_currentState);
-        }
-
-        public void Place()
-        {
-            _currentState = GameStates.Place;
-            MapManager.Instance.OnGameStateChanged(_currentState);
-            TowerManager.Instance.OnGameStateChanged(_currentState);
-            EnemyManager.Instance.OnGameStateChanged(_currentState);
-            UIManager.Instance.OnGameStateChanged(_currentState);
+            if (newState == GameStates.Pause)
+            {
+                Time.timeScale = 1f;
+            }
         }
 
         public bool IsCurrentState(GameStates comp)

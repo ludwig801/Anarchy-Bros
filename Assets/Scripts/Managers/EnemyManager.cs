@@ -8,7 +8,6 @@ namespace AnarchyBros
     {
         public static EnemyManager Instance { get; private set; }
 
-        public Transform EnemiesObj;
         public GameObject EnemyPrefab;
         public float SpawnTime;
         public int MaxEnemyCount, ActiveEnemies;
@@ -85,7 +84,7 @@ namespace AnarchyBros
 
         bool GenerateObjective(out Tower finalObjective, out Spot spawnSpot)
         {
-            spawnSpot = _mapManager.GetRandomSpot(SpotTypes.EnemySpot);
+            spawnSpot = _mapManager.RandomSpot(SpotTypes.EnemySpot);
             finalObjective = _towerManager.GetRandomTower();
 
             return (finalObjective != null && spawnSpot != null);
@@ -102,7 +101,7 @@ namespace AnarchyBros
             }
 
             GameObject instance = Instantiate(EnemyPrefab);
-            instance.transform.parent = EnemiesObj;
+            instance.transform.parent = transform;
 
             Enemy e = instance.GetComponent<Enemy>();
             Enemies.Add(e);

@@ -54,6 +54,10 @@ namespace AnarchyBros
             return Quaternion.Euler(0, 0, angle);
         }
 
+        public static float Distance(Vector3 a, Vector3 b)
+        {
+            return Vector2.Distance(a, b);
+        }
 
         public static bool NotInside(Vector2 aBottomLeft, Vector2 aTopRight, Vector2 bBottomleft, Vector2 bTopRight)
         {

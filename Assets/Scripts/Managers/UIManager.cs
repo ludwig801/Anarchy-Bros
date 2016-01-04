@@ -24,49 +24,5 @@ namespace AnarchyBros
             }
         }
 
-        public void OnGameStateChanged(GameStates newState)
-        {
-            switch (newState)
-            {
-                case GameStates.Play:
-                    PanelGraph.gameObject.SetActive(false);
-                    PanelGameState.gameObject.SetActive(true);
-                    PanelMap.gameObject.SetActive(false);
-                    PanelTowerPlacement.gameObject.SetActive(false);
-                    break;
-
-                case GameStates.Pause:
-                    PanelGraph.gameObject.SetActive(false);
-                    PanelGameState.gameObject.SetActive(false);
-                    PanelMap.gameObject.SetActive(false);
-                    PanelTowerPlacement.gameObject.SetActive(false);
-                    break;
-
-                case GameStates.Stop:
-                    PanelGraph.gameObject.SetActive(false);
-                    PanelGameState.gameObject.SetActive(false);
-                    PanelMap.gameObject.SetActive(false);
-                    PanelTowerPlacement.gameObject.SetActive(false);
-                    break;
-
-                case GameStates.Edit:
-                    PanelGraph.gameObject.SetActive(true);
-                    PanelGameState.gameObject.SetActive(true);
-                    PanelMap.gameObject.SetActive(true);
-                    PanelTowerPlacement.gameObject.SetActive(false);
-                    break;
-
-                case GameStates.Place:
-                    PanelGraph.gameObject.SetActive(true);
-                    PanelGameState.gameObject.SetActive(true);
-                    PanelMap.gameObject.SetActive(false);
-                    PanelTowerPlacement.gameObject.SetActive(true);
-                    break;
-
-                default:
-                    break;
-
-            }
-        }
     }
 }
