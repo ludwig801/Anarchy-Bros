@@ -1,76 +1,66 @@
-﻿using AnarchyBros.Enums;
+﻿using Enums;
 using UnityEngine;
 
-namespace AnarchyBros
+public class Bullet : MonoBehaviour
 {
-    public class Bullet : MonoBehaviour
+    public Vector2 Direction;
+    public float Speed, Damage;
+    public Tags.Tag CollisionTag;
+    public bool Fire;
+
+    GameManager _gameManager;
+    MapManager _mapManager;
+
+    float _delta;
+
+    void Start()
     {
-        public Vector2 Direction;
-        public float Speed, Damage;
-        public Tags.Tag CollisionTag;
+        _gameManager = GameManager.Instance;
+        _mapManager = MapManager.Instance;
 
-        GameManager _gameManager;
-        MapManager _mapManager;
+        _delta = 0;
+    }
 
-        float _delta;
-
-        void Start()
+    void Update()
+    {
+        if (!_gameManager.IsCurrentState(GameStates.Play))
         {
-            _gameManager = GameManager.Instance;
-            _mapManager = MapManager.Instance;
+            return;
+        }
 
+        if (!Fire)
+        {
+            return;
+        }
+
+        transform.position = Tools2D.MoveInDirection(transform.position, Direction, Time.deltaTime * Speed);
+
+        _delta += Time.deltaTime;
+
+        if (_delta > 0.03f)
+        {
             _delta = 0;
-        }
-
-        void Update()
-        {
-            if (!_gameManager.IsCurrentState(GameStates.Play))
+            if (_mapManager.OutOfMap(transform.position, transform.localScale))
             {
-                return;
-            }
-
-            transform.position = Tools2D.MoveInDirection(transform.position, Direction, Time.deltaTime * Speed);
-
-            _delta += Time.deltaTime;
-
-            if (_delta > 0.03f)
-            {
-                _delta = 0;
-                if (_mapManager.OutOfMap(transform.position, transform.localScale))
-                {
-                    Die();
-                }
-            }
-        }
-
-        void OnTriggerEnter2D(Collider2D other)
-        {
-            if (other.tag != Tags.GetStringTag(CollisionTag)) return;
-
-            IKillable x = other.transform.parent.GetComponent<IKillable>();
-            if (x != null && x.IsAlive())
-            {
-                x.TakeDamage(Damage);
                 Die();
             }
         }
+    }
 
-        //void OnTriggerStay2D(Collider2D other)
-        //{
-        //    if (other.tag != Tags.GetStringTag(CollisionTag)) return;
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.tag != Tags.GetStringTag(CollisionTag)) return;
 
-        //    IKillable x = other.transform.parent.GetComponent<IKillable>();
-        //    if (x != null && x.IsAlive())
-        //    {
-        //        x.TakeDamage(Damage);
-        //        Die();
-        //    }
-        //}
+        Piece piece = other.GetComponent<Piece>();
+        piece.TakeDamage(Damage);
+        _mapManager.CreateWound(piece.transform, (piece.transform.position - transform.position).normalized);
+        Die();
+    }
 
-        void Die()
-        {
-            gameObject.SetActive(false);
-            transform.position = new Vector3(100, 100, transform.position.z);
-        }
+    void Die()
+    {
+        Fire = false;
+        gameObject.SetActive(false);
+        transform.position = new Vector3(100, 100, transform.position.z);
     }
 }

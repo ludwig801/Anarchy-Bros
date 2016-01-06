@@ -1,245 +1,267 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-using AnarchyBros.Enums;
+using Enums;
 using UnityEngine.EventSystems;
 
-namespace AnarchyBros
+public class TowerManager : MonoBehaviour
 {
-    public class TowerManager : MonoBehaviour
+    public static TowerManager Instance { get; private set; }
+
+    public Transform BulletCan;
+    public GameObject TowerPrefab;
+    public Piece SelectedTower;
+    public int MaxTowerCount, ActiveTowers;
+    public List<Piece> Towers;
+
+    GameManager _gameManager;
+    EnemyManager _enemyManager;
+    MapManager _mapManager;
+
+    void Awake()
     {
-        public static TowerManager Instance { get; private set; }
+        Instance = this;
+    }
 
-        public Transform BulletCan;
-        public GameObject TowerPrefab;
-        public Tower SelectedTower;
-        public int MaxTowerCount, ActiveTowers;
-        public List<Tower> Towers;
+    void Start()
+    {
+        _gameManager = GameManager.Instance;
+        _enemyManager = EnemyManager.Instance;
+        _mapManager = MapManager.Instance;
 
-        GameManager _gameManager;
+        ActiveTowers = 0;
+    }
 
-        void Awake()
+    void Update()
+    {
+    }
+
+    void AssignTowerToSpot(Piece tower, Spot spot)
+    {
+        spot.Tower = tower;
+    }
+
+    void PlaceTower(Spot spot)
+    {
+        Piece tower = GetTower();
+        tower.gameObject.SetActive(true);
+        spot.Tower = tower;
+        tower.transform.position = Tools2D.Convert(tower.transform.position, spot.transform.position);
+        tower.Target = spot.transform;
+        tower.MoveTo = spot.transform;
+        tower.Live();
+        ActiveTowers++;
+    }
+
+    void RemoveTower(Piece tower)
+    {
+        Spot hit;
+        if (_mapManager.SpotAt(tower.Target.transform.position, out hit))
         {
-            Instance = this;
+            hit.Tower = null;
         }
 
-        void Start()
-        {
-            _gameManager = GameManager.Instance;
+        tower.gameObject.SetActive(false);
+        ActiveTowers--;
+    }
 
-            Towers = new List<Tower>();
-            ActiveTowers = 0;
+    void DestroyAllTowers()
+    {
+        for (int i = 0; i < Towers.Count; i++)
+        {
+            Destroy(Towers[i].gameObject);
         }
 
-        void Update()
-        {
-        }
+        Towers.Clear();
+        ActiveTowers = 0;
+    }
 
-        void AssignSpot(Tower tower, Spot spot)
+    void DestroyAllBullets()
+    {
+        for (int i = 0; i < BulletCan.childCount; i++)
         {
-            if (tower.Objective != null)
+            Destroy(BulletCan.GetChild(i).gameObject);
+        }
+    }
+
+    Piece GetTower()
+    {
+        for (int i = 0; i < Towers.Count; i++)
+        {
+            if (!Towers[i].gameObject.activeSelf)
             {
-                tower.Objective.Tower = null;
-            }
-            tower.Objective = spot;
-            tower.Objective.Tower = tower;
-        }
-
-        void PlaceTower(Spot spot)
-        {
-            Tower tower;
-
-            if (ActiveTowers < Towers.Count)
-            {
-                tower = GetTower();
-                tower.Reborn();
-                tower.gameObject.SetActive(true);
-            }
-            else
-            {
-                GameObject instance = Instantiate(TowerPrefab);
-                instance.name = "Tower";
-                instance.transform.parent = transform;
-
-                tower = instance.GetComponent<Tower>();
-                tower.Reborn();
-                Towers.Add(tower);
-                tower.BulletCan = BulletCan;
-            }
-
-            AssignSpot(tower, spot);
-            tower.transform.position = Tools2D.Convert(tower.transform.position, spot.transform.position);
-            tower.MoveTo = spot;
-            ActiveTowers++;
-        }
-
-        void RemoveTower(Tower tower)
-        {
-            if (tower.Objective != null)
-            {
-                tower.Objective.Tower = null;
-                tower.Objective = null;
-            }
-
-            tower.gameObject.SetActive(false);
-            ActiveTowers--;
-        }
-
-        void DestroyAllTowers()
-        {
-            for (int i = 0; i < Towers.Count; i++)
-            {
-                Destroy(Towers[i].gameObject);
-            }
-
-            Towers.Clear();
-            ActiveTowers = 0;
-        }
-
-        void DestroyAllBullets()
-        {
-            for (int i = 0; i < BulletCan.childCount; i++)
-            {
-                Destroy(BulletCan.GetChild(i).gameObject);
+                return Towers[i];
             }
         }
 
-        Tower GetTower()
+        GameObject instance = Instantiate(TowerPrefab);
+        instance.name = "Tower";
+        instance.transform.parent = transform;
+
+        Piece tower = instance.GetComponent<Piece>();
+        Towers.Add(tower);
+        tower.SetHealthElement(UIManager.Instance.GetHealthElement());
+
+        return tower;
+    }
+
+    public Piece TowerAt(Vector2 pos)
+    {
+        for (int i = 0; i < Towers.Count; i++)
         {
-            for (int i = 0; i < Towers.Count; i++)
+            if (Towers[i].Collider.OverlapPoint(pos))
             {
-                if (!Towers[i].gameObject.activeSelf)
+                return Towers[i];
+            }
+        }
+
+        return null;
+    }
+
+    public Piece GetRandomTower()
+    {
+        int rand = Random.Range(0, ActiveTowers);
+        for (int i = 0; i < Towers.Count; i++)
+        {
+            if (Towers[i].Alive)
+            {
+                if (rand <= 0)
                 {
                     return Towers[i];
                 }
+                rand--;
             }
-
-            return null;
         }
 
-        public Tower GetRandomTower()
+        return null;
+    }
+
+    public Piece GetNearestEnemy(Transform towerTransform)
+    {
+        float minDist = float.MaxValue;
+        Piece closest = null;
+
+        for (int i = 0; i < _enemyManager.Enemies.Count; i++)
         {
-            int rand = Random.Range(0, ActiveTowers);
-            for (int i = 0; i < Towers.Count; i++)
+            Piece enemy = _enemyManager.Enemies[i];
+            if (enemy.Alive)
             {
-                if (Towers[i].IsAlive())
+                float d = _mapManager.DistanceBetween(towerTransform, enemy.transform);
+                if (d < minDist)
                 {
-                    if (rand <= 0)
-                    {
-                        return Towers[i];
-                    }
-                    rand--;
+                    minDist = d;
+                    closest = enemy;
                 }
             }
-
-            return null;
         }
 
-        public void OnSpotClicked(Spot spot)
+        return closest;
+    }
+
+    public void OnSpotClicked(Spot spot)
+    {
+        switch (_gameManager.CurrentState)
         {
-            switch (_gameManager.CurrentState)
-            {
-                case GameStates.Edit:
-                    break;
+            case GameStates.Edit:
+                break;
 
-                case GameStates.Place:
-                    if (spot.Type == SpotTypes.TowerSpot && ActiveTowers < MaxTowerCount)
-                    {
-                        PlaceTower(spot);
-                    }
-                    break;
+            case GameStates.Place:
+                if (spot.Type == SpotTypes.TowerSpot && ActiveTowers < MaxTowerCount)
+                {
+                    PlaceTower(spot);
+                }
+                break;
 
-                case GameStates.Play:
-                    if (spot.Type == SpotTypes.TowerSpot)
+            case GameStates.Play:
+                if (spot.Type == SpotTypes.TowerSpot)
+                {
+                    if (SelectedTower != null)
                     {
-                        if (SelectedTower != null)
+                        if (spot.Occupied)
                         {
-                            if (spot.Occupied)
-                            {
-                                SelectedTower = spot.Tower;
-                                _gameManager.ChangeState(GameStates.Pause);
-                            }
-                            else
-                            {
-                                AssignSpot(SelectedTower, spot);
-                            }
+                            SelectedTower = spot.Tower;
+                            _gameManager.ChangeState(GameStates.Pause);
                         }
                         else
                         {
-                            SelectedTower = spot.Tower;
+                            AssignTowerToSpot(SelectedTower, spot);
                         }
                     }
-                    break;
-
-                case GameStates.Pause:
-                    if (spot.Type == SpotTypes.TowerSpot)
+                    else
                     {
-                        if (SelectedTower != null)
+                        SelectedTower = spot.Tower;
+                    }
+                }
+                break;
+
+            case GameStates.Pause:
+                if (spot.Type == SpotTypes.TowerSpot)
+                {
+                    if (SelectedTower != null)
+                    {
+                        if (spot.Occupied)
                         {
-                            if (spot.Occupied)
-                            {
-                                SelectedTower = spot.Tower;
-                            }
-                            else
-                            {
-                                AssignSpot(SelectedTower, spot);
-                            }
+                            SelectedTower = spot.Tower;
                         }
                         else
                         {
-                            SelectedTower = spot.Tower;
+                            AssignTowerToSpot(SelectedTower, spot);
                         }
                     }
-                    break;
-            }       
-        }
-
-        public void OnTowerClicked(PointerEventData eventData, Tower tower)
-        {
-            switch (_gameManager.CurrentState)
-            {
-                case GameStates.Edit:
-                    break;
-
-                case GameStates.Place:
-                    if (eventData.button == PointerEventData.InputButton.Right)
+                    else
                     {
-                        RemoveTower(tower);
+                        SelectedTower = spot.Tower;
                     }
-                    break;
-
-                case GameStates.Play:
-                    SelectedTower = tower;
-                    _gameManager.ChangeState(GameStates.Pause);
-                    break;
-
-                case GameStates.Pause:
-                    _gameManager.ChangeState(GameStates.Play);
-                    break;
-            }
+                }
+                break;
         }
+    }
 
-        public void OnTowerKill()
+    public void OnTowerClicked(PointerEventData eventData, Piece tower)
+    {
+        switch (_gameManager.CurrentState)
         {
-            ActiveTowers--;
+            case GameStates.Edit:
+                break;
+
+            case GameStates.Place:
+                if (eventData.button == PointerEventData.InputButton.Right)
+                {
+                    RemoveTower(tower);
+                }
+                break;
+
+            case GameStates.Play:
+                SelectedTower = tower;
+                _gameManager.ChangeState(GameStates.Pause);
+                break;
+
+            case GameStates.Pause:
+                _gameManager.ChangeState(GameStates.Play);
+                break;
         }
+    }
 
-        public void OnGameStateChanged(GameStates newState)
+    public void OnTowerDie()
+    {
+        ActiveTowers--;
+    }
+
+    public void OnGameStateChanged(GameStates newState)
+    {
+        switch (newState)
         {
-            switch (newState)
-            {
-                case GameStates.Edit:
-                    DestroyAllTowers();
-                    DestroyAllBullets();
-                    break;
+            case GameStates.Edit:
+                DestroyAllTowers();
+                DestroyAllBullets();
+                break;
 
-                case GameStates.Place:
-                    DestroyAllTowers();
-                    DestroyAllBullets();
-                    break;
+            case GameStates.Place:
+                DestroyAllTowers();
+                DestroyAllBullets();
+                break;
 
-                case GameStates.Play:
-                    break;
-            }
+            case GameStates.Play:
+                break;
         }
     }
 }
