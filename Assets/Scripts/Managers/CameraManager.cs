@@ -1,69 +1,72 @@
 ﻿using UnityEngine;
 
-public class CameraManager : MonoBehaviour
+namespace AnarchyBros
 {
-    public static CameraManager Instance;
-
-    public Camera MainCamera;
-    public Transform Ground;
-    public int Scale;
-    public float ScrollSensitivity, MoveSensitivity;
-
-    Vector3 _moveCameraTo;
-
-    void Awake()
+    public class CameraManager : MonoBehaviour
     {
-        Instance = this;
-    }
+        public static CameraManager Instance;
 
-    void Start()
-    {
-        _moveCameraTo = MainCamera.transform.position;
-    }
+        public Camera MainCamera;
+        public Transform Ground;
+        public int Scale;
+        public float ScrollSensitivity, MoveSensitivity;
 
-    void Update()
-    {
-        float sdelta = Input.GetAxis("Mouse ScrollWheel");
-        float hdelta = Input.GetAxis("Horizontal");
-        float vdelta = Input.GetAxis("Vertical");
+        Vector3 _moveCameraTo;
 
-        UpdateCamera(hdelta, vdelta, sdelta);
-    }
+        void Awake()
+        {
+            Instance = this;
+        }
 
-    void UpdateCamera(float h, float v, float s)
-    {
-        MainCamera.orthographicSize -= s * ScrollSensitivity * Scale;
+        void Start()
+        {
+            _moveCameraTo = MainCamera.transform.position;
+        }
 
-        _moveCameraTo += new Vector3(h, v, 0) * Time.deltaTime * MoveSensitivity * Scale;
+        void Update()
+        {
+            float sdelta = Input.GetAxis("Mouse ScrollWheel");
+            float hdelta = Input.GetAxis("Horizontal");
+            float vdelta = Input.GetAxis("Vertical");
 
-        ClampCamera();
+            UpdateCamera(hdelta, vdelta, sdelta);
+        }
 
-        MainCamera.transform.position = Vector3.Lerp(MainCamera.transform.position, _moveCameraTo, Time.deltaTime * MoveSensitivity * Scale);
-    }
+        void UpdateCamera(float h, float v, float s)
+        {
+            MainCamera.orthographicSize -= s * ScrollSensitivity * Scale;
 
-    void ClampCamera()
-    {
-        MainCamera.orthographicSize = Mathf.Max(Scale * 5, Mathf.Min(Scale * 10, MainCamera.orthographicSize));
+            _moveCameraTo += new Vector3(h, v, 0) * Time.deltaTime * MoveSensitivity * Scale;
 
-        float width = (MainCamera.orthographicSize * Screen.width) / Screen.height;
-        float height = MainCamera.orthographicSize;
+            ClampCamera();
 
-        Vector2 bottomLeft = Ground.transform.position - 0.5f * Ground.transform.localScale + new Vector3(width, height, 0);
-        Vector2 topRight = Ground.transform.position + 0.5f * Ground.transform.localScale - new Vector3(width, height, 0);
+            MainCamera.transform.position = Vector3.Lerp(MainCamera.transform.position, _moveCameraTo, Time.deltaTime * MoveSensitivity * Scale);
+        }
 
-        _moveCameraTo.x = Mathf.Max(bottomLeft.x, Mathf.Min(topRight.x, _moveCameraTo.x));
-        _moveCameraTo.y = Mathf.Max(bottomLeft.y, Mathf.Min(topRight.y, _moveCameraTo.y));
-    }
+        void ClampCamera()
+        {
+            MainCamera.orthographicSize = Mathf.Max(Scale * 5, Mathf.Min(Scale * 10, MainCamera.orthographicSize));
 
-    public void OnMapSizeChanged(float newVal)
-    {
-        Scale = (int)newVal;
+            float width = (MainCamera.orthographicSize * Screen.width) / Screen.height;
+            float height = MainCamera.orthographicSize;
 
-        int width = Scale * 36;
-        int height = Scale * 20;
+            Vector2 bottomLeft = Ground.transform.position - 0.5f * Ground.transform.localScale + new Vector3(width, height, 0);
+            Vector2 topRight = Ground.transform.position + 0.5f * Ground.transform.localScale - new Vector3(width, height, 0);
 
-        Ground.transform.localScale = new Vector3(width, height, 0);
+            _moveCameraTo.x = Mathf.Max(bottomLeft.x, Mathf.Min(topRight.x, _moveCameraTo.x));
+            _moveCameraTo.y = Mathf.Max(bottomLeft.y, Mathf.Min(topRight.y, _moveCameraTo.y));
+        }
 
-        MainCamera.orthographicSize = Scale * 10;
+        public void OnMapSizeChanged(float newVal)
+        {
+            Scale = (int)newVal;
+
+            int width = Scale * 36;
+            int height = Scale * 20;
+
+            Ground.transform.localScale = new Vector3(width, height, 0);
+
+            MainCamera.orthographicSize = Scale * 10;
+        }
     }
 }

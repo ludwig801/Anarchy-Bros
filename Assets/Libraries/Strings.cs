@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Enums
+namespace AnarchyBros.Enums
 {
     public enum GameStates
     {
@@ -46,4 +46,6 @@ namespace Enums
             return result;
         }
     }
+
+    
 }

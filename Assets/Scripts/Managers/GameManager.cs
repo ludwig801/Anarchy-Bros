@@ -1,76 +1,75 @@
-﻿using Enums;
+﻿using AnarchyBros.Enums;
 using UnityEngine;
 
-public class GameManager : MonoBehaviour
+namespace AnarchyBros
 {
-    public static GameManager Instance { get; private set; }
-
-    public GameStates CurrentState { get { return _currentState; } }
-
-    GameStates _currentState;
-
-    void Awake()
+    public class GameManager : MonoBehaviour
     {
-        Instance = this;
-    }
+        public static GameManager Instance { get; private set; }
 
-    void Start()
-    {
-        ChangeState(GameStates.Edit);
-    }
+        public GameStates CurrentState { get { return _currentState; } }
 
-    void Update()
-    {
-        if (Input.GetKeyUp(KeyCode.Escape))
-        {
-            Application.Quit();
-        }
-    }
+        GameStates _currentState;
 
-    public void ChangeState(string newState)
-    {
-        GameStates state = GameStates.Edit;
-        bool found = false;
-        if (GameStates.Edit.ToString() == newState)
+        void Awake()
         {
-            found = true;
-            state = GameStates.Edit;
-        }
-        else if (GameStates.Place.ToString() == newState)
-        {
-            found = true;
-            state = GameStates.Place;
-        }
-        else if (GameStates.Play.ToString() == newState)
-        {
-            found = true;
-            state = GameStates.Play;
+            Instance = this;
         }
 
-        if (found)
+        void Start()
         {
-            ChangeState(state);
+            ChangeState(GameStates.Edit);
         }
-    }
 
-    public void ChangeState(GameStates newState)
-    {
-        _currentState = newState;
-        MapManager.Instance.OnGameStateChanged(_currentState);
-        TowerManager.Instance.OnGameStateChanged(_currentState);
-        EnemyManager.Instance.OnGameStateChanged(_currentState);
-        if (newState == GameStates.Pause)
+        void Update()
         {
-            Time.timeScale = 0f;
+            if (Input.GetKeyUp(KeyCode.Escape))
+            {
+                Application.Quit();
+            }
         }
-        else
-        {
-            Time.timeScale = 1f;
-        }
-    }
 
-    public bool IsCurrentState(GameStates comp)
-    {
-        return comp == _currentState;
+        public void ChangeState(string newState)
+        {
+            GameStates state = GameStates.Edit;
+            bool found = false;
+            if (GameStates.Edit.ToString() == newState)
+            {
+                found = true;
+                state = GameStates.Edit;
+            }
+            else if (GameStates.Place.ToString() == newState)
+            {
+                found = true;
+                state = GameStates.Place;
+            }
+            else if (GameStates.Play.ToString() == newState)
+            {
+                found = true;
+                state = GameStates.Play;
+            }
+
+            if (found)
+            {
+                ChangeState(state);
+            }
+        }
+
+        public void ChangeState(GameStates newState)
+        {
+            _currentState = newState;
+            MapManager.Instance.OnGameStateChanged(_currentState);
+            TowerManager.Instance.OnGameStateChanged(_currentState);
+            EnemyManager.Instance.OnGameStateChanged(_currentState);
+            if (newState == GameStates.Pause)
+            {
+                Time.timeScale = 1f;
+            }
+        }
+
+        public bool IsCurrentState(GameStates comp)
+        {
+            return comp == _currentState;
+        }
     }
 }
