@@ -1,0 +1,643 @@
+fileFormatVersion: 2
+guid: e9e382d0916022149907d75b5239288a
+timeCreated: 1452103444
+licenseType: Free
+TextureImporter:
+  fileIDToRecycleName:
+    21300000: wounds_0
+    21300002: wounds_1
+    21300004: wounds_2
+    21300006: wounds_3
+    21300008: wounds_4
+    21300010: wounds_5
+    21300012: wounds_6
+    21300014: wounds_7
+    21300016: wounds_8
+    21300018: wounds_9
+    21300020: wounds_10
+    21300022: wounds_11
+    21300024: wounds_12
+    21300026: wounds_13
+    21300028: wounds_14
+    21300030: wounds_15
+    21300032: wounds_16
+    21300034: wounds_17
+    21300036: wounds_18
+    21300038: wounds_19
+    21300040: wounds_20
+    21300042: wounds_21
+    21300044: wounds_22
+    21300046: wounds_23
+    21300048: wounds_24
+    21300050: wounds_25
+    21300052: wounds_26
+    21300054: wounds_27
+    21300056: wounds_28
+    21300058: wounds_29
+    21300060: wounds_30
+    21300062: wounds_31
+  serializedVersion: 2
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 1
+    linearTexture: 0
+    correctGamma: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+  isReadable: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 0
+  cubemapConvolution: 0
+  cubemapConvolutionSteps: 7
+  cubemapConvolutionExponent: 1.5
+  seamlessCubemap: 0
+  textureFormat: -1
+  maxTextureSize: 2048
+  textureSettings:
+    filterMode: -1
+    aniso: 16
+    mipBias: -1
+    wrapMode: 1
+  nPOTScale: 0
+  lightmap: 0
+  rGBM: 0
+  compressionQuality: 50
+  allowsAlphaSplitting: 0
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spritePixelsToUnits: 256
+  alphaIsTransparency: 1
+  textureType: 8
+  buildTargetSettings:
+  - buildTarget: Android
+    maxTextureSize: 1024
+    textureFormat: -1
+    compressionQuality: 50
+    allowsAlphaSplitting: 0
+  spriteSheet:
+    sprites:
+    - name: wounds_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 768
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -7, y: 16}
+        - {x: -10, y: 13}
+        - {x: -10, y: -8}
+        - {x: -9, y: -18}
+        - {x: -7, y: -20}
+        - {x: 1, y: -20}
+        - {x: 8, y: -18}
+        - {x: 10, y: -10}
+        - {x: 10, y: 13}
+        - {x: 3, y: 16}
+    - name: wounds_1
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 768
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -7, y: 16}
+        - {x: -10, y: 13}
+        - {x: -10, y: -8}
+        - {x: -9, y: -18}
+        - {x: -7, y: -20}
+        - {x: 1, y: -20}
+        - {x: 8, y: -18}
+        - {x: 10, y: -10}
+        - {x: 10, y: 13}
+        - {x: 3, y: 16}
+      - - {x: -27, y: 46}
+        - {x: -30, y: 45}
+        - {x: -30, y: 24}
+        - {x: -14, y: 12}
+        - {x: -5, y: 12}
+        - {x: -4, y: 15}
+        - {x: -4, y: 33}
+        - {x: -13, y: 46}
+      - - {x: 4, y: 41}
+        - {x: 2, y: 35}
+        - {x: 2, y: 19}
+        - {x: 3, y: 15}
+        - {x: 38, y: 15}
+        - {x: 50, y: 21}
+        - {x: 50, y: 41}
+    - name: wounds_2
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 768
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 24, y: 36}
+        - {x: 10, y: 24}
+        - {x: 7, y: 21}
+        - {x: 23, y: 38}
+        - {x: 27, y: 80}
+        - {x: -52, y: 80}
+        - {x: -57, y: 58}
+        - {x: -57, y: 20}
+        - {x: -26, y: -17}
+        - {x: 28, y: -17}
+        - {x: 58, y: -1}
+        - {x: 58, y: 38}
+        - {x: 40, y: 47}
+      - - {x: 38, y: 67}
+        - {x: 29, y: 67}
+        - {x: 25, y: 63}
+        - {x: 22, y: 58}
+        - {x: 22, y: 46}
+        - {x: 24, y: 41}
+        - {x: 31, y: 41}
+        - {x: 42, y: 53}
+        - {x: 42, y: 64}
+    - name: wounds_3
+      rect:
+        serializedVersion: 2
+        x: 768
+        y: 768
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -3, y: 23}
+        - {x: -10, y: 13}
+        - {x: -10, y: 1}
+        - {x: -9, y: -3}
+        - {x: -1, y: -3}
+        - {x: 2, y: -2}
+        - {x: 10, y: 7}
+        - {x: 10, y: 19}
+        - {x: 8, y: 23}
+      - - {x: -55, y: 42}
+        - {x: -57, y: 38}
+        - {x: -57, y: 26}
+        - {x: -55, y: 24}
+        - {x: -36, y: 18}
+        - {x: -20, y: 18}
+        - {x: -20, y: 33}
+        - {x: -35, y: 42}
+      - - {x: 28, y: 42}
+        - {x: 26, y: 38}
+        - {x: 26, y: 27}
+        - {x: 43, y: 22}
+        - {x: 54, y: 22}
+        - {x: 58, y: 27}
+        - {x: 58, y: 35}
+        - {x: 51, y: 42}
+      - - {x: -20, y: 62}
+        - {x: -23, y: 58}
+        - {x: -23, y: 47}
+        - {x: -9, y: 31}
+        - {x: -3, y: 31}
+        - {x: 1, y: 36}
+        - {x: 1, y: 57}
+        - {x: -9, y: 62}
+      - - {x: 17, y: 69}
+        - {x: 10, y: 59}
+        - {x: 10, y: 46}
+        - {x: 12, y: 45}
+        - {x: 21, y: 45}
+        - {x: 31, y: 54}
+        - {x: 31, y: 65}
+        - {x: 30, y: 69}
+    - name: wounds_4
+      rect:
+        serializedVersion: 2
+        x: 1024
+        y: 768
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -3, y: 23}
+        - {x: -10, y: 13}
+        - {x: -10, y: 1}
+        - {x: -9, y: -3}
+        - {x: -1, y: -3}
+        - {x: 2, y: -2}
+        - {x: 10, y: 7}
+        - {x: 10, y: 19}
+        - {x: 8, y: 23}
+      - - {x: 43, y: 38}
+        - {x: 41, y: 33}
+        - {x: 41, y: 25}
+        - {x: 46, y: 23}
+        - {x: 58, y: 20}
+        - {x: 69, y: 20}
+        - {x: 70, y: 22}
+        - {x: 70, y: 36}
+        - {x: 64, y: 38}
+      - - {x: -31, y: 38}
+        - {x: -33, y: 36}
+        - {x: -33, y: 28}
+        - {x: -31, y: 22}
+        - {x: -13, y: 22}
+        - {x: -12, y: 25}
+        - {x: -12, y: 34}
+        - {x: -15, y: 38}
+      - - {x: 22, y: 48}
+        - {x: 15, y: 42}
+        - {x: 15, y: 31}
+        - {x: 16, y: 29}
+        - {x: 24, y: 29}
+        - {x: 34, y: 35}
+        - {x: 34, y: 45}
+        - {x: 30, y: 48}
+      - - {x: -20, y: 66}
+        - {x: -25, y: 69}
+        - {x: -33, y: 69}
+        - {x: -36, y: 64}
+        - {x: -36, y: 58}
+        - {x: -23, y: 48}
+        - {x: -18, y: 48}
+        - {x: -15, y: 50}
+        - {x: -15, y: 62}
+      - - {x: 23, y: 82}
+        - {x: 18, y: 73}
+        - {x: 18, y: 58}
+        - {x: 26, y: 58}
+        - {x: 35, y: 62}
+        - {x: 40, y: 69}
+        - {x: 40, y: 82}
+    - name: wounds_5
+      rect:
+        serializedVersion: 2
+        x: 1280
+        y: 768
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 16, y: 30}
+        - {x: 7, y: 30}
+        - {x: 4, y: 26}
+        - {x: 4, y: 14}
+        - {x: 7, y: 12}
+        - {x: 12, y: 12}
+        - {x: 18, y: 19}
+        - {x: 19, y: 22}
+        - {x: 19, y: 29}
+      - - {x: 48, y: 37}
+        - {x: 45, y: 35}
+        - {x: 45, y: 23}
+        - {x: 57, y: 22}
+        - {x: 66, y: 22}
+        - {x: 68, y: 23}
+        - {x: 68, y: 34}
+        - {x: 67, y: 37}
+      - - {x: -28, y: 36}
+        - {x: -29, y: 33}
+        - {x: -29, y: 25}
+        - {x: -26, y: 24}
+        - {x: -14, y: 24}
+        - {x: -13, y: 26}
+        - {x: -13, y: 34}
+        - {x: -16, y: 36}
+      - - {x: 22, y: 45}
+        - {x: 18, y: 44}
+        - {x: 18, y: 33}
+        - {x: 21, y: 31}
+        - {x: 27, y: 31}
+        - {x: 33, y: 35}
+        - {x: 33, y: 42}
+        - {x: 32, y: 45}
+      - - {x: 35, y: 79}
+        - {x: 26, y: 79}
+        - {x: 21, y: 69}
+        - {x: 21, y: 62}
+        - {x: 22, y: 60}
+        - {x: 29, y: 60}
+        - {x: 36, y: 63}
+        - {x: 39, y: 69}
+        - {x: 39, y: 74}
+      - - {x: -21, y: 66}
+        - {x: -15, y: 61}
+        - {x: -9, y: 61}
+        - {x: -6, y: 62}
+        - {x: -6, y: 72}
+        - {x: -11, y: 76}
+        - {x: -21, y: 76}
+    - name: wounds_6
+      rect:
+        serializedVersion: 2
+        x: 1536
+        y: 768
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    - name: wounds_7
+      rect:
+        serializedVersion: 2
+        x: 1792
+        y: 768
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    - name: wounds_8
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 512
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    - name: wounds_9
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 512
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    - name: wounds_10
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 512
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    - name: wounds_11
+      rect:
+        serializedVersion: 2
+        x: 768
+        y: 512
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    - name: wounds_12
+      rect:
+        serializedVersion: 2
+        x: 1024
+        y: 512
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    - name: wounds_13
+      rect:
+        serializedVersion: 2
+        x: 1280
+        y: 512
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    - name: wounds_14
+      rect:
+        serializedVersion: 2
+        x: 1536
+        y: 512
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    - name: wounds_15
+      rect:
+        serializedVersion: 2
+        x: 1792
+        y: 512
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    - name: wounds_16
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 256
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    - name: wounds_17
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 256
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    - name: wounds_18
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 256
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    - name: wounds_19
+      rect:
+        serializedVersion: 2
+        x: 768
+        y: 256
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    - name: wounds_20
+      rect:
+        serializedVersion: 2
+        x: 1024
+        y: 256
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    - name: wounds_21
+      rect:
+        serializedVersion: 2
+        x: 1280
+        y: 256
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    - name: wounds_22
+      rect:
+        serializedVersion: 2
+        x: 1536
+        y: 256
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    - name: wounds_23
+      rect:
+        serializedVersion: 2
+        x: 1792
+        y: 256
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    - name: wounds_24
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    - name: wounds_25
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 0
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    - name: wounds_26
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 0
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    - name: wounds_27
+      rect:
+        serializedVersion: 2
+        x: 768
+        y: 0
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    - name: wounds_28
+      rect:
+        serializedVersion: 2
+        x: 1024
+        y: 0
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    - name: wounds_29
+      rect:
+        serializedVersion: 2
+        x: 1280
+        y: 0
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    - name: wounds_30
+      rect:
+        serializedVersion: 2
+        x: 1536
+        y: 0
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    - name: wounds_31
+      rect:
+        serializedVersion: 2
+        x: 1792
+        y: 0
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+    outline: []
+  spritePackingTag: Sprites_1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

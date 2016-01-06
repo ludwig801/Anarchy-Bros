@@ -1,0 +1,587 @@
+fileFormatVersion: 2
+guid: 0eaeb1268086afe409e26f798e1a7ef7
+timeCreated: 1452110789
+licenseType: Free
+TextureImporter:
+  fileIDToRecycleName:
+    21300000: towers_0
+    21300002: towers_1
+    21300004: towers_2
+    21300006: towers_3
+    21300008: towers_4
+    21300010: towers_5
+    21300012: towers_6
+    21300014: towers_7
+    21300016: towers_8
+    21300018: towers_9
+    21300020: towers_10
+    21300022: towers_11
+    21300024: towers_12
+    21300026: towers_13
+    21300028: towers_14
+    21300030: towers_15
+    21300032: towers_16
+    21300034: towers_17
+    21300036: towers_18
+    21300038: towers_19
+    21300040: towers_20
+    21300042: towers_21
+    21300044: towers_22
+    21300046: towers_23
+    21300048: towers_24
+    21300050: towers_25
+    21300052: towers_26
+    21300054: towers_27
+    21300056: towers_28
+    21300058: towers_29
+    21300060: towers_30
+    21300062: towers_31
+    21300064: towers_32
+    21300066: towers_33
+    21300068: towers_34
+    21300070: towers_35
+    21300072: towers_36
+    21300074: towers_37
+    21300076: towers_38
+    21300078: towers_39
+    21300080: towers_40
+    21300082: towers_41
+    21300084: towers_42
+    21300086: towers_43
+    21300088: towers_44
+    21300090: towers_45
+    21300092: towers_46
+    21300094: towers_47
+    21300096: towers_48
+    21300098: towers_49
+    21300100: towers_50
+    21300102: towers_51
+    21300104: towers_52
+    21300106: towers_53
+    21300108: towers_54
+    21300110: towers_55
+    21300112: towers_56
+    21300114: towers_57
+    21300116: towers_58
+    21300118: towers_59
+    21300120: towers_60
+    21300122: towers_61
+    21300124: towers_62
+    21300126: towers_63
+  serializedVersion: 2
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 1
+    linearTexture: 0
+    correctGamma: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+  isReadable: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 0
+  cubemapConvolution: 0
+  cubemapConvolutionSteps: 7
+  cubemapConvolutionExponent: 1.5
+  seamlessCubemap: 0
+  textureFormat: -1
+  maxTextureSize: 2048
+  textureSettings:
+    filterMode: -1
+    aniso: 16
+    mipBias: -1
+    wrapMode: 1
+  nPOTScale: 0
+  lightmap: 0
+  rGBM: 0
+  compressionQuality: 50
+  allowsAlphaSplitting: 0
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spritePixelsToUnits: 256
+  alphaIsTransparency: 1
+  textureType: 8
+  buildTargetSettings:
+  - buildTarget: Android
+    maxTextureSize: 2048
+    textureFormat: -1
+    compressionQuality: 50
+    allowsAlphaSplitting: 0
+  spriteSheet:
+    sprites:
+    - name: towers_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 768
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -11, y: 91}
+        - {x: -91, y: 26}
+        - {x: -91, y: -70}
+        - {x: -70, y: -91}
+        - {x: 24, y: -91}
+        - {x: 37, y: -88}
+        - {x: 91, y: 15}
+        - {x: 91, y: 50}
+        - {x: 69, y: 91}
+    - name: towers_1
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 768
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 58, y: 94}
+        - {x: -5, y: 94}
+        - {x: -13, y: 89}
+        - {x: -65, y: 15}
+        - {x: -77, y: -5}
+        - {x: -84, y: -16}
+        - {x: -85, y: -21}
+        - {x: -85, y: -71}
+        - {x: -77, y: -94}
+        - {x: 43, y: -94}
+        - {x: 66, y: -80}
+        - {x: 85, y: 12}
+        - {x: 85, y: 85}
+    - name: towers_2
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 768
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 39, y: 85}
+        - {x: -44, y: 85}
+        - {x: -71, y: 11}
+        - {x: -71, y: -88}
+        - {x: -58, y: -94}
+        - {x: 12, y: -94}
+        - {x: 70, y: -59}
+        - {x: 71, y: -55}
+        - {x: 71, y: 71}
+    - name: towers_3
+      rect:
+        serializedVersion: 2
+        x: 768
+        y: 768
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -41, y: 86}
+        - {x: -63, y: 34}
+        - {x: -63, y: -89}
+        - {x: -60, y: -103}
+        - {x: 14, y: -103}
+        - {x: 18, y: -102}
+        - {x: 63, y: -57}
+        - {x: 63, y: 22}
+        - {x: 48, y: 86}
+    - name: towers_4
+      rect:
+        serializedVersion: 2
+        x: 1024
+        y: 768
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -21, y: 87}
+        - {x: -55, y: 79}
+        - {x: -66, y: 49}
+        - {x: -66, y: -32}
+        - {x: -40, y: -109}
+        - {x: -2, y: -109}
+        - {x: 6, y: -105}
+        - {x: 66, y: -63}
+        - {x: 66, y: 4}
+        - {x: 51, y: 87}
+    - name: towers_5
+      rect:
+        serializedVersion: 2
+        x: 1280
+        y: 768
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -63, y: 86}
+        - {x: -63, y: -103}
+        - {x: 2, y: -103}
+        - {x: 63, y: -53}
+        - {x: 63, y: 31}
+        - {x: 52, y: 86}
+    - name: towers_6
+      rect:
+        serializedVersion: 2
+        x: 1536
+        y: 768
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 39, y: 85}
+        - {x: -44, y: 85}
+        - {x: -71, y: 11}
+        - {x: -71, y: -88}
+        - {x: -58, y: -94}
+        - {x: 12, y: -94}
+        - {x: 70, y: -59}
+        - {x: 71, y: -55}
+        - {x: 71, y: 71}
+    - name: towers_7
+      rect:
+        serializedVersion: 2
+        x: 1792
+        y: 768
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 58, y: 94}
+        - {x: -5, y: 94}
+        - {x: -13, y: 89}
+        - {x: -65, y: 15}
+        - {x: -77, y: -5}
+        - {x: -84, y: -16}
+        - {x: -85, y: -21}
+        - {x: -85, y: -71}
+        - {x: -77, y: -94}
+        - {x: 43, y: -94}
+        - {x: 66, y: -80}
+        - {x: 85, y: 12}
+        - {x: 85, y: 85}
+    - name: towers_8
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 512
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -11, y: 91}
+        - {x: -91, y: 26}
+        - {x: -91, y: -70}
+        - {x: -70, y: -91}
+        - {x: 24, y: -91}
+        - {x: 37, y: -88}
+        - {x: 91, y: 15}
+        - {x: 91, y: 50}
+        - {x: 69, y: 91}
+    - name: towers_9
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 512
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 24, y: 75}
+        - {x: -19, y: 75}
+        - {x: -83, y: 22}
+        - {x: -104, y: -24}
+        - {x: -104, y: -66}
+        - {x: -73, y: -94}
+        - {x: 4, y: -94}
+        - {x: 54, y: -83}
+        - {x: 92, y: -1}
+        - {x: 92, y: 32}
+    - name: towers_10
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 512
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -27, y: 75}
+        - {x: -82, y: 75}
+        - {x: -107, y: 21}
+        - {x: -107, y: -64}
+        - {x: -70, y: -101}
+        - {x: -2, y: -101}
+        - {x: 36, y: -81}
+        - {x: 92, y: -28}
+        - {x: 92, y: 5}
+        - {x: 40, y: 50}
+    - name: towers_11
+      rect:
+        serializedVersion: 2
+        x: 768
+        y: 512
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -22, y: 40}
+        - {x: -41, y: 33}
+        - {x: -42, y: 29}
+        - {x: -48, y: 22}
+        - {x: -46, y: 24}
+        - {x: -45, y: 27}
+        - {x: -45, y: 32}
+        - {x: -53, y: 40}
+        - {x: -98, y: 40}
+        - {x: -114, y: 26}
+        - {x: -114, y: -56}
+        - {x: -75, y: -107}
+        - {x: -5, y: -107}
+        - {x: 13, y: -96}
+        - {x: 96, y: -30}
+        - {x: 96, y: -5}
+        - {x: 29, y: 40}
+    - name: towers_12
+      rect:
+        serializedVersion: 2
+        x: 1024
+        y: 512
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 13, y: 57}
+        - {x: -96, y: 57}
+        - {x: -111, y: 27}
+        - {x: -111, y: -46}
+        - {x: -61, y: -104}
+        - {x: -25, y: -112}
+        - {x: 54, y: -112}
+        - {x: 97, y: -99}
+        - {x: 98, y: -98}
+        - {x: 98, y: -55}
+        - {x: 48, y: 48}
+    - name: towers_13
+      rect:
+        serializedVersion: 2
+        x: 1280
+        y: 512
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 46, y: 2}
+        - {x: 60, y: 39}
+        - {x: -13, y: 102}
+        - {x: -63, y: 102}
+        - {x: -116, y: 35}
+        - {x: -128, y: 15}
+        - {x: -128, y: -69}
+        - {x: 10, y: -115}
+        - {x: 58, y: -115}
+        - {x: 81, y: -95}
+        - {x: 95, y: -83}
+        - {x: 95, y: -56}
+    - name: towers_14
+      rect:
+        serializedVersion: 2
+        x: 1536
+        y: 512
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 3, y: 125}
+        - {x: -67, y: 125}
+        - {x: -81, y: 103}
+        - {x: -111, y: 48}
+        - {x: -123, y: 18}
+        - {x: -123, y: -60}
+        - {x: -122, y: -64}
+        - {x: -59, y: -97}
+        - {x: -28, y: -93}
+        - {x: 20, y: -122}
+        - {x: 61, y: -122}
+        - {x: 98, y: -81}
+        - {x: 98, y: -46}
+        - {x: 27, y: 118}
+    - name: towers_15
+      rect:
+        serializedVersion: 2
+        x: 1792
+        y: 512
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -11, y: 91}
+        - {x: -91, y: 26}
+        - {x: -91, y: -70}
+        - {x: -70, y: -91}
+        - {x: 24, y: -91}
+        - {x: 37, y: -88}
+        - {x: 91, y: 15}
+        - {x: 91, y: 50}
+        - {x: 69, y: 91}
+    - name: towers_16
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 256
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 86, y: 23}
+        - {x: 73, y: 37}
+        - {x: 67, y: 41}
+        - {x: 55, y: 46}
+        - {x: 42, y: 61}
+        - {x: 11, y: 61}
+        - {x: -71, y: 38}
+        - {x: -91, y: -14}
+        - {x: -91, y: -71}
+        - {x: -69, y: -91}
+        - {x: -6, y: -91}
+        - {x: 38, y: -84}
+        - {x: 91, y: -5}
+        - {x: 92, y: 0}
+        - {x: 92, y: 16}
+    - name: towers_17
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 256
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 52, y: 46}
+        - {x: -34, y: 46}
+        - {x: -91, y: 4}
+        - {x: -91, y: -59}
+        - {x: -72, y: -84}
+        - {x: -58, y: -90}
+        - {x: -51, y: -91}
+        - {x: 30, y: -91}
+        - {x: 92, y: -45}
+        - {x: 92, y: 15}
+        - {x: 87, y: 24}
+    - name: towers_18
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 256
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 36, y: 24}
+        - {x: -91, y: 24}
+        - {x: -91, y: -87}
+        - {x: -79, y: -91}
+        - {x: 36, y: -91}
+        - {x: 92, y: -48}
+        - {x: 92, y: -16}
+        - {x: 89, y: -11}
+    - name: towers_19
+      rect:
+        serializedVersion: 2
+        x: 768
+        y: 256
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 52, y: 46}
+        - {x: -34, y: 46}
+        - {x: -91, y: 4}
+        - {x: -91, y: -59}
+        - {x: -72, y: -84}
+        - {x: -58, y: -90}
+        - {x: -51, y: -91}
+        - {x: 30, y: -91}
+        - {x: 92, y: -45}
+        - {x: 92, y: 15}
+        - {x: 87, y: 24}
+    - name: towers_20
+      rect:
+        serializedVersion: 2
+        x: 1024
+        y: 256
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 86, y: 23}
+        - {x: 73, y: 37}
+        - {x: 67, y: 41}
+        - {x: 55, y: 46}
+        - {x: 42, y: 61}
+        - {x: 11, y: 61}
+        - {x: -71, y: 38}
+        - {x: -91, y: -14}
+        - {x: -91, y: -71}
+        - {x: -69, y: -91}
+        - {x: -6, y: -91}
+        - {x: 38, y: -84}
+        - {x: 91, y: -5}
+        - {x: 92, y: 0}
+        - {x: 92, y: 16}
+    outline: []
+  spritePackingTag: Sprites_1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

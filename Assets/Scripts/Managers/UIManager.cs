@@ -1,28 +1,35 @@
-﻿using AnarchyBros.Enums;
-using UnityEngine;
-using UnityEngine.UI;
+﻿using UnityEngine;
+using System.Collections.Generic;
 
-namespace AnarchyBros
+public class UIManager : MonoBehaviour
 {
-    public class UIManager : MonoBehaviour
+    public static UIManager Instance { get; private set; }
+
+    public RectTransform PanelHealth;
+    public RectTransform HealthElementPrefab;
+    //public List<HealthElement> HealthElements;
+
+    void Awake()
     {
-        public static UIManager Instance { get; private set; }
+        Instance = this;
+    }
 
-        public RectTransform PanelGraph, PanelGameState, PanelMap, PanelTowerPlacement;
-        public Text TowerPlacementTowersLeft;
+    public HealthElement GetHealthElement()
+    {
+        //for (int i = 0; i < HealthElements.Count; i++)
+        //{
+        //    if (!HealthElements[i].gameObject.activeSelf)
+        //    {
+        //        HealthElements[i].gameObject.SetActive(true);
+        //        return HealthElements[i];
+        //    }
+        //}
 
-        void Awake()
-        {
-            Instance = this;
-        }
+        HealthElement newElem = Instantiate(HealthElementPrefab).GetComponent<HealthElement>();
+        newElem.name = "Health";
+        newElem.transform.SetParent(PanelHealth, false);
+        //HealthElements.Add(newElem);
 
-        void Update()
-        {
-            if (PanelTowerPlacement.gameObject.activeSelf)
-            {
-                TowerPlacementTowersLeft.text = "Towers left: " + (TowerManager.Instance.MaxTowerCount - TowerManager.Instance.ActiveTowers);
-            }
-        }
-
+        return newElem;
     }
 }
