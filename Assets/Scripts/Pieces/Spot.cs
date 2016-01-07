@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
-using Enums;
 
 public class Spot : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler
 {
@@ -32,7 +31,7 @@ public class Spot : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
     void Start()
     {
         _renderer = GetComponent<SpriteRenderer>();
-        OnGameStateChanged(GameManager.Instance.CurrentState);
+        OnGameStateChanged(GameController.Instance.CurrentState);
     }
 
     void Update()

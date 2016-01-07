@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections;
-using Enums;
 
 [RequireComponent(typeof(Piece))]
 public class MeleePiece : MonoBehaviour
@@ -8,16 +7,16 @@ public class MeleePiece : MonoBehaviour
     public GameObject WeaponPrefab;
     public Piece Target;
 
-    MapManager _mapManager;
+    GameController _gameController;
     MeleeWeapon _meleeWeapon;
     Piece _piece;
     float _animAttackSpeed;
 
     void Start()
     {
-        _piece = GetComponent<Piece>();
+        _gameController = GameController.Instance;
 
-        _mapManager = MapManager.Instance;
+        _piece = GetComponent<Piece>();
 
         _meleeWeapon = Instantiate(WeaponPrefab).GetComponent<MeleeWeapon>();
         _meleeWeapon.transform.position = transform.position;
@@ -56,7 +55,7 @@ public class MeleePiece : MonoBehaviour
                 if (Target != null)
                 {
                     Target.TakeDamage(_meleeWeapon.Damage);
-                    _mapManager.CreateWound(Target.transform, (Target.transform.position - transform.position).normalized);
+                    _gameController.CreateWound(Target.transform, (Target.transform.position - transform.position).normalized);
                 }
             }
             else

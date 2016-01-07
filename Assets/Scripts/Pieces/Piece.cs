@@ -1,11 +1,14 @@
-﻿using Enums;
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 
 public class Piece : MonoBehaviour
 {
     public float Speed, MaxHealth, Health, DeathSpeed;
     public Transform Target, MoveTo;
+    public Tags.Tag CollisionTag;
+    public Vector2 Direction { get { return (MoveTo.position - transform.position); } }
+    public bool Alive { get { return ((Health > 0f) && gameObject.activeSelf); } }
+    public bool IsMoving, IsAttacking;
     public Animator Animator
     {
         get
@@ -18,10 +21,6 @@ public class Piece : MonoBehaviour
             return _animator;
         }
     }
-    public Tags.Tag CollisionTag;
-    public Vector2 Direction { get { return (MoveTo.position - transform.position); } }
-    public bool Alive { get { return ((Health > 0f) && gameObject.activeSelf); } }
-    public bool IsMoving, IsAttacking;
     public Collider2D Collider
     {
         get
@@ -35,15 +34,15 @@ public class Piece : MonoBehaviour
         }
     }
 
+    GameController _gameController;
     float _deltaTime, _animDeathSpeed, _animSpeed;
     Animator _animator;
-    MapManager _mapManager;
     HealthElement _healthElement;
     Collider2D _collider;
 
     void Start()
     {
-        _mapManager = MapManager.Instance;
+        _gameController = GameController.Instance;
 
         _animDeathSpeed = 1f / DeathSpeed;
         _animSpeed = 0.5f * Speed; 
@@ -56,11 +55,11 @@ public class Piece : MonoBehaviour
         Animator.SetFloat("DeathSpeed", _animDeathSpeed);
         Animator.SetFloat("Speed", _animSpeed);
 
-        Piece piece;
-        _mapManager.PieceAt(Target, CollisionTag, out piece);
+
+        Piece piece = _gameController.PieceAt(Target, CollisionTag);
         if (piece == null || (piece != null && !piece.Alive))
         {
-            Target = _mapManager.NewTarget(CollisionTag);
+            Target = _gameController.NewTarget(CollisionTag);
         }
 
         if (Target == null)
@@ -76,19 +75,19 @@ public class Piece : MonoBehaviour
 
         if (Alive)
         {
-            if (_mapManager.SpotAt(transform.position))
+            if (_gameController.Map.Spots.Find(transform.position))
             {
                 if (Tools2D.At(transform.position, MoveTo.position))
                 {
                     SetIsMoving(true);
                     transform.position = MoveTo.position;
-                    MoveTo = _mapManager.NextStep(transform, Target);
+                    MoveTo = _gameController.Map.NextStep(transform, Target);
                 }
             }
             else
             {
                 SetIsMoving(true);
-                MoveTo = _mapManager.NextStep(transform, Target);
+                MoveTo = _gameController.Map.NextStep(transform, Target);
             }
 
             if (IsMoving)

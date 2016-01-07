@@ -1,5 +1,4 @@
-﻿using Enums;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Bullet : MonoBehaviour
 {
@@ -8,22 +7,20 @@ public class Bullet : MonoBehaviour
     public Tags.Tag CollisionTag;
     public bool Fire;
 
-    GameManager _gameManager;
-    MapManager _mapManager;
+    GameController _gameController;
 
     float _delta;
 
     void Start()
     {
-        _gameManager = GameManager.Instance;
-        _mapManager = MapManager.Instance;
+        _gameController = GameController.Instance;
 
         _delta = 0;
     }
 
     void Update()
     {
-        if (!_gameManager.IsCurrentState(GameStates.Play))
+        if (!_gameController.IsCurrentState(GameStates.Play))
         {
             return;
         }
@@ -40,7 +37,7 @@ public class Bullet : MonoBehaviour
         if (_delta > 0.03f)
         {
             _delta = 0;
-            if (_mapManager.OutOfMap(transform.position, transform.localScale))
+            if (_gameController.Map.OutOfMap(transform.position, transform.localScale))
             {
                 Die();
             }
@@ -53,7 +50,7 @@ public class Bullet : MonoBehaviour
 
         Piece piece = other.GetComponent<Piece>();
         piece.TakeDamage(Damage);
-        _mapManager.CreateWound(piece.transform, (piece.transform.position - transform.position).normalized);
+        _gameController.CreateWound(piece.transform, (piece.transform.position - transform.position).normalized);
         Die();
     }
 
