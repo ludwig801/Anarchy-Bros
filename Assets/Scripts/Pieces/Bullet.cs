@@ -3,17 +3,18 @@
 public class Bullet : MonoBehaviour
 {
     public Vector2 Direction;
-    public float Speed, Damage;
+    public float Speed;
+    public int Damage;
     public Tags.Tag CollisionTag;
     public bool Fire;
 
-    GameController _gameController;
+    GameManager _gameController;
 
     float _delta;
 
     void Start()
     {
-        _gameController = GameController.Instance;
+        _gameController = GameManager.Instance;
 
         _delta = 0;
     }

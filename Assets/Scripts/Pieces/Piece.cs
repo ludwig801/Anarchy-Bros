@@ -1,14 +1,27 @@
 ﻿using System.Collections;
 using UnityEngine;
 
+[RequireComponent(typeof(Animator))]
+[RequireComponent(typeof(MoveBehavior))]
 public class Piece : MonoBehaviour
 {
-    public float Speed, MaxHealth, Health, DeathSpeed;
-    public Transform Target, MoveTo;
-    public Tags.Tag CollisionTag;
-    public Vector2 Direction { get { return (MoveTo.position - transform.position); } }
-    public bool Alive { get { return ((Health > 0f) && gameObject.activeSelf); } }
-    public bool IsMoving, IsAttacking;
+    public int MaxHealth, Health;
+    public float DeathSpeed;
+    public Tags.Tag TargetTag;
+    public bool Alive { get { return (Health > 0) && gameObject.activeSelf; } }
+    public bool IsAttacking
+    {
+        get
+        {
+            return _isAttacking;
+        }
+
+        set
+        {
+            _isAttacking = value;
+            Animator.SetBool("Attacking", value);
+        }
+    }
     public Animator Animator
     {
         get
@@ -21,31 +34,30 @@ public class Piece : MonoBehaviour
             return _animator;
         }
     }
-    public Collider2D Collider
+    public MoveBehavior Movement
     {
         get
         {
-            if (_collider == null)
+            if (_movement == null)
             {
-                _collider = GetComponent<Collider2D>();
+                _movement = GetComponent<MoveBehavior>();
             }
-
-            return _collider;
+            return _movement;
         }
     }
 
-    GameController _gameController;
-    float _deltaTime, _animDeathSpeed, _animSpeed;
+    GameManager _gameManager;
+    MoveBehavior _movement;
+    float _deltaTime, _animDeathSpeed;
     Animator _animator;
     HealthElement _healthElement;
-    Collider2D _collider;
+    bool _isAttacking;
 
     void Start()
     {
-        _gameController = GameController.Instance;
+        _gameManager = GameManager.Instance;
 
         _animDeathSpeed = 1f / DeathSpeed;
-        _animSpeed = 0.5f * Speed; 
 
         Health = MaxHealth;
     }
@@ -53,74 +65,24 @@ public class Piece : MonoBehaviour
     void Update()
     {
         Animator.SetFloat("DeathSpeed", _animDeathSpeed);
-        Animator.SetFloat("Speed", _animSpeed);
 
-
-        Piece piece = _gameController.PieceAt(Target, CollisionTag);
-        if (piece == null || (piece != null && !piece.Alive))
+        switch (TargetTag)
         {
-            Target = _gameController.NewTarget(CollisionTag);
-        }
-
-        if (Target == null)
-        {
-            Die();
-            return;
-        }
-
-        if (IsAttacking && !IsMoving)
-        {
-            return;
-        }
-
-        if (Alive)
-        {
-            if (_gameController.Map.Spots.Find(transform.position))
-            {
-                if (Tools2D.At(transform.position, MoveTo.position))
+            case Tags.Tag.Tower:
+                if (!_gameManager.GetTarget(Movement, out Movement.Target))
                 {
-                    SetIsMoving(true);
-                    transform.position = MoveTo.position;
-                    MoveTo = _gameController.Map.NextStep(transform, Target);
+                    Debug.LogWarning("Failed to give a new target with the tag: " + TargetTag.ToString());
                 }
-            }
-            else
-            {
-                SetIsMoving(true);
-                MoveTo = _gameController.Map.NextStep(transform, Target);
-            }
-
-            if (IsMoving)
-            {
-                transform.rotation = Tools2D.LookAt(Direction);
-                transform.position = Tools2D.MoveTowards(transform.position, MoveTo.transform.position, Time.deltaTime * Speed);
-            }
+                break;
         }
-    }
-
-    public void SetIsMoving(bool value)
-    {
-        IsMoving = value;
-        Animator.SetBool("IsMoving", value);
-    }
-
-    public void SetIsAttacking(bool value)
-    {
-        if (value == true)
-        {
-            SetIsMoving(false);
-        }     
-        IsAttacking = value;
-        Animator.SetBool("Attacking", value);
     }
 
     public IEnumerator Die()
     {
-        Collider.enabled = false;
         Health = 0;
         Animator.SetTrigger("Die");
         Animator.SetBool("Alive", false);
-        _healthElement.gameObject.SetActive(false);
+        //_healthElement.gameObject.SetActive(false);
 
         yield return new WaitForSeconds(DeathSpeed);
 
@@ -129,16 +91,14 @@ public class Piece : MonoBehaviour
 
     public void Live()
     {   
-        Collider.enabled = true;
         Health = MaxHealth;     
-        SetIsAttacking(false);
-        SetIsMoving(false);
+        IsAttacking = false;
         Animator.ResetTrigger("Die");
         Animator.SetBool("Alive", Alive);
-        _healthElement.gameObject.SetActive(true);
+        //_healthElement.gameObject.SetActive(true);
     }
 
-    public void TakeDamage(float amount)
+    public void TakeDamage(int amount)
     {
         Health -= amount;
         if (Health <= 0)

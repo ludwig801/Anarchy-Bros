@@ -5,7 +5,8 @@ using System.Collections.Generic;
 public class Spot : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler
 {
     public Color ColorInEditor, ColorInGame;
-    public int Index { get; set; }
+    public int Index;
+    public float HitRadius;
     public SpotTypes Type;
     public Piece Tower;
     public bool Occupied { get { return Tower != null; } }
@@ -31,7 +32,7 @@ public class Spot : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
     void Start()
     {
         _renderer = GetComponent<SpriteRenderer>();
-        OnGameStateChanged(GameController.Instance.CurrentState);
+        OnGameStateChanged(GameManager.Instance.CurrentState);
     }
 
     void Update()
@@ -49,9 +50,29 @@ public class Spot : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
         Edges.Remove(e);
     }
 
-    public Spot GetNeighbor(int index)
+    public Spot GetNeighbor(int edgeIndex)
     {
-        return Edges[index].Neighbor(this);
+        return Edges[edgeIndex].Neighbor(this);
+    }
+
+    public Spot GetNeighbor(Edge edge)
+    {
+        return edge.Neighbor(this);
+    }
+
+    public bool GetEdge(Spot neighbor, out Edge linking)
+    {
+        linking = null;
+        for (int i = 0; i < Edges.Count; i++)
+        {
+            if (Edges[i].HasSpot(neighbor))
+            {
+                linking = Edges[i];
+                break;
+            }
+        }
+
+        return (linking != null);
     }
 
     public void OnBeginDrag(PointerEventData eventData)

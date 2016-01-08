@@ -1,7 +1,7 @@
 ﻿using UnityEditor;
 using AnarchyBros;
 
-[CustomEditor(typeof(GameController))]
+[CustomEditor(typeof(GameManager))]
 public class GameManagerEditor : Editor
 {
     public override void OnInspectorGUI()

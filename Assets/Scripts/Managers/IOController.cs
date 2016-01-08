@@ -8,18 +8,18 @@ public class IOController : MonoBehaviour
 {
     public TextAsset Level;
 
-    GameController _gameController;
+    GameManager _gameController;
 
     void Start()
     {
-        _gameController = GameController.Instance;
+        _gameController = GameManager.Instance;
     }
 
     public void SaveGraph()
     {
         Map map = _gameController.Map;
-        List<Spot> spots = map.Spots.Objects;
-        List<Edge> edges = map.Edges.Objects;
+        List<Spot> spots = map.Graph.Spots;
+        List<Edge> edges = map.Graph.Edges;
 
         GameGraph graph = new GameGraph();
         for (int i = 0; i < spots.Count; i++)
@@ -47,19 +47,18 @@ public class IOController : MonoBehaviour
         BinaryFormatter bf = new BinaryFormatter();
         GameGraph graph = (GameGraph)bf.Deserialize(s);
 
-        map.Spots.RemoveAll();
-        map.Edges.RemoveAll();
+        map.Graph.RemoveAll();
 
         for (int i = 0; i < graph.Spots.Count; i++)
         {
             IOSpot spot = graph.Spots[i];
-            map.Spots.Create(spot.Position.ToVector2, spot.Type);
+            map.Graph.CreateSpot(spot.Position.ToVector2, spot.Type);
         }
 
         for (int i = 0; i < graph.Edges.Count; i++)
         {
             IOEdge edge = graph.Edges[i];
-            map.Edges.CreateEdge(map.Spots.Find(edge.a.ToVector2), map.Spots.Find(edge.b.ToVector2));
+            map.Graph.CreateEdge(map.Graph.FindSpot(edge.a.ToVector2), map.Graph.FindSpot(edge.b.ToVector2));
         }
         
         s.Close();

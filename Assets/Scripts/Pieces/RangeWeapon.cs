@@ -6,8 +6,8 @@ public class RangeWeapon : MonoBehaviour
 {
     public GameObject BulletPrefab;
     public Transform GunPoint, BulletCan;
-    public int RoundsPerMinute;
-    public float BulletSpeed, Damage;
+    public int RoundsPerMinute, Damage;
+    public float BulletSpeed;
     public bool PredictiveShooting, CanFire;
     public Piece Target;
     public List<Bullet> Bullets;
@@ -66,9 +66,9 @@ public class RangeWeapon : MonoBehaviour
         }
 
         AimAt = Target.transform.position;
-        if (PredictiveShooting && Target.IsMoving)
+        if (PredictiveShooting && Target.Movement.IsMoving)
         {
-            Vector2 dir = Target.Direction;
+            Vector2 dir = Target.Movement.Direction;
             if (dir.magnitude < 1f)
             {
                 return;
@@ -76,7 +76,7 @@ public class RangeWeapon : MonoBehaviour
 
             Vector2 E = Target.transform.position;
             Vector2 B = GunPoint.position;
-            Vector2 vE = Target.Speed * dir.normalized;
+            Vector2 vE = Target.Movement.Speed * dir.normalized;
 
             // Inteligent shooting: using the enemy's know velocity and the bullet's speed, predict where to should we fire.
             float k = vE.x + vE.y;

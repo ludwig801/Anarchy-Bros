@@ -57,12 +57,6 @@
     <Reference Include="UnityEngine.Networking">
       <HintPath>Library\UnityAssemblies\UnityEngine.Networking.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.Networking">
-      <HintPath>Library\UnityAssemblies\UnityEngine.Networking.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.UI">
-      <HintPath>Library\UnityAssemblies\UnityEngine.UI.dll</HintPath>
-    </Reference>
     <Reference Include="UnityEditor">
       <HintPath>Library\UnityAssemblies\UnityEditor.dll</HintPath>
     </Reference>
@@ -71,11 +65,14 @@
     <Compile Include="Assets\Libraries\Strings.cs" />
     <Compile Include="Assets\Libraries\Tools.cs" />
     <Compile Include="Assets\Libraries\Tools2D.cs" />
-    <Compile Include="Assets\Scripts\EdgeManager.cs" />
+    <Compile Include="Assets\Scripts\EnemyManager.cs" />
+    <Compile Include="Assets\Scripts\Graph.cs" />
+    <Compile Include="Assets\Scripts\GraphLogic.cs" />
     <Compile Include="Assets\Scripts\Managers\CameraController.cs" />
-    <Compile Include="Assets\Scripts\Managers\GameController.cs" />
+    <Compile Include="Assets\Scripts\Managers\GameManager.cs" />
     <Compile Include="Assets\Scripts\Managers\IOController.cs" />
     <Compile Include="Assets\Scripts\Managers\UIController.cs" />
+    <Compile Include="Assets\Scripts\MoveBehavior.cs" />
     <Compile Include="Assets\Scripts\Pieces\Bullet.cs" />
     <Compile Include="Assets\Scripts\Pieces\Edge.cs" />
     <Compile Include="Assets\Scripts\Pieces\Map.cs" />
@@ -86,7 +83,7 @@
     <Compile Include="Assets\Scripts\Pieces\RangedPiece.cs" />
     <Compile Include="Assets\Scripts\Pieces\Spot.cs" />
     <Compile Include="Assets\Scripts\Pieces\Wound.cs" />
-    <Compile Include="Assets\Scripts\SpotManager.cs" />
+    <Compile Include="Assets\Scripts\TowerManager.cs" />
     <Compile Include="Assets\Scripts\UI\HealthElement.cs" />
     <Compile Include="Assets\Scripts\UI\HidePanelBehavior.cs" />
   </ItemGroup>

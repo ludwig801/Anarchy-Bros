@@ -7,14 +7,14 @@ public class MeleePiece : MonoBehaviour
     public GameObject WeaponPrefab;
     public Piece Target;
 
-    GameController _gameController;
+    GameManager _gameController;
     MeleeWeapon _meleeWeapon;
     Piece _piece;
     float _animAttackSpeed;
 
     void Start()
     {
-        _gameController = GameController.Instance;
+        _gameController = GameManager.Instance;
 
         _piece = GetComponent<Piece>();
 
@@ -33,13 +33,13 @@ public class MeleePiece : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.tag != Tags.GetStringTag(_piece.CollisionTag)) return;
+        if (other.tag != Tags.GetStringTag(_piece.TargetTag)) return;
 
-        Piece piece = other.GetComponent<Piece>();
-        _piece.SetIsAttacking(true);
+        Piece otherPiece = other.GetComponent<Piece>();
+        _piece.IsAttacking = true;
         if (Target == null || (Target != null && !Target.Alive))
         {
-            Target = piece;
+            Target = otherPiece;
             StartCoroutine(Attack());
         }
     }
@@ -66,7 +66,7 @@ public class MeleePiece : MonoBehaviour
             yield return new WaitForSeconds(0.5f * _meleeWeapon.AttackDelay);
         }
 
-        _piece.SetIsAttacking(false);
+        _piece.IsAttacking = false;
         Target = null; 
     }
 }

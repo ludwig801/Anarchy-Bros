@@ -2,5 +2,6 @@
 
 public class MeleeWeapon : MonoBehaviour
 {
-    public float Damage, AttackDelay;
+    public float AttackDelay;
+    public int Damage;
 }

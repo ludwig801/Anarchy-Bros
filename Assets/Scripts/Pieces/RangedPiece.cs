@@ -5,22 +5,32 @@ public class RangedPiece : MonoBehaviour
 {
     public GameObject WeaponPrefab;
     public Transform GunPoint;
+    public Piece Piece
+    {
+        get
+        {
+            if (_piece == null)
+            {
+                _piece = GetComponent<Piece>();
+            }
+            return _piece;
+        }
+    }
 
-    GameController _gameController;
+    GameManager _gameManager;
     RangeWeapon _rangeWeapon;
     Piece _piece;
     float _animAttackSpeed;
 
     void Start()
     {
-        _gameController = GameController.Instance;
-        _piece = GetComponent<Piece>();
+        _gameManager = GameManager.Instance;
 
         _rangeWeapon = Instantiate(WeaponPrefab).GetComponent<RangeWeapon>();
         _rangeWeapon.transform.position = transform.position;
         _rangeWeapon.transform.parent = transform;
         _rangeWeapon.name = WeaponPrefab.name;
-        _rangeWeapon.BulletCan = _gameController.ObjBullets;
+        _rangeWeapon.BulletCan = _gameManager.Towers.ObjBullets;
         _rangeWeapon.GunPoint = GunPoint;
 
         _animAttackSpeed = 2f / _rangeWeapon.FireDelay;
@@ -28,13 +38,13 @@ public class RangedPiece : MonoBehaviour
 
     void Update()
     {
-        _piece.Animator.SetFloat("AttackingSpeed", _animAttackSpeed);
-        _piece.Animator.SetBool("Attacking", _rangeWeapon.Firing);
-        _rangeWeapon.CanFire = !_piece.IsMoving && _piece.Alive;
-        if (!_piece.IsMoving)
+        Piece.Animator.SetFloat("AttackingSpeed", _animAttackSpeed);
+        Piece.Animator.SetBool("Attacking", _rangeWeapon.Firing);
+        _rangeWeapon.CanFire = !_piece.Movement.IsMoving && _piece.Alive;
+        if (_rangeWeapon.CanFire)
         {
-            _rangeWeapon.Target = _gameController.GetNearest(_piece.CollisionTag, transform);
-            transform.rotation = Quaternion.Lerp(transform.rotation, Tools2D.LookAt(GunPoint.position, _rangeWeapon.AimAt), Time.deltaTime * 5f);
+            //if(_gameManager.GetTarget(this, out _rangeWeapon.Target))
+            //transform.rotation = Quaternion.Lerp(transform.rotation, Tools2D.LookAt(GunPoint.position, _rangeWeapon.AimAt), Time.deltaTime * 5f);
         }
     }
 }

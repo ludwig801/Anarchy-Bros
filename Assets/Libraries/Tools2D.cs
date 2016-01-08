@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public abstract class Tools2D
 {
@@ -7,9 +8,14 @@ public abstract class Tools2D
         return a + (Vector3)b;
     }
 
-    public static Vector3 Subtract(Vector3 a, Vector2 b)
+    public static Vector2 Subtract(Vector2 a, Vector2 b)
     {
-        return a - (Vector3)b;
+        return (a - b);
+    }
+
+    public static Vector2 DirectionFromRotation(Quaternion rotation)
+    {
+        return rotation * Vector2.up;
     }
 
     public static Vector3 Convert(Vector3 from, Vector2 to)
@@ -33,14 +39,16 @@ public abstract class Tools2D
         return new Vector3(v.x * mult, v.y * mult, v.z);
     }
 
-    public static bool At(Vector2 a, Vector2 b)
+    public static bool SamePos(Vector2 a, Vector2 b, float threshold = 0)
     {
-        return Mathf.Approximately(a.x, b.x)&& Mathf.Approximately(a.y, b.y);
-    }
-
-    public static bool Near(Vector2 a, Vector2 b, float threshold = 0.05f)
-    {
-        return Mathf.Abs(a.x - b.x) < threshold && Mathf.Abs(a.y - b.y) < threshold;
+        if (threshold == 0)
+        {
+            return a.x == b.x && a.y == b.y;
+        }
+        else
+        {
+            return Mathf.Abs(a.x - b.x) < threshold && Mathf.Abs(a.y - b.y) < threshold;
+        }      
     }
 
     public static Quaternion LookAt(Vector2 position, Vector2 target)

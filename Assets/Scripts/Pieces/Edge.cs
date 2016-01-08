@@ -3,34 +3,43 @@
 public class Edge : MonoBehaviour
 {
     public Color ColorInEditor, ColorInGame;
-    public Spot A { get; private set; }
-    public Spot B { get; private set; }
-    public Collider2D Collider
-    {
-        get
-        {
-            if (_collider == null)
-            {
-                _collider = GetComponent<Collider2D>();
-            }
-
-            return _collider;
-        }
-    }
+    public Spot A, B;
+    public float Thickness;
 
     SpriteRenderer _renderer;
-    Color _colorTo;
-    Collider2D _collider;
+    GameManager _gameController;
 
     void Start()
     {
+        _gameController = GameManager.Instance;
+
         _renderer = GetComponent<SpriteRenderer>();
-        OnGameStateChanged(GameController.Instance.CurrentState);
+
+        transform.localScale = new Vector3(transform.localScale.x * Thickness, transform.localScale.y, transform.localScale.z);
     }
 
     void Update()
     {
-        _renderer.color = Color.Lerp(_renderer.color, _colorTo, Time.deltaTime * 8f);
+        switch (_gameController.CurrentState)
+        {
+            case GameStates.Play:
+                _renderer.color = Color.Lerp(_renderer.color, ColorInGame, Time.deltaTime * 8f);
+                break;
+
+            default:
+                _renderer.color = Color.Lerp(_renderer.color, ColorInEditor, Time.deltaTime * 8f);
+                break;
+        }
+
+        if (A != null && B != null)
+        {
+            Vector2 posA = A.transform.position;
+            Vector2 posB = B.transform.position;
+            Vector2 delta = (posA - posB);
+            transform.position = posB + (0.5f * delta);
+            transform.localScale = new Vector3(transform.localScale.x, delta.magnitude, transform.localScale.z);
+            transform.rotation = Tools2D.LookAt(delta.normalized);
+        }
     }
 
     public Spot Neighbor(Spot n)
@@ -50,48 +59,8 @@ public class Edge : MonoBehaviour
         }
     }
 
-    public bool HasNode(Spot n)
+    public bool HasSpot(Spot n)
     {
         return (n == A) || (n == B);
-    }
-
-    public void SetNodes(Spot a, Spot b)
-    {
-        A = a;
-        B = b;
-
-        SetVertices(A.transform.position, B.transform.position);
-    }
-
-    public void SetVertices(Vector2 posA, Vector2 posB)
-    {
-        Vector2 delta = posB - posA;
-        transform.position = posA + (0.5f * delta);
-        transform.localScale = new Vector3(transform.localScale.x, 0.9f * delta.magnitude, transform.localScale.z);
-        float angle = (delta.x < 0f) ? Vector2.Angle(Vector2.up, delta) : 360f - Vector2.Angle(Vector2.up, delta);
-        transform.rotation = Quaternion.Euler(0, 0, angle);
-    }
-
-    public void OnSpotsPositionChanged()
-    {
-        SetVertices(A.transform.position, B.transform.position);
-    }
-
-    public void OnGameStateChanged(GameStates newState)
-    {
-        switch (newState)
-        {
-            case GameStates.Edit:
-                _colorTo = ColorInEditor;
-                break;
-
-            case GameStates.Place:
-                _colorTo = ColorInEditor;
-                break;
-
-            case GameStates.Play:
-                _colorTo = ColorInGame;
-                break;
-        }
     }
 }
