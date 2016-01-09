@@ -64,7 +64,7 @@ public class MoveBehavior : MonoBehaviour
             return;
         }
 
-        if (Target == null || Step == null)
+        if (Target == null)
         {
             IsMoving = false;
             return;
@@ -72,29 +72,32 @@ public class MoveBehavior : MonoBehaviour
 
         Animator.SetFloat("Speed", _animSpeed);
 
-        if (Tools2D.SamePos(transform.position, Step.transform.position))
+        UpdatePosition();
+    }
+
+    void UpdatePosition()
+    {
+        if (Step != null && Tools2D.SamePos(transform.position, Step.transform.position))
         {
-            if (Step == Target)
-            {
-                IsMoving = false;
-            }
             CurrentSpot = Step;
             CurrentEdge = null;
         }
 
-        if (_gameManager.GetNextStep(this, out Step))
+        if (CurrentSpot == Target)
         {
-            if (Step != CurrentSpot)
+            IsMoving = false;
+            Step = null;
+        }
+        else if (_gameManager.StepToTarget(this, out Step))
+        {
+            IsMoving = true;
+            if (CurrentSpot != null)
             {
-                IsMoving = true;
-                if (CurrentSpot != null)
-                {
-                    CurrentSpot.GetEdge(Step, out CurrentEdge);
-                    CurrentSpot = null;
-                }
-                transform.position = Tools2D.MoveTowards(transform.position, Step.transform.position, Time.deltaTime * Speed);
-                transform.rotation = Quaternion.Lerp(transform.rotation, Tools2D.LookAt(transform.position, Step.transform.position), Time.deltaTime * 8f);
+                CurrentSpot.GetEdge(Step, out CurrentEdge);
+                CurrentSpot = null;
             }
+            transform.position = Tools2D.MoveTowards(transform.position, Step.transform.position, Time.deltaTime * Speed);
+            transform.rotation = Quaternion.Lerp(transform.rotation, Tools2D.LookAt(transform.position, Step.transform.position), Time.deltaTime * 8f);
         }
     }
 }

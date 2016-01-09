@@ -155,20 +155,15 @@ public class GameManager : MonoBehaviour
         return comp == _currentState;
     }
 
-    public bool GetTowerTarget(MoveBehavior requester)
+    public bool ProvideEnemyWithTargetSpot(MoveBehavior requester)
     {
         MoveBehavior closestTower;
-        if (Map.GetClosestTower(requester, out closestTower) && Map.GraphLogic.NextStep(requester, closestTower, out requester.Step))
-        {
-            requester.Target = requester.Step;
-            return true;
-        }
-        return false;
+        return Map.GetClosestTower(requester, out closestTower) && Map.GraphLogic.ProvideTarget(requester, closestTower, out requester.Target);
     }
 
-    public bool GetNextStep(MoveBehavior requester, out Spot newStep)
+    public bool StepToTarget(MoveBehavior requester, out Spot newStep)
     {
-        return Map.GraphLogic.NextStep(requester, out newStep);
+        return Map.GraphLogic.StepToTarget(requester, out newStep);
     }
 
     public void CreateWound(MoveBehavior movingPiece, Vector2 direction)

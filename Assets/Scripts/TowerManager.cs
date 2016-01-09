@@ -95,7 +95,7 @@ public class TowerManager : MonoBehaviour
             obj.Live();
             spot.Tower = obj;
             obj.Movement.Target = spot;
-            obj.Movement.Step = spot;
+            obj.Movement.CurrentSpot = spot;
         }
         else
         {

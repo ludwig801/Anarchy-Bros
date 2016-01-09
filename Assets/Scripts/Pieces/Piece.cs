@@ -47,7 +47,6 @@ public class Piece : MonoBehaviour
         }
     }
 
-    GameManager _gameManager;
     MoveBehavior _movement;
     float _deltaTime, _animDeathSpeed;
     Animator _animator;
@@ -56,8 +55,6 @@ public class Piece : MonoBehaviour
 
     void Start()
     {
-        _gameManager = GameManager.Instance;
-
         _animDeathSpeed = 1f / DeathSpeed;
 
         Health = MaxHealth;
@@ -66,16 +63,6 @@ public class Piece : MonoBehaviour
     void Update()
     {
         Animator.SetFloat("DeathSpeed", _animDeathSpeed);
-
-        switch (TargetTag)
-        {
-            case Tags.Tag.Tower:
-                if (!_gameManager.GetTowerTarget(Movement) && Alive)
-                {
-                    StartCoroutine(Die());
-                }
-                break;
-        }
     }
 
     public IEnumerator Die()

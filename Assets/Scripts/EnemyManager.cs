@@ -9,19 +9,19 @@ public class EnemyManager : MonoBehaviour
     public List<Piece> Objects;
     public int ActiveEnemies {get { return CountActiveEnemies(); }}
 
-    GameManager _gameController;
+    GameManager _gameManager;
     float _timeSinceLastSpawn;
 
     void Start()
     {
-        _gameController = GameManager.Instance;
+        _gameManager = GameManager.Instance;
 
         _timeSinceLastSpawn = 0;
     }
 
     void Update()
     {
-        switch (_gameController.CurrentState)
+        switch (_gameManager.CurrentState)
         {
             case GameStates.Play:
                 _timeSinceLastSpawn += Time.deltaTime;
@@ -29,6 +29,15 @@ public class EnemyManager : MonoBehaviour
                 {
                     SpawnEnemy();
                     _timeSinceLastSpawn = 0;
+                }
+
+                for (int i = 0; i < Objects.Count; i++)
+                {
+                    Piece enemy = Objects[i];
+                    if (enemy.Alive && !_gameManager.ProvideEnemyWithTargetSpot(enemy.Movement))
+                    {
+                        StartCoroutine(enemy.Die());
+                    }
                 }
                 break;
         }
@@ -73,8 +82,8 @@ public class EnemyManager : MonoBehaviour
 
     bool NewTarget(out Piece finalObjective, out Spot spawnSpot)
     {
-        spawnSpot = _gameController.Map.Graph.RandomSpot(SpotTypes.EnemySpawn);
-        finalObjective = _gameController.Towers.Random();
+        spawnSpot = _gameManager.Map.Graph.RandomSpot(SpotTypes.EnemySpawn);
+        finalObjective = _gameManager.Towers.Random();
 
         return (finalObjective != null && spawnSpot != null);
     }
