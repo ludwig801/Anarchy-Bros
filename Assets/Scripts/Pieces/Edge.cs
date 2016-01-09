@@ -7,11 +7,11 @@ public class Edge : MonoBehaviour
     public float Thickness;
 
     SpriteRenderer _renderer;
-    GameManager _gameController;
+    GameManager _gameManager;
 
     void Start()
     {
-        _gameController = GameManager.Instance;
+        _gameManager = GameManager.Instance;
 
         _renderer = GetComponent<SpriteRenderer>();
 
@@ -20,7 +20,7 @@ public class Edge : MonoBehaviour
 
     void Update()
     {
-        switch (_gameController.CurrentState)
+        switch (_gameManager.CurrentState)
         {
             case GameStates.Play:
                 _renderer.color = Color.Lerp(_renderer.color, ColorInGame, Time.deltaTime * 8f);

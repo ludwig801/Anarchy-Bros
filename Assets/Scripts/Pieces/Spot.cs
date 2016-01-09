@@ -24,20 +24,29 @@ public class Spot : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
         }
     }
 
+    GameManager _gameManager;
     SpriteRenderer _renderer;
-    Color _colorTo;
     Collider2D _collider;
     bool _justScrolled;
 
     void Start()
     {
+        _gameManager = GameManager.Instance;
         _renderer = GetComponent<SpriteRenderer>();
-        OnGameStateChanged(GameManager.Instance.CurrentState);
     }
 
     void Update()
     {
-        _renderer.color = Color.Lerp(_renderer.color, _colorTo, Time.deltaTime * 8f);
+        switch (_gameManager.CurrentState)
+        {
+            case GameStates.Play:
+                _renderer.color = Color.Lerp(_renderer.color, ColorInGame, Time.deltaTime * 8f);
+                break;
+
+            default:
+                _renderer.color = Color.Lerp(_renderer.color, ColorInEditor, Time.deltaTime * 8f);
+                break;
+        }
     }
 
     public void AddEdge(Edge e)
@@ -97,23 +106,5 @@ public class Spot : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
         //{
         //    _mapManager.OnSpotDrag(eventData, this);
         //}
-    }
-
-    public void OnGameStateChanged(GameStates newState)
-    {
-        switch (newState)
-        {
-            case GameStates.Edit:
-                _colorTo = ColorInEditor;
-                break;
-
-            case GameStates.Place:
-                _colorTo = ColorInEditor;
-                break;
-
-            case GameStates.Play:
-                _colorTo = ColorInGame;
-                break;
-        }
     }
 }

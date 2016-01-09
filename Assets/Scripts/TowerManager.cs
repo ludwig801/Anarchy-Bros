@@ -84,6 +84,10 @@ public class TowerManager : MonoBehaviour
             obj.Movement.Target = spot;
             obj.Movement.Step = spot;
         }
+        else
+        {
+            Debug.Log("Tower spawn is not possible: maximum towers achieved");
+        }
     }
 
     public Piece Random()

@@ -7,14 +7,14 @@ public class MeleePiece : MonoBehaviour
     public GameObject WeaponPrefab;
     public Piece Target;
 
-    GameManager _gameController;
+    GameManager _gameManager;
     MeleeWeapon _meleeWeapon;
     Piece _piece;
     float _animAttackSpeed;
 
     void Start()
     {
-        _gameController = GameManager.Instance;
+        _gameManager = GameManager.Instance;
 
         _piece = GetComponent<Piece>();
 
@@ -29,44 +29,54 @@ public class MeleePiece : MonoBehaviour
     void Update()
     {
         _piece.Animator.SetFloat("AttackingSpeed", _animAttackSpeed);
+
+        if (Target != null && !Target.Alive)
+        {
+            Target = null;
+            _piece.Attacking = false;
+        }
     }
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.tag != Tags.GetStringTag(_piece.TargetTag)) return;
-
-        Piece otherPiece = other.GetComponent<Piece>();
-        _piece.IsAttacking = true;
-        if (Target == null || (Target != null && !Target.Alive))
+        if (other.tag == _piece.tag)
         {
-            Target = otherPiece;
-            StartCoroutine(Attack());
+            // Prevent movement from one end
+        }
+        else if (other.tag == _piece.TargetTag.ToString())
+        {
+            Piece otherPiece = other.GetComponent<Piece>();  
+            if (Target == null)
+            {
+                _piece.Attacking = true;
+                Target = otherPiece;
+            }
         }
     }
 
-    IEnumerator Attack()
+    void OnTriggerExit2D(Collider2D other)
     {
-        while (Target != null && Target.Alive)
+        if (other.tag == _piece.tag)
         {
-            yield return new WaitForSeconds(0.5f * _meleeWeapon.AttackDelay);
-
-            if (_piece.Alive)
-            {
-                if (Target != null)
-                {
-                    Target.TakeDamage(_meleeWeapon.Damage);
-                    _gameController.CreateWound(Target.transform, (Target.transform.position - transform.position).normalized);
-                }
-            }
-            else
-            {
-                yield break;
-            }
-
-            yield return new WaitForSeconds(0.5f * _meleeWeapon.AttackDelay);
+            // Conceded movement from one end
         }
+        else if (other.tag == _piece.TargetTag.ToString())
+        {
+            Piece otherPiece = other.GetComponent<Piece>();
+            if (Target == otherPiece)
+            {
+                _piece.Attacking = false;
+                Target = null;
+            }
+        }
+    }
 
-        _piece.IsAttacking = false;
-        Target = null; 
+    public void Attack()
+    {
+        if (Target != null)
+        {
+            Target.TakeDamage(_meleeWeapon.Damage);
+            _gameManager.CreateWound(Target.Movement, (_piece.transform.position - Target.transform.position).normalized);
+        }
     }
 }

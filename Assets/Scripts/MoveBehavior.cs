@@ -7,6 +7,7 @@ public class MoveBehavior : MonoBehaviour
     public Spot Step;
     public Spot CurrentSpot;
     public Edge CurrentEdge;
+    public bool CanMove;
     public Animator Animator
     {
         get
@@ -45,11 +46,19 @@ public class MoveBehavior : MonoBehaviour
         _gameManager = GameManager.Instance;
 
         _animSpeed = 0.5f * Speed;
+
+        CanMove = true;
     }
 
     void Update()
     {
-        if (_gameManager.CurrentState != GameStates.Play)
+        if (!_gameManager.IsCurrentState(GameStates.Play))
+        {
+            IsMoving = false;
+            return;
+        }
+
+        if (!CanMove)
         {
             IsMoving = false;
             return;
@@ -65,21 +74,27 @@ public class MoveBehavior : MonoBehaviour
 
         if (Tools2D.SamePos(transform.position, Step.transform.position))
         {
-            IsMoving = false;
+            if (Step == Target)
+            {
+                IsMoving = false;
+            }
             CurrentSpot = Step;
             CurrentEdge = null;
         }
 
-        if (CurrentSpot != Target && _gameManager.GetNextStep(this, out Step))
+        if (_gameManager.GetNextStep(this, out Step))
         {
-            IsMoving = true;
-            if (CurrentSpot != null)
+            if (Step != CurrentSpot)
             {
-                CurrentSpot.GetEdge(Step, out CurrentEdge);
-                CurrentSpot = null;
+                IsMoving = true;
+                if (CurrentSpot != null)
+                {
+                    CurrentSpot.GetEdge(Step, out CurrentEdge);
+                    CurrentSpot = null;
+                }
+                transform.position = Tools2D.MoveTowards(transform.position, Step.transform.position, Time.deltaTime * Speed);
+                transform.rotation = Quaternion.Lerp(transform.rotation, Tools2D.LookAt(transform.position, Step.transform.position), Time.deltaTime * 8f);
             }
-            transform.position = Tools2D.MoveTowards(transform.position, Step.transform.position, Time.deltaTime * Speed);
-            transform.rotation = Tools2D.LookAt(transform.position, Step.transform.position);
         }
     }
 }

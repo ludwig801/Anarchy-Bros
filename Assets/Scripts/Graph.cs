@@ -153,25 +153,29 @@ public class Graph : MonoBehaviour
 
     public void Remove(Spot spot)
     {
-        for (int i = 0; i < spot.Edges.Count; i++)
+        for (int i = spot.Edges.Count - 1; i >= 0; i--)
         {
             Remove(spot.Edges[i]);
         }
+
         Spots.Remove(spot);
         Destroy(spot.gameObject);
     }
 
     public void RemoveAll()
     {
-        for (int i = 0; i < Edges.Count; i++)
+        for (int i = Spots.Count - 1; i >= 0; i--)
+        {
+            Remove(Spots[i]);
+        }
+
+        for (int i = Edges.Count - 1; i >= 0; i--)
         {
             Remove(Edges[i]);
         }
 
-        for (int i = 0; i < Spots.Count; i++)
-        {
-            Remove(Spots[i]);
-        }
+        Edges.Clear();
+        Spots.Clear();
     }
 
     public bool FindSpot(Vector2 pos, out Spot hit, float tolerance)

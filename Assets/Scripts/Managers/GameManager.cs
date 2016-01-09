@@ -56,7 +56,6 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        // Game States
         ChangeState(GameStates.Edit);
     }
 
@@ -156,13 +155,12 @@ public class GameManager : MonoBehaviour
         return comp == _currentState;
     }
 
-    public bool GetTarget(MoveBehavior requester, out Spot newTarget)
+    public bool GetTowerTarget(MoveBehavior requester)
     {
-        newTarget = null;
-        Piece closestTower;
-        if (Map.GetClosestTower(requester, out closestTower))
+        MoveBehavior closestTower;
+        if (Map.GetClosestTower(requester, out closestTower) && Map.GraphLogic.NextStep(requester, closestTower, out requester.Step))
         {
-            newTarget = closestTower.Movement.Step;
+            requester.Target = requester.Step;
             return true;
         }
         return false;
@@ -173,16 +171,16 @@ public class GameManager : MonoBehaviour
         return Map.GraphLogic.NextStep(requester, out newStep);
     }
 
-    public void CreateWound(Transform t, Vector2 direction)
+    public void CreateWound(MoveBehavior movingPiece, Vector2 direction)
     {
         Wound wound = GetWound();
-        wound.Follow = t;
-        wound.transform.position = t.position;
+        wound.Follow = movingPiece.transform;
+        wound.transform.position = wound.Follow.position;
         wound.transform.rotation = Tools2D.LookAt(direction);
         wound.Die();
     }
 
-    public Wound GetWound()
+    Wound GetWound()
     {
         for (int i = 0; i < Wounds.Count; i++)
         {
@@ -202,19 +200,79 @@ public class GameManager : MonoBehaviour
 
     public void OnPointerClick(PointerEventData eventData, Vector2 worldPos)
     {
-        Piece hitTower;
-        if(Towers.Find(worldPos, out hitTower) && !Towers.HasSelectedTower)
+        switch (CurrentState)
         {
-            Debug.Log("Selecting tower...");
+            case GameStates.Play:
+                HandlePlayClick(eventData, worldPos); 
+                break;
+
+            case GameStates.Pause:
+                HandlePauseClick(eventData, worldPos);
+                break;
+
+            case GameStates.Place:
+                HandlePlaceClick(eventData, worldPos);
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    void HandlePlayClick(PointerEventData eventData, Vector2 worldPos)
+    {
+        Piece hitTower;
+        if (Towers.Find(worldPos, out hitTower))
+        {
             Towers.SelectTower(hitTower);
+            ChangeState(GameStates.Pause);
+        }
+    }
+
+    void HandlePauseClick(PointerEventData eventData, Vector2 worldPos)
+    {
+        Piece hitTower;
+        if (Towers.Find(worldPos, out hitTower) && Towers.HasSelectedTower)
+        {
+            if (hitTower == Towers.SelectedTower)
+            {
+                Towers.SelectedTower = null;
+                ChangeState(GameStates.Play);
+            }
+            else
+            {
+                Towers.SelectTower(hitTower);
+            }
             return;
         }
 
         Spot hitSpot;
-        if (Map.Graph.FindSpot(worldPos, out hitSpot) && Towers.HasSelectedTower)
+        if (Map.Graph.FindSpot(worldPos, out hitSpot) && hitSpot.Type == SpotTypes.TowerSpot && Towers.HasSelectedTower)
         {
-            Debug.Log("Moving tower to spot...");
             Towers.MoveTower(Towers.SelectedTower, hitSpot);
+            ChangeState(GameStates.Play);
+        }
+    }
+
+    void HandlePlaceClick(PointerEventData eventData, Vector2 worldPos)
+    {
+        Spot hitSpot;
+        if (Map.Graph.FindSpot(worldPos, out hitSpot))
+        {
+            Piece hitTower;
+            if (Towers.Find(worldPos, out hitTower))
+            {
+                bool rightClick = (eventData.button == PointerEventData.InputButton.Right);
+
+                if (rightClick)
+                {
+                    Towers.Remove(hitTower);
+                }
+            }
+            else if (hitSpot.Type == SpotTypes.TowerSpot)
+            {
+                Towers.Spawn(hitSpot);
+            }
         }
     }
 }

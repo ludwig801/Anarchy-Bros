@@ -9,7 +9,7 @@ public class Piece : MonoBehaviour
     public float DeathSpeed;
     public Tags.Tag TargetTag;
     public bool Alive { get { return (Health > 0) && gameObject.activeSelf; } }
-    public bool IsAttacking
+    public bool Attacking
     {
         get
         {
@@ -20,6 +20,7 @@ public class Piece : MonoBehaviour
         {
             _isAttacking = value;
             Animator.SetBool("Attacking", value);
+            Movement.CanMove = !value;
         }
     }
     public Animator Animator
@@ -69,9 +70,9 @@ public class Piece : MonoBehaviour
         switch (TargetTag)
         {
             case Tags.Tag.Tower:
-                if (!_gameManager.GetTarget(Movement, out Movement.Target))
+                if (!_gameManager.GetTowerTarget(Movement) && Alive)
                 {
-                    Debug.LogWarning("Failed to give a new target with the tag: " + TargetTag.ToString());
+                    StartCoroutine(Die());
                 }
                 break;
         }
@@ -91,10 +92,10 @@ public class Piece : MonoBehaviour
 
     public void Live()
     {   
-        Health = MaxHealth;     
-        IsAttacking = false;
+        Health = MaxHealth;
+        Attacking = false;
         Animator.ResetTrigger("Die");
-        Animator.SetBool("Alive", Alive);
+        Animator.SetBool("Alive", true);
         //_healthElement.gameObject.SetActive(true);
     }
 

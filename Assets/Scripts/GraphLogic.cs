@@ -148,9 +148,6 @@ public class GraphLogic : MonoBehaviour
         for (int i = 0; i < source.Edges.Count; i++)
         {
             Spot neighbor = source.Edges[i].Neighbor(source);
-            Debug.Log("Neighbor: " + neighbor);
-            Debug.Log("Distances: " + _distances);
-            Debug.Log("Target: " + target);
             float d = _distances[neighbor.Index, target.Index] + DistanceBetween(source, neighbor);
 
             if (d < minDist)
@@ -165,11 +162,11 @@ public class GraphLogic : MonoBehaviour
 
     Spot NextStep(Spot source, MoveBehavior target)
     {
-        if (source.Edges.Contains(target.CurrentEdge))
+        if (target.CurrentEdge.HasSpot(source))
         {
             if (source == target.Step)
             {
-                return target.CurrentEdge.Neighbor(source);
+                return target.CurrentEdge.Neighbor(target.Step);
             }
             else
             {
@@ -223,7 +220,7 @@ public class GraphLogic : MonoBehaviour
         {
             Edge edge = target.CurrentEdge;
             Spot spot = target.Step == edge.A ? edge.A : edge.B;
-            Vector2 spotPos = spot.transform.position;
+            Vector2 spotPos = spot.transform.position;            
             return Tools2D.Distance(target.transform.position, spotPos) < Tools2D.Distance(source.transform.position, spotPos) ? spot : edge.Neighbor(spot);
         }
 

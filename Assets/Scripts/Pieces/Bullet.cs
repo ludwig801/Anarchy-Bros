@@ -51,7 +51,7 @@ public class Bullet : MonoBehaviour
 
         Piece piece = other.GetComponent<Piece>();
         piece.TakeDamage(Damage);
-        _gameController.CreateWound(piece.transform, (piece.transform.position - transform.position).normalized);
+        _gameController.CreateWound(piece.Movement, (piece.transform.position - transform.position).normalized);
         Die();
     }
 

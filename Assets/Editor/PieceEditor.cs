@@ -24,7 +24,7 @@ public class PieceEditor : Editor
         _script.TargetTag = (Tags.Tag)EditorGUILayout.EnumPopup("Target Tag", _script.TargetTag);
         GUI.enabled = false;
         EditorGUILayout.Toggle("Alive", _script.Alive);
-        EditorGUILayout.Toggle("Is Attacking", _script.IsAttacking);
+        EditorGUILayout.Toggle("Is Attacking", _script.Attacking);
         GUI.enabled = true;
     }
 }
