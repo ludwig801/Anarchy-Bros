@@ -10,6 +10,13 @@ public class GameManager : MonoBehaviour
     public Transform ObjWounds;
     public GameObject WoundPrefab;
     public List<Wound> Wounds;
+    public GameStates CurrentState
+    {
+        get
+        {
+            return _currentState;
+        }
+    }
     public TowerManager Towers
     {
         get
@@ -32,22 +39,23 @@ public class GameManager : MonoBehaviour
             return _enemies;
         }
     }
-    public Map Map
+    public MapManager Map
     {
         get
         {
             if (_map == null)
             {
-                _map = ObjMap.GetComponent<Map>();
+                _map = ObjMap.GetComponent<MapManager>();
             }
 
             return _map;
         }
     }
 
+    GameStates _currentState;
     TowerManager _towers;
     EnemyManager _enemies;
-    Map _map;
+    MapManager _map;
 
     void Awake()
     {
@@ -68,26 +76,17 @@ public class GameManager : MonoBehaviour
 
         switch (CurrentState)
         {
-            case GameStates.Edit:
-                break;
-
-            case GameStates.Pause:
-                break;
-
-            case GameStates.Place:
-                break;
-
             case GameStates.Play:
                 if (Towers.ActiveTowers <= 0)
                 {
                     Towers.RemoveAll();
                 }
                 break;
+
+            default:
+                break;
         }
     }
-
-    public GameStates CurrentState { get { return _currentState; } }
-    GameStates _currentState;
 
     public void ChangeState(string newState)
     {
@@ -158,12 +157,56 @@ public class GameManager : MonoBehaviour
     public bool ProvideEnemyWithTargetSpot(MoveBehavior requester)
     {
         MoveBehavior closestTower;
-        return Map.GetClosestTower(requester, out closestTower) && Map.GraphLogic.ProvideTarget(requester, closestTower, out requester.Target);
+        return GetClosestTower(requester, out closestTower) && Map.GraphLogic.ProvideTarget(requester, closestTower, out requester.Target);
+    }
+
+    bool GetClosestTower(MoveBehavior requester, out MoveBehavior closestTower)
+    {
+        float minDist = float.MaxValue;
+        closestTower = null;
+
+        for (int i = 0; i < Towers.Objects.Count; i++)
+        {
+            PieceBehavior tower = Towers.Objects[i];
+            if (tower.Alive)
+            {
+                float d = Map.GraphLogic.DistanceBetween(requester, tower.Movement);
+                if (d < minDist)
+                {
+                    minDist = d;
+                    closestTower = tower.Movement;
+                }
+            }
+        }
+
+        return (closestTower != null);
     }
 
     public bool ProvideRangedPieceWithEnemyTarget(RangedPiece requester)
     {
-        return Map.GetClosestEnemy(requester.Piece.Movement, out requester.Target);
+        return GetClosestEnemy(requester.Piece.Movement, out requester.Target);
+    }
+
+    bool GetClosestEnemy(MoveBehavior requester, out MoveBehavior closestEnemy)
+    {
+        float minDist = float.MaxValue;
+        closestEnemy = null;
+
+        for (int i = 0; i < Enemies.Objects.Count; i++)
+        {
+            PieceBehavior enemy = Enemies.Objects[i];
+            if (enemy.Alive)
+            {
+                float d = Map.GraphLogic.DistanceBetween(requester, enemy.Movement);
+                if (d < minDist)
+                {
+                    minDist = d;
+                    closestEnemy = enemy.Movement;
+                }
+            }
+        }
+
+        return (closestEnemy != null);
     }
 
     public bool StepToTarget(MoveBehavior requester, out Spot newStep)
@@ -198,20 +241,27 @@ public class GameManager : MonoBehaviour
         return wound;
     }
 
-    public void OnPointerClick(PointerEventData eventData, Vector2 worldPos)
+    public void OnPointerClick(BaseEventData eventData)
     {
+        PointerEventData pEventData = eventData as PointerEventData;
+        Vector2 worldPos = pEventData.pointerCurrentRaycast.worldPosition;
+
         switch (CurrentState)
         {
             case GameStates.Play:
-                HandlePlayClick(eventData, worldPos); 
+                HandlePlayClick(pEventData, worldPos); 
                 break;
 
             case GameStates.Pause:
-                HandlePauseClick(eventData, worldPos);
+                HandlePauseClick(pEventData, worldPos);
                 break;
 
             case GameStates.Place:
-                HandlePlaceClick(eventData, worldPos);
+                HandlePlaceClick(pEventData, worldPos);
+                break;
+
+            case GameStates.Edit:
+                Map.HandleEditClick(pEventData, worldPos);
                 break;
 
             default:
@@ -221,7 +271,7 @@ public class GameManager : MonoBehaviour
 
     void HandlePlayClick(PointerEventData eventData, Vector2 worldPos)
     {
-        Piece hitTower;
+        PieceBehavior hitTower;
         if (Towers.Find(worldPos, out hitTower))
         {
             Towers.SelectTower(hitTower);
@@ -231,7 +281,7 @@ public class GameManager : MonoBehaviour
 
     void HandlePauseClick(PointerEventData eventData, Vector2 worldPos)
     {
-        Piece hitTower;
+        PieceBehavior hitTower;
         if (Towers.Find(worldPos, out hitTower) && Towers.HasSelectedTower)
         {
             if (hitTower == Towers.SelectedTower)
@@ -259,7 +309,7 @@ public class GameManager : MonoBehaviour
         Spot hitSpot;
         if (Map.Graph.FindSpot(worldPos, out hitSpot))
         {
-            Piece hitTower;
+            PieceBehavior hitTower;
             if (Towers.Find(worldPos, out hitTower))
             {
                 bool rightClick = (eventData.button == PointerEventData.InputButton.Right);

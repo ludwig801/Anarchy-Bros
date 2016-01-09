@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class UIController : MonoBehaviour
+public class UIManager : MonoBehaviour
 {
     public RectTransform PanelHealth;
     public RectTransform HealthElementPrefab;

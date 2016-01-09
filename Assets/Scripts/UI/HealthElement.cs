@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 public class HealthElement : MonoBehaviour
 {
-    public Piece Target;
+    public PieceBehavior Target;
     public Text TargetName;
     public Slider HealthBar;
     public Image HealthBarFill;

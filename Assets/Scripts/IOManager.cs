@@ -4,7 +4,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 using System;
 
-public class IOController : MonoBehaviour
+public class IOManager : MonoBehaviour
 {
     public TextAsset Level;
 
@@ -17,7 +17,7 @@ public class IOController : MonoBehaviour
 
     public void SaveGraph()
     {
-        Map map = _gameController.Map;
+        MapManager map = _gameController.Map;
         List<Spot> spots = map.Graph.Spots;
         List<Edge> edges = map.Graph.Edges;
 
@@ -40,7 +40,7 @@ public class IOController : MonoBehaviour
 
     public void LoadGraph()
     {
-        Map map = _gameController.Map;
+        MapManager map = _gameController.Map;
 
         Stream s = new MemoryStream(Level.bytes);
 
@@ -63,66 +63,66 @@ public class IOController : MonoBehaviour
         
         s.Close();
     }
+}
 
-    [Serializable]
-    class GameGraph
+[Serializable]
+class GameGraph
+{
+    internal List<IOSpot> Spots;
+    internal List<IOEdge> Edges;
+
+    internal GameGraph()
     {
-        internal List<IOSpot> Spots;
-        internal List<IOEdge> Edges;
+        Spots = new List<IOSpot>();
+        Edges = new List<IOEdge>();
+    }
 
-        internal GameGraph()
-        {
-            Spots = new List<IOSpot>();
-            Edges = new List<IOEdge>();
-        }
+    internal void AddSpot(Spot spot)
+    {
+        IOSpot x = new IOSpot();
+        x.Position = new Point(spot.transform.position);
+        x.Type = spot.Type;
+        Spots.Add(x);
+    }
 
-        internal void AddSpot(Spot spot)
-        {
-            IOSpot x = new IOSpot();
-            x.Position = new Point(spot.transform.position);
-            x.Type = spot.Type;
-            Spots.Add(x);
-        }
+    internal void AddEdge(Edge edge)
+    {
+        IOEdge x = new IOEdge();
+        x.a = new Point(edge.A.transform.position);
+        x.b = new Point(edge.B.transform.position);
+        Edges.Add(x);
+    }
+}
 
-        internal void AddEdge(Edge edge)
+[Serializable]
+class IOSpot
+{
+    internal SpotTypes Type;
+    internal Point Position;
+}
+
+[Serializable]
+class IOEdge
+{
+    internal Point a, b;
+}
+
+[Serializable]
+class Point
+{
+    internal float x, y;
+
+    internal Vector2 ToVector2
+    {
+        get
         {
-            IOEdge x = new IOEdge();
-            x.a = new Point(edge.A.transform.position);
-            x.b = new Point(edge.B.transform.position);
-            Edges.Add(x);
+            return new Vector2(x, y);
         }
     }
 
-    [Serializable]
-    class IOSpot
+    internal Point(Vector2 pos)
     {
-        internal SpotTypes Type;
-        internal Point Position;
-    }
-
-    [Serializable]
-    class IOEdge
-    {
-        internal Point a, b;
-    }
-
-    [Serializable]
-    class Point
-    {
-        internal float x, y;
-
-        internal Vector2 ToVector2
-        {
-            get
-            {
-                return new Vector2(x, y);
-            }
-        }
-
-        internal Point(Vector2 pos)
-        {
-            x = pos.x;
-            y = pos.y;
-        }
+        x = pos.x;
+        y = pos.y;
     }
 }

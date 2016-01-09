@@ -19,7 +19,6 @@ public class Wound : MonoBehaviour
             Animator.SetFloat("Speed", Speed);
             transform.position = Follow.position;
         }
-
     }
 
     public void Restart()

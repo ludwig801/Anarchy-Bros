@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-[RequireComponent(typeof(Piece))]
+[RequireComponent(typeof(PieceBehavior))]
 public class RangedPiece : MonoBehaviour
 {
     public GameObject WeaponPrefab;
@@ -10,13 +10,13 @@ public class RangedPiece : MonoBehaviour
     public MoveBehavior Target;
     public bool PredictiveShooting, CanFire;
     public List<Bullet> Bullets;
-    public Piece Piece
+    public PieceBehavior Piece
     {
         get
         {
             if (_piece == null)
             {
-                _piece = GetComponent<Piece>();
+                _piece = GetComponent<PieceBehavior>();
             }
             return _piece;
         }
@@ -35,7 +35,7 @@ public class RangedPiece : MonoBehaviour
 
     GameManager _gameManager;
     RangeWeapon _rangeWeapon;
-    Piece _piece;
+    PieceBehavior _piece;
     Vector2 _aimAt;
     float _animAttackSpeed, _timeSinceLastFired, _fireDelay = float.MaxValue;
 

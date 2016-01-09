@@ -1,18 +1,18 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-[RequireComponent(typeof(Piece))]
+[RequireComponent(typeof(PieceBehavior))]
 public class MeleePiece : MonoBehaviour
 {
     public GameObject WeaponPrefab;
-    public Piece Target;
-    public Piece Piece
+    public PieceBehavior Target;
+    public PieceBehavior Piece
     {
         get
         {
             if (_piece == null)
             {
-                _piece = GetComponent<Piece>();
+                _piece = GetComponent<PieceBehavior>();
             }
             return _piece;
         }
@@ -20,7 +20,7 @@ public class MeleePiece : MonoBehaviour
 
     GameManager _gameManager;
     MeleeWeapon _meleeWeapon;
-    Piece _piece;
+    PieceBehavior _piece;
     float _animAttackSpeed;
 
     void Start()
@@ -39,7 +39,7 @@ public class MeleePiece : MonoBehaviour
     {
         Piece.Animator.SetFloat("AttackingSpeed", _animAttackSpeed);
 
-        if (Target != null && !Target.Alive)
+        if (!Piece.Alive || (Target != null && !Target.Alive))
         {
             Target = null;
             Piece.Attacking = false;
@@ -54,7 +54,7 @@ public class MeleePiece : MonoBehaviour
         }
         else if (other.tag == Piece.TargetTag.ToString())
         {
-            Piece otherPiece = other.GetComponent<Piece>();  
+            PieceBehavior otherPiece = other.GetComponent<PieceBehavior>();  
             if (Target == null)
             {
                 Piece.Attacking = true;
@@ -71,7 +71,7 @@ public class MeleePiece : MonoBehaviour
         }
         else if (other.tag == Piece.TargetTag.ToString())
         {
-            Piece otherPiece = other.GetComponent<Piece>();
+            PieceBehavior otherPiece = other.GetComponent<PieceBehavior>();
             if (Target == otherPiece)
             {
                 Piece.Attacking = false;

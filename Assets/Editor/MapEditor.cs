@@ -1,14 +1,14 @@
 ﻿using UnityEngine;
 using UnityEditor;
 
-[CustomEditor(typeof(Map))]
+[CustomEditor(typeof(MapManager))]
 public class MapEditor : Editor
 {
-    Map _script;
+    MapManager _script;
 
     public void OnEnable()
     {
-        _script = target as Map;
+        _script = target as MapManager;
     }
 
     public override void OnInspectorGUI()

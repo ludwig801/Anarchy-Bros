@@ -32,7 +32,7 @@ public class Bullet : MonoBehaviour
         if (_timePassedSinceLastOutOfMapCheck > 0.03f)
         {
             _timePassedSinceLastOutOfMapCheck = 0;
-            if (_gameManager.Map.OutOfMap(transform.position, transform.localScale))
+            if (_gameManager.Map.OutOfMapBounds(transform.position, transform.localScale))
             {
                 Die();
             }
@@ -43,13 +43,13 @@ public class Bullet : MonoBehaviour
     {
         if (other.tag != Tags.GetStringTag(CollisionTag)) return;
 
-        Piece otherPiece = other.GetComponent<Piece>();
+        PieceBehavior otherPiece = other.GetComponent<PieceBehavior>();
         if (otherPiece.Alive)
         {
-            otherPiece.TakeDamage(Damage);          
-        }
-        _gameManager.CreateWound(otherPiece.Movement, -Direction.normalized);
-        Die();
+            otherPiece.TakeDamage(Damage);
+            _gameManager.CreateWound(otherPiece.Movement, -Direction.normalized);
+            Die();
+        }      
     }
 
     void Die()

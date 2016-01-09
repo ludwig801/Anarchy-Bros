@@ -2,15 +2,15 @@
 using System.Collections.Generic;
 using System;
 
-[RequireComponent(typeof(Graph))]
+[RequireComponent(typeof(GraphManager))]
 public class GraphLogic : MonoBehaviour
 {
-    Graph _graph;
+    GraphManager _graph;
     float[,] _distances;
 
     void Start()
     {
-        _graph = GetComponent<Graph>();
+        _graph = GetComponent<GraphManager>();
     }
 
     // Public Methods

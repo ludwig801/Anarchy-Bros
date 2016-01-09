@@ -1,76 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-public class Graph : MonoBehaviour
+public class GraphManager : MonoBehaviour
 {
+    public Transform ObjSpots, ObjEdges;
     public GameObject ConnectionPrefab, TowerSpotPrefab, EnemySpawnPrefab, EdgePrefab;
     public float SpotHitTolerance, EdgeHitTolerance;
     public List<Spot> Spots;
     public List<Edge> Edges;
-    public SpotTypes CurrentMode;
     public int SpotCount { get { return Spots.Count; } }
-
-    GameManager _gameController;
-
-    void Start()
-    {
-        _gameController = GameManager.Instance;
-    }
-
-    void CreateLink(Vector2 source)
-    {
-        Spot spot;
-        if (!FindSpot(source, out spot))
-        {
-            spot = CreateSpot(source, CurrentMode);
-            Edge hitEdge;
-
-            if (FindEdge(source, out hitEdge))
-            {
-                SplitEdge(hitEdge, spot);
-            }
-        }
-    }
-
-    void CreateLink(Vector2 source, Vector2 target)
-    {
-        Spot spotA, spotB;
-        Edge hitEdge;
-
-        if (!FindSpot(source, out spotA))
-        {
-            spotA = CreateSpot(source, CurrentMode);
-            if (FindEdge(source, out hitEdge))
-            {
-                SplitEdge(hitEdge, spotA);
-            }
-        }
-
-        if (!FindSpot(target, out spotB))
-        {
-            spotB = CreateSpot(target, CurrentMode);
-            if (FindEdge(target, out hitEdge))
-            {
-                SplitEdge(hitEdge, spotB);
-            }
-        }
-
-        if (FindEdge(spotA, spotB))
-        {
-            return;
-        }
-
-        CreateEdge(spotA, spotB);
-    }
-
-    void SplitEdge(Edge hitEdge, Spot spliterSpot)
-    {
-        Vector2 spotA = hitEdge.A.transform.position;
-        hitEdge.A.RemoveEdge(hitEdge);
-        hitEdge.A = spliterSpot;
-        spliterSpot.AddEdge(hitEdge);
-        CreateEdge(spliterSpot, FindSpot(spotA));
-    }
 
     public Spot CreateSpot(Vector2 worldPos, SpotTypes type)
     {
@@ -102,7 +40,7 @@ public class Graph : MonoBehaviour
         Spot spot = obj.GetComponent<Spot>();
         spot.transform.position = worldPos;
         spot.Type = type;
-        spot.transform.parent = transform;
+        spot.transform.parent = ObjSpots;
         Spots.Add(spot);
 
         return spot;
@@ -110,14 +48,11 @@ public class Graph : MonoBehaviour
 
     public Edge CreateEdge(Spot a, Spot b)
     {
-        if (FindEdge(a, b))
-        {
-            return null;
-        }
+        if (FindEdge(a, b)) return null;
 
         Edge obj = Instantiate(EdgePrefab).GetComponent<Edge>();
         obj.name = "Edge"; ;
-        obj.transform.parent = transform;
+        obj.transform.parent = ObjEdges;
         obj.A = a;
         obj.B = b;
         obj.A.AddEdge(obj);
@@ -127,9 +62,9 @@ public class Graph : MonoBehaviour
         return obj;
     }
 
-    public Spot ChangeType(Spot spot, SpotTypes toType)
+    public Spot ChangeSpotType(Spot spot, SpotTypes newType)
     {
-        Spot to = CreateSpot(spot.transform.position, toType);
+        Spot to = CreateSpot(spot.transform.position, newType);
         for (int i = spot.Edges.Count - 1; i >= 0; i--)
         {
             Edge e = spot.Edges[i];
@@ -138,12 +73,12 @@ public class Graph : MonoBehaviour
             spot.RemoveEdge(spot.Edges[i]);
         }
 
-        Remove(spot);
+        RemoveSpot(spot);
 
         return to;
     }
 
-    public void Remove(Edge edge)
+    public void RemoveEdge(Edge edge)
     {
         Edges.Remove(edge);
         edge.A.RemoveEdge(edge);
@@ -151,11 +86,11 @@ public class Graph : MonoBehaviour
         Destroy(edge.gameObject);
     }
 
-    public void Remove(Spot spot)
+    public void RemoveSpot(Spot spot)
     {
         for (int i = spot.Edges.Count - 1; i >= 0; i--)
         {
-            Remove(spot.Edges[i]);
+            RemoveEdge(spot.Edges[i]);
         }
 
         Spots.Remove(spot);
@@ -166,12 +101,12 @@ public class Graph : MonoBehaviour
     {
         for (int i = Spots.Count - 1; i >= 0; i--)
         {
-            Remove(Spots[i]);
+            RemoveSpot(Spots[i]);
         }
 
         for (int i = Edges.Count - 1; i >= 0; i--)
         {
-            Remove(Edges[i]);
+            RemoveEdge(Edges[i]);
         }
 
         Edges.Clear();
@@ -209,13 +144,7 @@ public class Graph : MonoBehaviour
 
     public bool FindEdge(Spot a, Spot b)
     {
-        Edge hit;
-        return FindEdge(a, b, out hit);
-    }
-
-    public bool FindEdge(Spot a, Spot b, out Edge hit)
-    {
-        hit = null;
+        Edge hit = null;
         for (int i = 0; i < Edges.Count; i++)
         {
             Edge x = Edges[i];
@@ -227,11 +156,6 @@ public class Graph : MonoBehaviour
         }
 
         return (hit != null);
-    }
-
-    public bool FindEdge(Vector2 pos, out Edge hit, float tolerance)
-    {
-        return (hit = FindEdge(pos, tolerance)) != null;
     }
 
     public Edge FindEdge(Vector2 pos, float tolerance)
@@ -264,9 +188,9 @@ public class Graph : MonoBehaviour
         return (hit = FindEdge(pos)) != null;
     }
 
-    public Spot RandomSpot(SpotTypes type)
+    public Spot GetRandomSpot(SpotTypes type)
     {
-        int rand = UnityEngine.Random.Range(0, TypeCount(type));
+        int rand = Random.Range(0, TypeCount(type));
 
         Spot s = null;
 
@@ -303,28 +227,5 @@ public class Graph : MonoBehaviour
         }
 
         return count;
-    }
-
-    public bool OnPointerClick(Vector2 pos)
-    {
-        Spot spot;
-        Edge edge;
-
-        if (FindSpot(pos, out spot))
-        {
-            switch (_gameController.CurrentState)
-            {
-                case GameStates.Place:
-                    _gameController.Towers.Spawn(spot);
-                    return true;
-            }
-        }
-
-        if (FindEdge(pos, out edge))
-        {
-            return true;
-        }
-
-        return false;
     }
 }

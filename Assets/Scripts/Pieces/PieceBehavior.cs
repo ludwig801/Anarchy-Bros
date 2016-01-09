@@ -3,12 +3,13 @@ using UnityEngine;
 
 [RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(MoveBehavior))]
-public class Piece : MonoBehaviour
+public class PieceBehavior : MonoBehaviour
 {
     public int MaxHealth, Health;
     public float DeathSpeed;
     public Tags.Tag TargetTag;
     public bool Alive { get { return (Health > 0) && gameObject.activeSelf; } }
+    public bool Reciclable;
     public bool Attacking
     {
         get
@@ -20,7 +21,7 @@ public class Piece : MonoBehaviour
         {
             _isAttacking = value;
             Animator.SetBool("Attacking", value);
-            Movement.CanMove = !value;
+            Movement.CanMove = !value && Alive;
         }
     }
     public Animator Animator
@@ -75,7 +76,7 @@ public class Piece : MonoBehaviour
 
         yield return new WaitForSeconds(DeathSpeed);
 
-        gameObject.SetActive(false);
+        Reciclable = true;
     }
 
     public void Live()
@@ -85,6 +86,7 @@ public class Piece : MonoBehaviour
         Animator.ResetTrigger("Die");
         Animator.SetBool("Alive", Alive);
         Movement.CanMove = Alive;
+        Reciclable = false;
         //_healthElement.gameObject.SetActive(true);
     }
 

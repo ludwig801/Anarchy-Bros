@@ -4,11 +4,10 @@ using System.Collections.Generic;
 
 public class Spot : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler
 {
-    public Color ColorInEditor, ColorInGame;
+    public Color ColorInEditor, ColorInGame, ColorInGamePaused;
     public int Index;
-    public float HitRadius;
     public SpotTypes Type;
-    public Piece Tower;
+    public PieceBehavior Tower;
     public bool Occupied { get { return Tower != null; } }
     public List<Edge> Edges;
     public Collider2D Collider
@@ -41,6 +40,10 @@ public class Spot : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
         {
             case GameStates.Play:
                 _renderer.color = Color.Lerp(_renderer.color, ColorInGame, Time.deltaTime * 8f);
+                break;
+
+            case GameStates.Pause:
+                _renderer.color = Color.Lerp(_renderer.color, ColorInGamePaused, Time.unscaledDeltaTime * 8f);
                 break;
 
             default:

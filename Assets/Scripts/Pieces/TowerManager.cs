@@ -7,23 +7,23 @@ public class TowerManager : MonoBehaviour
     public GameObject TowerPrefab;
     public int MaxNumTowers;
     public float TowerHitTolerance;
-    public Piece SelectedTower;
-    public List<Piece> Objects;
+    public PieceBehavior SelectedTower;
+    public List<PieceBehavior> Objects;
     public int ActiveTowers { get { return CountActiveTowers(); } }
     public bool HasSelectedTower { get { return SelectedTower != null; } }
 
-    Piece Find()
+    PieceBehavior Find()
     {
         for (int i = 0; i < Objects.Count; i++)
         {
-            Piece x = Objects[i];
-            if (!x.Alive)
+            PieceBehavior x = Objects[i];
+            if (x.Reciclable)
             {
                 return Objects[i];
             }
         }
 
-        Piece piece = Instantiate(TowerPrefab).GetComponent<Piece>();
+        PieceBehavior piece = Instantiate(TowerPrefab).GetComponent<PieceBehavior>();
         piece.name = tag.ToString();
         piece.transform.parent = transform;
         Objects.Add(piece);
@@ -32,7 +32,7 @@ public class TowerManager : MonoBehaviour
         return piece;
     }
 
-    public bool Find(Vector2 pos, out Piece tower)
+    public bool Find(Vector2 pos, out PieceBehavior tower)
     {
         tower = null;
         for (int i = 0; i < Objects.Count; i++)
@@ -59,12 +59,12 @@ public class TowerManager : MonoBehaviour
         return true;
     }
 
-    public void SelectTower(Piece tower)
+    public void SelectTower(PieceBehavior tower)
     {
         SelectedTower = tower;
     }
 
-    public void MoveTower(Piece tower, Spot moveTo)
+    public void MoveTower(PieceBehavior tower, Spot moveTo)
     {
         tower.Movement.Target = moveTo;
     }
@@ -88,7 +88,7 @@ public class TowerManager : MonoBehaviour
     {
         if (ActiveTowers < MaxNumTowers)
         {
-            Piece obj = Find();
+            PieceBehavior obj = Find();
             obj.name = TowerPrefab.name;
             obj.gameObject.SetActive(true);
             obj.transform.position = Tools2D.Convert(obj.transform.position, spot.transform.position);
@@ -104,12 +104,12 @@ public class TowerManager : MonoBehaviour
         }
     }
 
-    public Piece Random()
+    public PieceBehavior Random()
     {
         int rand = UnityEngine.Random.Range(0, ActiveTowers);
         for (int i = 0; i < Objects.Count; i++)
         {
-            Piece x = Objects[i];
+            PieceBehavior x = Objects[i];
             if (x.Alive)
             {
                 if (rand <= 0) return x;
@@ -120,7 +120,7 @@ public class TowerManager : MonoBehaviour
         return null;
     }
 
-    public void Remove(Piece tower)
+    public void Remove(PieceBehavior tower)
     {
         Objects.Remove(tower);
         Destroy(tower.gameObject);
@@ -142,7 +142,7 @@ public class TowerManager : MonoBehaviour
     {
         for (int i = 0; i < Objects.Count; i++)
         {
-            Piece x = Objects[i];
+            PieceBehavior x = Objects[i];
             if (x.Alive)
             {
                 StartCoroutine(x.Die());
@@ -160,7 +160,7 @@ public class TowerManager : MonoBehaviour
 
     public bool OnPointerClick(Vector2 pos)
     {
-        Piece tower;
+        PieceBehavior tower;
         if (Find(pos, out tower))
         {
             return true;

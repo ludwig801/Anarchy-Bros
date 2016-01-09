@@ -2,7 +2,7 @@
 
 public class Edge : MonoBehaviour
 {
-    public Color ColorInEditor, ColorInGame;
+    public Color ColorInEditor, ColorInGame, ColorInGamePaused;
     public Spot A, B;
     public float Thickness;
 
@@ -24,6 +24,17 @@ public class Edge : MonoBehaviour
         {
             case GameStates.Play:
                 _renderer.color = Color.Lerp(_renderer.color, ColorInGame, Time.deltaTime * 8f);
+                break;
+
+            case GameStates.Pause:
+                if (A.Type == SpotTypes.TowerSpot && B.Type == SpotTypes.TowerSpot)
+                {
+                    _renderer.color = Color.Lerp(_renderer.color, ColorInGamePaused, Time.unscaledDeltaTime * 8f);
+                }
+                else
+                {
+                    _renderer.color = Color.Lerp(_renderer.color, ColorInGame, Time.unscaledDeltaTime * 8f);
+                }
                 break;
 
             default:

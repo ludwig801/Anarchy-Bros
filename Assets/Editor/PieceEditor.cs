@@ -1,20 +1,20 @@
 ﻿using UnityEngine;
 using UnityEditor;
 
-[CustomEditor(typeof(Piece))]
+[CustomEditor(typeof(PieceBehavior))]
 public class PieceEditor : Editor
 {
-    Piece _script;
+    PieceBehavior _script;
 
     void OnEnable()
     {
-        _script = target as Piece;
+        _script = target as PieceBehavior;
     }
 
     public override void OnInspectorGUI()
     {
         GUI.enabled = false;
-        EditorGUILayout.ObjectField("Script", _script, typeof(Piece), false);
+        EditorGUILayout.ObjectField("Script", _script, typeof(PieceBehavior), false);
         GUI.enabled = true;
         _script.MaxHealth = EditorGUILayout.IntField("Full Health", _script.MaxHealth);
         GUI.enabled = false;

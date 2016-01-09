@@ -5,9 +5,9 @@ public class EnemyManager : MonoBehaviour
 {
     public GameObject EnemyPrefab;
     public float SpawnTime;
-    public int MaxNumEnemies;
-    public List<Piece> Objects;
-    public int ActiveEnemies {get { return CountActiveEnemies(); }}
+    public int MaxNumEnemies, MaxNumDeadBodies;
+    public List<PieceBehavior> Objects;
+    public int AliveEnemies {get { return CountAliveEnemies(); }}
 
     GameManager _gameManager;
     float _timeSinceLastSpawn;
@@ -25,7 +25,7 @@ public class EnemyManager : MonoBehaviour
         {
             case GameStates.Play:
                 _timeSinceLastSpawn += Time.deltaTime;
-                if (_timeSinceLastSpawn >= SpawnTime && ActiveEnemies < MaxNumEnemies)
+                if (_timeSinceLastSpawn >= SpawnTime && AliveEnemies < MaxNumEnemies)
                 {
                     SpawnEnemy();
                     _timeSinceLastSpawn = 0;
@@ -33,7 +33,7 @@ public class EnemyManager : MonoBehaviour
 
                 for (int i = 0; i < Objects.Count; i++)
                 {
-                    Piece enemy = Objects[i];
+                    PieceBehavior enemy = Objects[i];
                     if (enemy.Alive && !_gameManager.ProvideEnemyWithTargetSpot(enemy.Movement))
                     {
                         StartCoroutine(enemy.Die());
@@ -49,12 +49,12 @@ public class EnemyManager : MonoBehaviour
 
     void SpawnEnemy()
     {
-        Piece objective;
+        PieceBehavior objective;
         Spot spawnSpot;
 
         if (NewTarget(out objective, out spawnSpot))
         {
-            Piece obj = Find();
+            PieceBehavior obj = Find();
             obj.transform.position = spawnSpot.transform.position;
             obj.name = "Enemy";
             obj.gameObject.SetActive(true);
@@ -64,18 +64,18 @@ public class EnemyManager : MonoBehaviour
         }
     }
 
-    Piece Find()
+    PieceBehavior Find()
     {
         for (int i = 0; i < Objects.Count; i++)
         {
-            Piece x = Objects[i];
-            if (!x.Alive)
+            PieceBehavior x = Objects[i];
+            if (x.Reciclable)
             {
                 return Objects[i];
             }
         }
 
-        Piece piece = Instantiate(EnemyPrefab).GetComponent<Piece>();
+        PieceBehavior piece = Instantiate(EnemyPrefab).GetComponent<PieceBehavior>();
         piece.name = tag.ToString();
         piece.transform.parent = transform;
         Objects.Add(piece);
@@ -84,21 +84,21 @@ public class EnemyManager : MonoBehaviour
         return piece;
     }
 
-    bool NewTarget(out Piece finalObjective, out Spot spawnSpot)
+    bool NewTarget(out PieceBehavior finalObjective, out Spot spawnSpot)
     {
-        spawnSpot = _gameManager.Map.Graph.RandomSpot(SpotTypes.EnemySpawn);
+        spawnSpot = _gameManager.Map.Graph.GetRandomSpot(SpotTypes.EnemySpawn);
         finalObjective = _gameManager.Towers.Random();
 
         return (finalObjective != null && spawnSpot != null);
     }
 
-    int CountActiveEnemies()
+    int CountAliveEnemies()
     {
         int count = 0;
 
         for (int i = 0; i < Objects.Count; i++)
         {
-            if (Objects[i].gameObject.activeSelf)
+            if (Objects[i].Alive)
             {
                 count++;
             }
@@ -107,7 +107,7 @@ public class EnemyManager : MonoBehaviour
         return count;
     }
 
-    public void Remove(Piece enemy)
+    public void Remove(PieceBehavior enemy)
     {
         Objects.Remove(enemy);
         Destroy(enemy.gameObject);
@@ -127,7 +127,7 @@ public class EnemyManager : MonoBehaviour
     {
         for (int i = 0; i < Objects.Count; i++)
         {
-            Piece x = Objects[i];
+            PieceBehavior x = Objects[i];
             if (x.Alive)
             {
                 StartCoroutine(x.Die());
