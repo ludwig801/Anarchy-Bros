@@ -16,7 +16,7 @@ public class MoveBehaviorEditor : Editor
         base.OnInspectorGUI();
 
         GUI.enabled = false;
-        EditorGUILayout.Toggle("Moving", _script.IsMoving);
+        EditorGUILayout.Toggle("Moving", _script.Moving);
         EditorGUILayout.Toggle("Spot", _script.HasCurrentSpot);
         EditorGUILayout.Toggle("Edge", _script.HasCurrentEdge);
         GUI.enabled = true;

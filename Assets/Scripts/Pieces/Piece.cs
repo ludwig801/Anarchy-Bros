@@ -69,7 +69,8 @@ public class Piece : MonoBehaviour
     {
         Health = 0;
         Animator.SetTrigger("Die");
-        Animator.SetBool("Alive", false);
+        Animator.SetBool("Alive", Alive);
+        Movement.CanMove = Alive;
         //_healthElement.gameObject.SetActive(false);
 
         yield return new WaitForSeconds(DeathSpeed);
@@ -82,7 +83,8 @@ public class Piece : MonoBehaviour
         Health = MaxHealth;
         Attacking = false;
         Animator.ResetTrigger("Die");
-        Animator.SetBool("Alive", true);
+        Animator.SetBool("Alive", Alive);
+        Movement.CanMove = Alive;
         //_healthElement.gameObject.SetActive(true);
     }
 

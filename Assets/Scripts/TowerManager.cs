@@ -96,6 +96,7 @@ public class TowerManager : MonoBehaviour
             spot.Tower = obj;
             obj.Movement.Target = spot;
             obj.Movement.CurrentSpot = spot;
+            obj.GetComponent<RangedPiece>().BulletCan = ObjBullets;
         }
         else
         {

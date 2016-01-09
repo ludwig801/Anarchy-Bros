@@ -161,6 +161,11 @@ public class GameManager : MonoBehaviour
         return Map.GetClosestTower(requester, out closestTower) && Map.GraphLogic.ProvideTarget(requester, closestTower, out requester.Target);
     }
 
+    public bool ProvideRangedPieceWithEnemyTarget(RangedPiece requester)
+    {
+        return Map.GetClosestEnemy(requester.Piece.Movement, out requester.Target);
+    }
+
     public bool StepToTarget(MoveBehavior requester, out Spot newStep)
     {
         return Map.GraphLogic.StepToTarget(requester, out newStep);

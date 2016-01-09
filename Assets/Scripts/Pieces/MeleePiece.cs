@@ -6,6 +6,17 @@ public class MeleePiece : MonoBehaviour
 {
     public GameObject WeaponPrefab;
     public Piece Target;
+    public Piece Piece
+    {
+        get
+        {
+            if (_piece == null)
+            {
+                _piece = GetComponent<Piece>();
+            }
+            return _piece;
+        }
+    }
 
     GameManager _gameManager;
     MeleeWeapon _meleeWeapon;
@@ -15,8 +26,6 @@ public class MeleePiece : MonoBehaviour
     void Start()
     {
         _gameManager = GameManager.Instance;
-
-        _piece = GetComponent<Piece>();
 
         _meleeWeapon = Instantiate(WeaponPrefab).GetComponent<MeleeWeapon>();
         _meleeWeapon.transform.position = transform.position;
@@ -28,27 +37,27 @@ public class MeleePiece : MonoBehaviour
 
     void Update()
     {
-        _piece.Animator.SetFloat("AttackingSpeed", _animAttackSpeed);
+        Piece.Animator.SetFloat("AttackingSpeed", _animAttackSpeed);
 
         if (Target != null && !Target.Alive)
         {
             Target = null;
-            _piece.Attacking = false;
+            Piece.Attacking = false;
         }
     }
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.tag == _piece.tag)
+        if (other.tag == Piece.tag)
         {
             // Prevent movement from one end
         }
-        else if (other.tag == _piece.TargetTag.ToString())
+        else if (other.tag == Piece.TargetTag.ToString())
         {
             Piece otherPiece = other.GetComponent<Piece>();  
             if (Target == null)
             {
-                _piece.Attacking = true;
+                Piece.Attacking = true;
                 Target = otherPiece;
             }
         }
@@ -56,16 +65,16 @@ public class MeleePiece : MonoBehaviour
 
     void OnTriggerExit2D(Collider2D other)
     {
-        if (other.tag == _piece.tag)
+        if (other.tag == Piece.tag)
         {
             // Conceded movement from one end
         }
-        else if (other.tag == _piece.TargetTag.ToString())
+        else if (other.tag == Piece.TargetTag.ToString())
         {
             Piece otherPiece = other.GetComponent<Piece>();
             if (Target == otherPiece)
             {
-                _piece.Attacking = false;
+                Piece.Attacking = false;
                 Target = null;
             }
         }
@@ -76,7 +85,7 @@ public class MeleePiece : MonoBehaviour
         if (Target != null)
         {
             Target.TakeDamage(_meleeWeapon.Damage);
-            _gameManager.CreateWound(Target.Movement, (_piece.transform.position - Target.transform.position).normalized);
+            _gameManager.CreateWound(Target.Movement, (Piece.transform.position - Target.transform.position).normalized);
         }
     }
 }

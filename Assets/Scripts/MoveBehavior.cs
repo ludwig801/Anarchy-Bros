@@ -19,7 +19,7 @@ public class MoveBehavior : MonoBehaviour
             return _animator;
         }
     }
-    public bool IsMoving
+    public bool Moving
     {
         get
         {
@@ -54,19 +54,19 @@ public class MoveBehavior : MonoBehaviour
     {
         if (!_gameManager.IsCurrentState(GameStates.Play))
         {
-            IsMoving = false;
+            Moving = false;
             return;
         }
 
         if (!CanMove)
         {
-            IsMoving = false;
+            Moving = false;
             return;
         }
 
         if (Target == null)
         {
-            IsMoving = false;
+            Moving = false;
             return;
         }
 
@@ -85,12 +85,12 @@ public class MoveBehavior : MonoBehaviour
 
         if (CurrentSpot == Target)
         {
-            IsMoving = false;
+            Moving = false;
             Step = null;
         }
         else if (_gameManager.StepToTarget(this, out Step))
         {
-            IsMoving = true;
+            Moving = true;
             if (CurrentSpot != null)
             {
                 CurrentSpot.GetEdge(Step, out CurrentEdge);

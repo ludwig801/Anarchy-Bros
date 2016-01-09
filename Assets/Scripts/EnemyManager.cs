@@ -40,6 +40,10 @@ public class EnemyManager : MonoBehaviour
                     }
                 }
                 break;
+
+            default:
+                _timeSinceLastSpawn = 0;
+                break;
         }
     }
 

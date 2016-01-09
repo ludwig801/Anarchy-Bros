@@ -2,43 +2,37 @@
 
 public class Bullet : MonoBehaviour
 {
-    public Vector2 Direction;
+    public Tags.Tag CollisionTag;
     public float Speed;
     public int Damage;
-    public Tags.Tag CollisionTag;
-    public bool Fire;
+    public Vector2 Direction;
 
-    GameManager _gameController;
+    GameManager _gameManager;
 
-    float _delta;
+    float _timePassedSinceLastOutOfMapCheck;
 
     void Start()
     {
-        _gameController = GameManager.Instance;
+        _gameManager = GameManager.Instance;
 
-        _delta = 0;
+        _timePassedSinceLastOutOfMapCheck = 0;
     }
 
     void Update()
     {
-        if (!_gameController.IsCurrentState(GameStates.Play))
-        {
-            return;
-        }
-
-        if (!Fire)
+        if (!_gameManager.IsCurrentState(GameStates.Play))
         {
             return;
         }
 
         transform.position = Tools2D.MoveInDirection(transform.position, Direction, Time.deltaTime * Speed);
 
-        _delta += Time.deltaTime;
+        _timePassedSinceLastOutOfMapCheck += Time.deltaTime;
 
-        if (_delta > 0.03f)
+        if (_timePassedSinceLastOutOfMapCheck > 0.03f)
         {
-            _delta = 0;
-            if (_gameController.Map.OutOfMap(transform.position, transform.localScale))
+            _timePassedSinceLastOutOfMapCheck = 0;
+            if (_gameManager.Map.OutOfMap(transform.position, transform.localScale))
             {
                 Die();
             }
@@ -49,15 +43,17 @@ public class Bullet : MonoBehaviour
     {
         if (other.tag != Tags.GetStringTag(CollisionTag)) return;
 
-        Piece piece = other.GetComponent<Piece>();
-        piece.TakeDamage(Damage);
-        _gameController.CreateWound(piece.Movement, (piece.transform.position - transform.position).normalized);
+        Piece otherPiece = other.GetComponent<Piece>();
+        if (otherPiece.Alive)
+        {
+            otherPiece.TakeDamage(Damage);          
+        }
+        _gameManager.CreateWound(otherPiece.Movement, -Direction.normalized);
         Die();
     }
 
     void Die()
     {
-        Fire = false;
         gameObject.SetActive(false);
         transform.position = new Vector3(100, 100, transform.position.z);
     }

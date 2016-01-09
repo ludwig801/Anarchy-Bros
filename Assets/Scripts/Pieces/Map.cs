@@ -66,6 +66,28 @@ public class Map : MonoBehaviour
         return (closestTower != null);
     }
 
+    public bool GetClosestEnemy(MoveBehavior requester, out MoveBehavior closestEnemy)
+    {
+        float minDist = float.MaxValue;
+        closestEnemy = null;
+
+        for (int i = 0; i < _gameManager.Enemies.Objects.Count; i++)
+        {
+            Piece enemy = _gameManager.Enemies.Objects[i];
+            if (enemy.Alive)
+            {
+                float d = GraphLogic.DistanceBetween(requester, enemy.Movement);
+                if (d < minDist)
+                {
+                    minDist = d;
+                    closestEnemy = enemy.Movement;
+                }
+            }
+        }
+
+        return (closestEnemy != null);
+    }
+
     public void OnModeChanged(int newMode)
     {
         Targeting = false;
