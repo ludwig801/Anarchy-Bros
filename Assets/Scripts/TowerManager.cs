@@ -46,6 +46,19 @@ public class TowerManager : MonoBehaviour
         return (tower != null);
     }
 
+    public bool NoTowerHasTarget(Spot target)
+    {
+        for (int i = 0; i < Objects.Count; i++)
+        {
+            if (Objects[i].Movement.Target == target)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public void SelectTower(Piece tower)
     {
         SelectedTower = tower;

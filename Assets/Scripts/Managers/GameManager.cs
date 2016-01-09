@@ -247,7 +247,7 @@ public class GameManager : MonoBehaviour
         }
 
         Spot hitSpot;
-        if (Map.Graph.FindSpot(worldPos, out hitSpot) && hitSpot.Type == SpotTypes.TowerSpot && Towers.HasSelectedTower)
+        if (Map.Graph.FindSpot(worldPos, out hitSpot) && hitSpot.Type == SpotTypes.TowerSpot && Towers.HasSelectedTower && Towers.NoTowerHasTarget(hitSpot))
         {
             Towers.MoveTower(Towers.SelectedTower, hitSpot);
             ChangeState(GameStates.Play);

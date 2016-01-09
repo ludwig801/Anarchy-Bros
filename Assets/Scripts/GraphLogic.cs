@@ -269,7 +269,8 @@ public class GraphLogic : MonoBehaviour
 
     float DistanceBetween(Spot source, MoveBehavior target)
     {
-        return Mathf.Min(DistanceBetween(source, target.CurrentEdge.A), DistanceBetween(source, target.CurrentEdge.B));
+        return Mathf.Min(DistanceBetween(source, target.CurrentEdge.A) + Tools2D.Distance(target.transform.position, target.CurrentEdge.A.transform.position),
+            DistanceBetween(source, target.CurrentEdge.B) + Tools2D.Distance(target.transform.position, target.CurrentEdge.B.transform.position));
     }
 
     int GetNextBest(List<GraphSpot> graph)
