@@ -5,7 +5,8 @@ public enum GameStates
     Play = 0,
     Place = 1,
     Edit = 2,
-    Pause = 3
+    Pause = 3,
+    GameOver
 }
 
 public enum GraphModes
@@ -22,24 +23,30 @@ public enum SpotTypes
     EnemySpawn = 2
 }
 
-public abstract class Tags
+public enum Tags
 {
-    public enum Tag
-    {
-        Tower,
-        Enemy
-    }
+    Tower,
+    Enemy
+}
 
-    static Dictionary<Tag, string> dictionary = new Dictionary<Tag, string>
-    {
-        { Tag.Tower, "Tower" },
-        { Tag.Enemy, "Enemy" }
-    };
+public enum LevelEras
+{
+    Egyptian,
+    Greek,
+    Roman
+}
 
-    public static string GetStringTag(Tag tagIdentifier)
-    {
-        string result = "";
-        dictionary.TryGetValue(tagIdentifier, out result);
-        return result;
-    }
+public enum SortingLayers
+{
+    Default,
+    Background,
+    Graph,
+    Pieces
+}
+
+public enum MenuPanels
+{
+    Initial,
+    GroupSelection,
+    LevelSelection
 }

@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using UnityEditor;
-using AnarchyBros;
 
 [CustomEditor(typeof(Spot))]
 [CanEditMultipleObjects]

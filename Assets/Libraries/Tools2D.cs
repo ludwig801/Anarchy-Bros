@@ -3,6 +3,11 @@ using UnityEngine;
 
 public abstract class Tools2D
 {
+    public static Vector2 Abs(Vector2 a)
+    {
+        return new Vector2(Mathf.Abs(a.x), Mathf.Abs(a.y));
+    }
+
     public static Vector3 Add(Vector3 a, Vector2 b)
     {
         return a + (Vector3)b;
@@ -11,6 +16,11 @@ public abstract class Tools2D
     public static Vector2 Subtract(Vector2 a, Vector2 b)
     {
         return (a - b);
+    }
+
+    public static Vector2 Divide(Vector2 a, Vector2 b)
+    {
+        return new Vector2(a.x / b.x, a.y / b.y);
     }
 
     public static Vector2 DirectionFromRotation(Quaternion rotation)
@@ -49,6 +59,11 @@ public abstract class Tools2D
         {
             return Mathf.Abs(a.x - b.x) < threshold && Mathf.Abs(a.y - b.y) < threshold;
         }      
+    }
+
+    public static bool Approximate(Vector2 a, Vector2 b, float tolerance = 0.01f)
+    {
+        return Mathf.Abs(a.x - b.x) < tolerance && Mathf.Abs(a.y - b.y) < tolerance;
     }
 
     public static Quaternion LookAt(Vector2 position, Vector2 target)

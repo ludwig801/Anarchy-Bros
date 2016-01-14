@@ -7,19 +7,39 @@ public class MapManager : MonoBehaviour
     public Transform ObjGround, ObjGraph;
     public GameObject EditSourcePrefab, EditTargetPrefab;
     public SpotTypes CurrentMode;
-    public GraphManager Graph;
-    public GraphLogic GraphLogic;
+    public GraphManager Graph
+    {
+        get
+        {
+            if (_graph == null)
+            {
+                _graph = ObjGraph.GetComponent<GraphManager>();
+            }
+            return _graph;
+        }
+    }
+    public GraphLogic GraphLogic
+    {
+        get
+        {
+            if (_graphLogic == null)
+            {
+                _graphLogic = ObjGraph.GetComponent<GraphLogic>();
+            }
+            return _graphLogic;
+        }
+    }
     public bool Targeting { get; private set; }
+    public Vector2 Center, Size;
 
+    GraphManager _graph;
+    GraphLogic _graphLogic;
     GameManager _gameManager;
     Transform _editSource, _editTarget;
 
     void Start()
     {
         _gameManager = GameManager.Instance;
-
-        Graph = ObjGraph.GetComponent<GraphManager>();
-        GraphLogic = ObjGraph.GetComponent<GraphLogic>();
 
         _editSource = Instantiate(EditSourcePrefab).transform;
         _editSource.name = "Source [Edit Only]";
@@ -33,6 +53,13 @@ public class MapManager : MonoBehaviour
 
         Targeting = false;
         CurrentMode = SpotTypes.Connection;
+
+        SpriteRenderer groundRenderer = ObjGround.GetComponent<SpriteRenderer>();
+        float mapWidth = ObjGround.localScale.x * groundRenderer.sprite.textureRect.width / groundRenderer.sprite.pixelsPerUnit;
+        float mapHeight = ObjGround.localScale.y * groundRenderer.sprite.textureRect.height / groundRenderer.sprite.pixelsPerUnit;
+        Size = new Vector3(mapWidth, mapHeight, 1);
+        Center = ObjGraph.position;
+        ObjGround.GetComponent<BoxCollider2D>().size = Tools2D.Divide(Size, ObjGround.localScale);
     }
 
     void Update()
@@ -67,14 +94,14 @@ public class MapManager : MonoBehaviour
         CurrentMode = (SpotTypes)newMode;
     }
 
-    public bool OutOfMapBounds(Vector2 position, Vector2 margin)
+    public bool OutOfBounds(Transform requester)
     {
-        Vector2 mapBottomLeft = ObjGround.transform.position - 0.5f * ObjGround.transform.localScale;
-        Vector2 mapTopRight = ObjGround.transform.position + 0.5f * ObjGround.transform.localScale;
-        Vector2 objBottomLeft = position - margin;
-        Vector2 objTopRight = position + margin;
+        Vector2 requesterPos = transform.position;
+        Vector2 requesterScale = transform.localScale;
+        Vector2 requesterBottomLeft = requesterPos - requesterScale;
+        Vector2 requesterTopRight = requesterPos + requesterScale;
 
-        return Tools2D.NotInside(objBottomLeft, objTopRight, mapBottomLeft, mapTopRight);
+        return Tools2D.NotInside(requesterBottomLeft, requesterTopRight, 0.5f * -Size, 0.5f * Size);
     }
 
     public void HandleEditClick(PointerEventData eventData, Vector2 worldPos)
@@ -99,8 +126,20 @@ public class MapManager : MonoBehaviour
     {
         bool leftClick = eventData.button == PointerEventData.InputButton.Left;
         bool rightClick = eventData.button == PointerEventData.InputButton.Right;
+        Spot hitSpot;
 
-        if (Targeting)
+        if (Graph.FindSpotNear(worldPos, out hitSpot) && rightClick)
+        {
+            if (hitSpot.Type != SpotTypes.Connection)
+            {
+                Graph.ChangeSpotType(hitSpot, SpotTypes.Connection);
+            }
+            else
+            {
+                Graph.RemoveSpot(hitSpot);
+            }
+        }
+        else if (Targeting)
         {
             if (leftClick)
             {
@@ -124,7 +163,7 @@ public class MapManager : MonoBehaviour
         bool rightClick = eventData.button == PointerEventData.InputButton.Right;
         Spot hitSpot;
 
-        if (Graph.FindSpot(worldPos, out hitSpot))
+        if (Graph.FindSpotNear(worldPos, out hitSpot))
         {
             if (leftClick)
             {
@@ -143,7 +182,7 @@ public class MapManager : MonoBehaviour
         bool rightClick = eventData.button == PointerEventData.InputButton.Right;
         Spot hitSpot;
 
-        if (Graph.FindSpot(worldPos, out hitSpot))
+        if (Graph.FindSpotNear(worldPos, out hitSpot))
         {
             if (leftClick)
             {
@@ -163,7 +202,7 @@ public class MapManager : MonoBehaviour
         Spot spotA, spotB;
         Edge hitEdge;
 
-        if (!Graph.FindSpot(sourcePos, out spotA))
+        if (!Graph.FindSpotNear(sourcePos, out spotA))
         {
             spotA = Graph.CreateSpot(sourcePos, CurrentMode);
             if (Graph.FindEdge(sourcePos, out hitEdge))
@@ -174,7 +213,7 @@ public class MapManager : MonoBehaviour
 
         if (!Targeting) return;
 
-        if (!Graph.FindSpot(targetPos, out spotB))
+        if (!Graph.FindSpotNear(targetPos, out spotB))
         {
             spotB = Graph.CreateSpot(targetPos, CurrentMode);
             if (Graph.FindEdge(targetPos, out hitEdge))

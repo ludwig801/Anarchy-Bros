@@ -21,7 +21,7 @@ public class PieceEditor : Editor
         EditorGUILayout.IntSlider("Health", _script.Health, 0, _script.MaxHealth);
         GUI.enabled = true;
         _script.DeathSpeed = EditorGUILayout.Slider("Death Time", _script.DeathSpeed, 0f, 2f);
-        _script.TargetTag = (Tags.Tag)EditorGUILayout.EnumPopup("Target Tag", _script.TargetTag);
+        _script.TargetTag = (Tags)EditorGUILayout.EnumPopup("Target Tag", _script.TargetTag);
         GUI.enabled = false;
         EditorGUILayout.Toggle("Alive", _script.Alive);
         EditorGUILayout.Toggle("Is Attacking", _script.Attacking);

@@ -97,7 +97,7 @@ public class MoveBehavior : MonoBehaviour
                 CurrentSpot = null;
             }
             transform.position = Tools2D.MoveTowards(transform.position, Step.transform.position, Time.deltaTime * Speed);
-            transform.rotation = Quaternion.Lerp(transform.rotation, Tools2D.LookAt(transform.position, Step.transform.position), Time.deltaTime * 8f);
+            transform.rotation = Quaternion.Lerp(transform.rotation, Tools2D.LookAt(transform.position, Step.transform.position), Time.deltaTime * 5f);
         }
     }
 }

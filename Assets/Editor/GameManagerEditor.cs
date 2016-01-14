@@ -1,5 +1,4 @@
 ﻿using UnityEditor;
-using AnarchyBros;
 
 [CustomEditor(typeof(GameManager))]
 public class GameManagerEditor : Editor

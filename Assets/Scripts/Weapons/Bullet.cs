@@ -2,7 +2,7 @@
 
 public class Bullet : MonoBehaviour
 {
-    public Tags.Tag CollisionTag;
+    public Tags CollisionTag;
     public float Speed;
     public int Damage;
     public Vector2 Direction;
@@ -29,10 +29,10 @@ public class Bullet : MonoBehaviour
 
         _timePassedSinceLastOutOfMapCheck += Time.deltaTime;
 
-        if (_timePassedSinceLastOutOfMapCheck > 0.03f)
+        if (_timePassedSinceLastOutOfMapCheck > 0.0075f)
         {
             _timePassedSinceLastOutOfMapCheck = 0;
-            if (_gameManager.Map.OutOfMapBounds(transform.position, transform.localScale))
+            if (_gameManager.Map.OutOfBounds(transform))
             {
                 Die();
             }
@@ -41,13 +41,13 @@ public class Bullet : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.tag != Tags.GetStringTag(CollisionTag)) return;
+        if (other.tag != CollisionTag.ToString()) return;
 
         PieceBehavior otherPiece = other.GetComponent<PieceBehavior>();
         if (otherPiece.Alive)
         {
             otherPiece.TakeDamage(Damage);
-            _gameManager.CreateWound(otherPiece.Movement, -Direction.normalized);
+            _gameManager.Wounds.CreateWound(otherPiece.transform, transform);
             Die();
         }      
     }
@@ -55,6 +55,5 @@ public class Bullet : MonoBehaviour
     void Die()
     {
         gameObject.SetActive(false);
-        transform.position = new Vector3(100, 100, transform.position.z);
     }
 }

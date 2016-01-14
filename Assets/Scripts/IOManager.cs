@@ -1,23 +1,20 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-using System.Runtime.Serialization.Formatters.Binary;
+using System.Xml.Serialization;
 using System.IO;
-using System;
 
 public class IOManager : MonoBehaviour
 {
-    public TextAsset Level;
-
-    GameManager _gameController;
+    GameManager _gameManager;
 
     void Start()
     {
-        _gameController = GameManager.Instance;
+        _gameManager = GameManager.Instance;
     }
 
     public void SaveGraph()
     {
-        MapManager map = _gameController.Map;
+        MapManager map = _gameManager.Map;
         List<Spot> spots = map.Graph.Spots;
         List<Edge> edges = map.Graph.Edges;
 
@@ -32,22 +29,47 @@ public class IOManager : MonoBehaviour
             graph.AddEdge(edges[i]);
         }
 
-        BinaryFormatter bf = new BinaryFormatter();
-        Stream file = File.Create(Application.dataPath + "/Resources/GraphData.txt");
-        bf.Serialize(file, graph);
-        file.Close();
+
+        XmlSerializer serializer = new XmlSerializer(typeof(GameGraph));
+        if (!Directory.Exists(Application.persistentDataPath + "/Resources/Levels/" + LevelManager.Instance.CurrentEra.Title))
+        {
+            Directory.CreateDirectory(Application.persistentDataPath + "/Resources/Levels/" + LevelManager.Instance.CurrentEra.Title);
+        }
+
+        StreamWriter stream = new StreamWriter(Application.persistentDataPath + "/Resources/Levels/" + LevelManager.Instance.CurrentEra.Title +
+            "/lvl_" + LevelManager.Instance.CurrentLevel.Order + ".xml", false, System.Text.Encoding.GetEncoding("UTF-8"));
+
+        serializer.Serialize(stream, graph);
+        stream.Dispose();
     }
 
     public void LoadGraph()
     {
-        MapManager map = _gameController.Map;
+        MapManager map = _gameManager.Map;
+        bool existed = false;
 
-        Stream s = new MemoryStream(Level.bytes);
+        XmlSerializer serializer = new XmlSerializer(typeof(GameGraph));
+        Stream stream;
+        if (File.Exists(Application.persistentDataPath + "/Resources/Levels/"
+            + LevelManager.Instance.CurrentEra + "/lvl_" + LevelManager.Instance.CurrentLevel.Order + ".xml"))
+        {
+            //Debug.Log("Loading from persistent data path...");
+            existed = true;
+            stream = new FileStream(Application.persistentDataPath + "/Resources/Levels/"
+            + LevelManager.Instance.CurrentEra + "/lvl_" + LevelManager.Instance.CurrentLevel.Order + ".xml", FileMode.Open);
+        }
+        else
+        {
+            //Debug.Log("Loading from resources...");
+            string path = "Levels/" + LevelManager.Instance.CurrentEra.Title + "/lvl_" + LevelManager.Instance.CurrentLevel.Order;
+            TextAsset lvl = Resources.Load(path, typeof(TextAsset)) as TextAsset;
+            stream = new MemoryStream(lvl.bytes);
+        }
+            
+        GameGraph graph = serializer.Deserialize(stream) as GameGraph;
+        stream.Dispose();
 
-        BinaryFormatter bf = new BinaryFormatter();
-        GameGraph graph = (GameGraph)bf.Deserialize(s);
-
-        map.Graph.RemoveAll();
+        _gameManager.Map.Graph.RemoveAll();
 
         for (int i = 0; i < graph.Spots.Count; i++)
         {
@@ -58,71 +80,76 @@ public class IOManager : MonoBehaviour
         for (int i = 0; i < graph.Edges.Count; i++)
         {
             IOEdge edge = graph.Edges[i];
-            map.Graph.CreateEdge(map.Graph.FindSpot(edge.a.ToVector2), map.Graph.FindSpot(edge.b.ToVector2));
+            map.Graph.CreateEdge(map.Graph.FindSpotExact(edge.a.ToVector2), map.Graph.FindSpotExact(edge.b.ToVector2));
         }
-        
-        s.Close();
+
+        if (!existed)
+        {
+            SaveGraph();
+        }
     }
 }
 
-[Serializable]
-class GameGraph
+[XmlRoot("GameGraph")]
+public class GameGraph
 {
-    internal List<IOSpot> Spots;
-    internal List<IOEdge> Edges;
+    [XmlArray("Spots"), XmlArrayItem("Spot")]
+    public List<IOSpot> Spots;
+    [XmlArray("Edges"), XmlArrayItem("Edge")]
+    public List<IOEdge> Edges;
 
-    internal GameGraph()
+    public GameGraph()
     {
         Spots = new List<IOSpot>();
         Edges = new List<IOEdge>();
     }
 
-    internal void AddSpot(Spot spot)
+    public void AddSpot(Spot spot)
     {
         IOSpot x = new IOSpot();
-        x.Position = new Point(spot.transform.position);
+        x.Position = new Point();
+        x.Position.x = spot.transform.position.x;
+        x.Position.y = spot.transform.position.y;
         x.Type = spot.Type;
         Spots.Add(x);
     }
 
-    internal void AddEdge(Edge edge)
+    public void AddEdge(Edge edge)
     {
-        IOEdge x = new IOEdge();
-        x.a = new Point(edge.A.transform.position);
-        x.b = new Point(edge.B.transform.position);
-        Edges.Add(x);
+        IOEdge ioEdge = new IOEdge();
+        ioEdge.a = new Point();
+        ioEdge.a.x = edge.A.transform.position.x;
+        ioEdge.a.y = edge.A.transform.position.y;
+        ioEdge.b = new Point();
+        ioEdge.b.x = edge.B.transform.position.x;
+        ioEdge.b.y = edge.B.transform.position.y;
+        Edges.Add(ioEdge);
     }
 }
 
-[Serializable]
-class IOSpot
+[XmlRoot("Spot")]
+public class IOSpot
 {
-    internal SpotTypes Type;
-    internal Point Position;
+    public SpotTypes Type;
+    public Point Position;
 }
 
-[Serializable]
-class IOEdge
+[XmlRoot("Edge")]
+public class IOEdge
 {
-    internal Point a, b;
+    public Point a, b;
 }
 
-[Serializable]
-class Point
+[System.Serializable]
+public class Point
 {
-    internal float x, y;
+    public float x, y;
 
-    internal Vector2 ToVector2
+    public Vector2 ToVector2
     {
         get
         {
             return new Vector2(x, y);
         }
-    }
-
-    internal Point(Vector2 pos)
-    {
-        x = pos.x;
-        y = pos.y;
     }
 }

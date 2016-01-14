@@ -7,7 +7,7 @@ public class PieceBehavior : MonoBehaviour
 {
     public int MaxHealth, Health;
     public float DeathSpeed;
-    public Tags.Tag TargetTag;
+    public Tags TargetTag;
     public bool Alive { get { return (Health > 0) && gameObject.activeSelf; } }
     public bool Reciclable;
     public bool Attacking
@@ -47,15 +47,29 @@ public class PieceBehavior : MonoBehaviour
             return _movement;
         }
     }
+    public SpriteRenderer Renderer
+    {
+        get
+        {
+            if (_renderer == null)
+            {
+                _renderer = GetComponent<SpriteRenderer>();
+            }
+            return _renderer;
+        }
+    }
 
+    GameManager _gameManager;
     MoveBehavior _movement;
     float _deltaTime, _animDeathSpeed;
     Animator _animator;
-    HealthElement _healthElement;
+    SpriteRenderer _renderer;
     bool _isAttacking;
 
     void Start()
     {
+        _gameManager = GameManager.Instance;
+
         _animDeathSpeed = 1f / DeathSpeed;
 
         Health = MaxHealth;
@@ -72,6 +86,12 @@ public class PieceBehavior : MonoBehaviour
         Animator.SetTrigger("Die");
         Animator.SetBool("Alive", Alive);
         Movement.CanMove = Alive;
+        GetComponent<Collider2D>().enabled = false;
+        Movement.CurrentEdge = null;
+        Movement.CurrentSpot = null;
+        Movement.Target = null;
+        Renderer.sortingOrder = 0;
+        _gameManager.OnPieceKilled(this);
         //_healthElement.gameObject.SetActive(false);
 
         yield return new WaitForSeconds(DeathSpeed);
@@ -80,13 +100,14 @@ public class PieceBehavior : MonoBehaviour
     }
 
     public void Live()
-    {   
+    {
         Health = MaxHealth;
         Attacking = false;
         Animator.ResetTrigger("Die");
         Animator.SetBool("Alive", Alive);
         Movement.CanMove = Alive;
         Reciclable = false;
+        GetComponent<Collider2D>().enabled = true;
         //_healthElement.gameObject.SetActive(true);
     }
 
@@ -97,11 +118,5 @@ public class PieceBehavior : MonoBehaviour
         {
             StartCoroutine(Die());
         }
-    }
-
-    public void SetHealthElement(HealthElement elem)
-    {
-        _healthElement = elem;
-        _healthElement.Target = this;
     }
 }

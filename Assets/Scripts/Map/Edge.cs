@@ -26,19 +26,12 @@ public class Edge : MonoBehaviour
                 _renderer.color = Color.Lerp(_renderer.color, ColorInGame, Time.deltaTime * 8f);
                 break;
 
-            case GameStates.Pause:
-                if (A.Type == SpotTypes.TowerSpot && B.Type == SpotTypes.TowerSpot)
-                {
-                    _renderer.color = Color.Lerp(_renderer.color, ColorInGamePaused, Time.unscaledDeltaTime * 8f);
-                }
-                else
-                {
-                    _renderer.color = Color.Lerp(_renderer.color, ColorInGame, Time.unscaledDeltaTime * 8f);
-                }
+            case GameStates.Edit:
+                _renderer.color = Color.Lerp(_renderer.color, ColorInEditor, Time.deltaTime * 8f);
                 break;
 
             default:
-                _renderer.color = Color.Lerp(_renderer.color, ColorInEditor, Time.deltaTime * 8f);
+                _renderer.color = Color.Lerp(_renderer.color, ColorInGamePaused, Time.unscaledDeltaTime * 8f);         
                 break;
         }
 

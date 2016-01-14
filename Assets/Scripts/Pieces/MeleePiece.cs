@@ -44,6 +44,11 @@ public class MeleePiece : MonoBehaviour
             Target = null;
             Piece.Attacking = false;
         }
+        else if (Target != null && Target.Alive)
+        {
+            transform.rotation = Quaternion.Lerp(transform.rotation,
+                Tools2D.LookAt(Piece.transform.position, Target.transform.position), Time.deltaTime * 10f);
+        }
     }
 
     void OnTriggerEnter2D(Collider2D other)
@@ -85,7 +90,7 @@ public class MeleePiece : MonoBehaviour
         if (Target != null)
         {
             Target.TakeDamage(_meleeWeapon.Damage);
-            _gameManager.CreateWound(Target.Movement, (Piece.transform.position - Target.transform.position).normalized);
+            _gameManager.Wounds.CreateWound(Piece.transform, Target.transform);
         }
     }
 }

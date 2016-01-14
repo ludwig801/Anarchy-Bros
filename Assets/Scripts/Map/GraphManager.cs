@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System;
 
 public class GraphManager : MonoBehaviour
 {
@@ -9,6 +10,13 @@ public class GraphManager : MonoBehaviour
     public List<Spot> Spots;
     public List<Edge> Edges;
     public int SpotCount { get { return Spots.Count; } }
+
+    GameManager _gameManager;
+
+    void Start()
+    {
+        _gameManager = GameManager.Instance;
+    }
 
     public Spot CreateSpot(Vector2 worldPos, SpotTypes type)
     {
@@ -78,6 +86,17 @@ public class GraphManager : MonoBehaviour
         return to;
     }
 
+    public void RemovePieceFromSpot(PieceBehavior tower)
+    {
+        for (int i = 0; i < Spots.Count; i++)
+        {
+            if (Spots[i].Piece == tower)
+            {
+                Spots[i].Piece = null;
+            }
+        }
+    }
+
     public void RemoveEdge(Edge edge)
     {
         Edges.Remove(edge);
@@ -113,33 +132,78 @@ public class GraphManager : MonoBehaviour
         Spots.Clear();
     }
 
-    public bool FindSpot(Vector2 pos, out Spot hit, float tolerance)
+    public bool FindSpotNear(Vector2 pos, out Spot hit)
     {
-        return (hit = FindSpot(pos, tolerance)) != null;
+        hit = null;
+
+        switch (_gameManager.CurrentState)
+        {
+            case GameStates.Edit:
+                for (int i = 0; i < Spots.Count; i++)
+                {
+                    Spot spot = Spots[i];
+                    if (Tools2D.SamePos(spot.transform.position, pos, spot.ScaleInEditor))
+                    {
+                        hit = spot;
+                        break;
+                    }
+                }
+                break;
+
+            case GameStates.Pause:
+                for (int i = 0; i < Spots.Count; i++)
+                {
+                    Spot spot = Spots[i];
+                    if (Tools2D.SamePos(spot.transform.position, pos, spot.ScaleInGamePaused))
+                    {
+                        hit = spot;
+                        break;
+                    }
+                }
+                break;
+
+            case GameStates.Play:
+                for (int i = 0; i < Spots.Count; i++)
+                {
+                    Spot spot = Spots[i];
+                    if (Tools2D.SamePos(spot.transform.position, pos, spot.ScaleInGame))
+                    {
+                        hit = spot;
+                        break;
+                    }
+                }
+                break;
+
+            case GameStates.Place:
+                for (int i = 0; i < Spots.Count; i++)
+                {
+                    Spot spot = Spots[i];
+                    if (Tools2D.SamePos(spot.transform.position, pos, spot.ScaleInGamePaused))
+                    {
+                        hit = spot;
+                        break;
+                    }
+                }
+                break;
+
+            default:
+                break;
+        }
+
+        return (hit != null);
     }
 
-    public bool FindSpot(Vector2 pos, out Spot hit)
-    {
-        hit = FindSpot(pos);
-        return hit != null;
-    }
-
-    public Spot FindSpot(Vector2 pos, float tolerance)
+    public Spot FindSpotExact(Vector2 pos)
     {
         for (int i = 0; i < Spots.Count; i++)
         {
             Spot spot = Spots[i];
-            if (Tools2D.SamePos(spot.transform.position, pos, tolerance))
+            if (Tools2D.SamePos(spot.transform.position, pos, SpotHitTolerance))
             {
                 return spot;
             }
         }
         return null;
-    }
-
-    public Spot FindSpot(Vector2 pos)
-    {
-        return FindSpot(pos, SpotHitTolerance);
     }
 
     public bool FindEdge(Spot a, Spot b)
@@ -190,7 +254,7 @@ public class GraphManager : MonoBehaviour
 
     public Spot GetRandomSpot(SpotTypes type)
     {
-        int rand = Random.Range(0, TypeCount(type));
+        int rand = UnityEngine.Random.Range(0, TypeCount(type));
 
         Spot s = null;
 

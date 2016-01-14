@@ -32,6 +32,13 @@ public class RangedPiece : MonoBehaviour
             return _fireDelay;
         }
     }
+    public RangeWeapon Weapon
+    {
+        get
+        {
+            return _rangeWeapon;
+        }
+    }
 
     GameManager _gameManager;
     RangeWeapon _rangeWeapon;
@@ -47,6 +54,8 @@ public class RangedPiece : MonoBehaviour
         _rangeWeapon.transform.position = transform.position;
         _rangeWeapon.transform.parent = transform;
         _rangeWeapon.name = WeaponPrefab.name;
+        _rangeWeapon.transform.localScale =
+            new Vector3(_rangeWeapon.Range / Piece.transform.localScale.x, _rangeWeapon.Range / Piece.transform.localScale.y, 1);
 
         _animAttackSpeed = 1.5f / FireDelay;
         _timeSinceLastFired = 0;
@@ -56,14 +65,20 @@ public class RangedPiece : MonoBehaviour
     {
         Piece.Animator.SetFloat("AttackingSpeed", _animAttackSpeed);
 
-        CanFire = !Piece.Movement.Moving;
+        CanFire = Piece.Alive && !Piece.Movement.Moving;
 
         if (!CanFire)
         {
+            if (!Piece.Alive)
+            {
+                _rangeWeapon.gameObject.SetActive(false);
+            }
             Piece.Attacking = false;
             _timeSinceLastFired = 0;
             return;
         }
+
+        _rangeWeapon.gameObject.SetActive(true);
 
         if (!_gameManager.ProvideRangedPieceWithEnemyTarget(this))
         {

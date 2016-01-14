@@ -5,10 +5,12 @@ using System.Collections.Generic;
 public class Spot : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler
 {
     public Color ColorInEditor, ColorInGame, ColorInGamePaused;
+    public SortingLayers LayerDefault, LayerInGamePaused;
     public int Index;
+    public float ScaleInEditor, ScaleInGame, ScaleInGamePaused;
     public SpotTypes Type;
-    public PieceBehavior Tower;
-    public bool Occupied { get { return Tower != null; } }
+    public PieceBehavior Piece;
+    public bool Occupied { get { return Piece != null; } }
     public List<Edge> Edges;
     public Collider2D Collider
     {
@@ -27,27 +29,53 @@ public class Spot : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
     SpriteRenderer _renderer;
     Collider2D _collider;
     bool _justScrolled;
+    int _layerDefault, _layerInGamePaused;
+    Vector3 _scaleDefault;
 
     void Start()
     {
         _gameManager = GameManager.Instance;
         _renderer = GetComponent<SpriteRenderer>();
+
+        _layerDefault = SortingLayer.NameToID(LayerDefault.ToString());
+        _layerInGamePaused = SortingLayer.NameToID(LayerInGamePaused.ToString());
+
+        _scaleDefault = transform.localScale;
     }
 
     void Update()
     {
+        if (Piece != null && !Piece.Alive)
+        {
+            Piece = null;
+        }
+
         switch (_gameManager.CurrentState)
         {
             case GameStates.Play:
                 _renderer.color = Color.Lerp(_renderer.color, ColorInGame, Time.deltaTime * 8f);
+                _renderer.sortingLayerID = _layerDefault;
+                transform.localScale = Vector3.Lerp(transform.localScale, Tools2D.Multiply(_scaleDefault, ScaleInGame), Time.deltaTime * 8f);
                 break;
 
-            case GameStates.Pause:
-                _renderer.color = Color.Lerp(_renderer.color, ColorInGamePaused, Time.unscaledDeltaTime * 8f);
+            case GameStates.Edit:
+                _renderer.color = Color.Lerp(_renderer.color, ColorInEditor, Time.deltaTime * 8f);
+                _renderer.sortingLayerID = _layerDefault;
+                transform.localScale = Vector3.Lerp(transform.localScale, Tools2D.Multiply(_scaleDefault, ScaleInEditor), Time.deltaTime * 8f);
                 break;
 
             default:
-                _renderer.color = Color.Lerp(_renderer.color, ColorInEditor, Time.deltaTime * 8f);
+                _renderer.color = Color.Lerp(_renderer.color, ColorInGamePaused, Time.unscaledDeltaTime * 8f);
+                _renderer.sortingLayerID = _layerInGamePaused;
+                transform.localScale = Vector3.Lerp(transform.localScale, Tools2D.Multiply(_scaleDefault, ScaleInGamePaused), Time.unscaledDeltaTime * 8f);
+                //if (!Occupied)
+                //{
+                //    transform.localScale = Vector3.Lerp(transform.localScale, Tools2D.Multiply(_scaleDefault, ScaleInGamePaused), Time.unscaledDeltaTime * 8f);
+                //}
+                //else
+                //{
+                //    transform.localScale = Vector3.Lerp(transform.localScale, Tools2D.Multiply(_scaleDefault, ScaleInGamePaused), Time.deltaTime * 8f);
+                //}
                 break;
         }
     }
