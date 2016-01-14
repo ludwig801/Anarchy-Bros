@@ -2,9 +2,9 @@
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 
-public class MenuManager : MonoBehaviour
+public class MenuUIManager : MonoBehaviour
 {
-    public static MenuManager Instance;
+    public static MenuUIManager Instance;
 
     public enum Menus
     {

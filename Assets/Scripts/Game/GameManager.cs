@@ -49,13 +49,13 @@ public class GameManager : MonoBehaviour
             return _map;
         }
     }
-    public UIManager UI
+    public GameUIManager UI
     {
         get
         {
             if (_ui == null)
             {
-                _ui = ObjCanvas.GetComponent<UIManager>();
+                _ui = ObjCanvas.GetComponent<GameUIManager>();
             }
             return _ui;
         }
@@ -88,7 +88,7 @@ public class GameManager : MonoBehaviour
     TowerManager _towers;
     EnemyManager _enemies;
     MapManager _map;
-    UIManager _ui;
+    GameUIManager _ui;
     WoundManager _wounds;
     IOManager _io;
 

@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 
-public class CameraManager : MonoBehaviour
+public class GameCameraManager : MonoBehaviour
 {
-    public Camera MainCamera;
+    public Camera GameCamera;
     public int Scale;
     public float ScrollSensitivity, MoveSensitivity;
 
@@ -14,7 +14,7 @@ public class CameraManager : MonoBehaviour
     {
         _gameManager = GameManager.Instance;
 
-        _moveCameraTo = MainCamera.transform.position;
+        _moveCameraTo = GameCamera.transform.position;
 
         _screenRatio = Screen.width / Screen.height;
     }
@@ -25,21 +25,21 @@ public class CameraManager : MonoBehaviour
         float hDelta = Input.GetAxis("Horizontal");
         float vDelta = Input.GetAxis("Vertical");
 
-        MainCamera.orthographicSize -= sDelta * ScrollSensitivity * Scale;
+        GameCamera.orthographicSize -= sDelta * ScrollSensitivity * Scale;
 
         _moveCameraTo += new Vector3(hDelta, vDelta, 0) * Time.deltaTime * MoveSensitivity * Scale;
 
         ClampCamera();
 
-        MainCamera.transform.position = Vector3.Lerp(MainCamera.transform.position, _moveCameraTo, Time.deltaTime * MoveSensitivity * 2 * Scale);
+        GameCamera.transform.position = Vector3.Lerp(GameCamera.transform.position, _moveCameraTo, Time.deltaTime * MoveSensitivity * 2 * Scale);
     }
 
     void ClampCamera()
     {
-        MainCamera.orthographicSize = Mathf.Max(Scale * 5, Mathf.Min(Scale * 10, MainCamera.orthographicSize));
+        GameCamera.orthographicSize = Mathf.Max(Scale * 5, Mathf.Min(Scale * 10, GameCamera.orthographicSize));
 
-        float width = MainCamera.orthographicSize * _screenRatio;
-        float height = MainCamera.orthographicSize;
+        float width = GameCamera.orthographicSize * _screenRatio;
+        float height = GameCamera.orthographicSize;
 
         Vector2 mapBottomLeft = _gameManager.Map.Center - 0.5f * _gameManager.Map.Size + new Vector2(width, height);
         Vector2 mapTopRight = _gameManager.Map.Center + 0.5f * _gameManager.Map.Size - new Vector2(width, height);

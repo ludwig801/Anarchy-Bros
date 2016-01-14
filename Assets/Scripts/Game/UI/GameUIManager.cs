@@ -2,7 +2,7 @@
 using UnityEngine.UI;
 using System.Collections.Generic;
 
-public class UIManager : MonoBehaviour
+public class GameUIManager : MonoBehaviour
 {
     public RectTransform PanelHealth;
     public RectTransform HealthElementPrefab;

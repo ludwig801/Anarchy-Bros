@@ -35,19 +35,19 @@ public class ScrollerBehavior : MonoBehaviour, IBeginDragHandler, IDragHandler, 
             _currentOption = Mathf.Clamp(value, OptionsMin, OptionsMax);
         }
     }
-    public MenuManager MenuManager
+    public MenuUIManager MenuManager
     {
         get
         {
             if (_menuManager == null)
             {
-                _menuManager = MenuManager.Instance;
+                _menuManager = MenuUIManager.Instance;
             }
             return _menuManager;
         }
     }
 
-    MenuManager _menuManager;
+    MenuUIManager _menuManager;
     Vector2 _dragDelta;
     float _dragTime;
     float _centerBtnRightEdge, _centerBtnLeftEdge;
@@ -55,7 +55,7 @@ public class ScrollerBehavior : MonoBehaviour, IBeginDragHandler, IDragHandler, 
 
     void Start()
     {
-        _menuManager = MenuManager.Instance;
+        _menuManager = MenuUIManager.Instance;
 
         _centerBtnRightEdge = 0.5f + 0.5f * OptionScaleCurrent;
         _centerBtnLeftEdge = 0.5f - 0.5f * OptionScaleCurrent;
