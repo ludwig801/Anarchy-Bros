@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <GameGraph xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Spots>
     <Spot>
@@ -11,36 +11,8 @@
     <Spot>
       <Type>Connection</Type>
       <Position>
-        <x>-1.95822442</x>
-        <y>1.1749351</y>
-      </Position>
-    </Spot>
-    <Spot>
-      <Type>Connection</Type>
-      <Position>
-        <x>-3.002611</x>
-        <y>8.224544</y>
-      </Position>
-    </Spot>
-    <Spot>
-      <Type>Connection</Type>
-      <Position>
         <x>-8.433419</x>
         <y>8.746737</y>
-      </Position>
-    </Spot>
-    <Spot>
-      <Type>Connection</Type>
-      <Position>
-        <x>-7.46375942</x>
-        <y>-2.65755177</y>
-      </Position>
-    </Spot>
-    <Spot>
-      <Type>Connection</Type>
-      <Position>
-        <x>-11.4554043</x>
-        <y>-3.490972</y>
       </Position>
     </Spot>
     <Spot>
@@ -67,22 +39,8 @@
     <Spot>
       <Type>Connection</Type>
       <Position>
-        <x>10.93883</x>
-        <y>-0.5959326</y>
-      </Position>
-    </Spot>
-    <Spot>
-      <Type>Connection</Type>
-      <Position>
         <x>16.2025375</x>
         <y>0.851587653</y>
-      </Position>
-    </Spot>
-    <Spot>
-      <Type>Connection</Type>
-      <Position>
-        <x>11.728385</x>
-        <y>-3.28877234</y>
       </Position>
     </Spot>
     <Spot>
@@ -97,13 +55,6 @@
       <Position>
         <x>-2.898172</x>
         <y>-2.01044369</y>
-      </Position>
-    </Spot>
-    <Spot>
-      <Type>TowerSpot</Type>
-      <Position>
-        <x>3.263707</x>
-        <y>0.287206173</y>
       </Position>
     </Spot>
     <Spot>
@@ -139,6 +90,118 @@
       <Position>
         <x>-12.7185383</x>
         <y>9.956136</y>
+      </Position>
+    </Spot>
+    <Spot>
+      <Type>TowerSpot</Type>
+      <Position>
+        <x>-2.04166675</x>
+        <y>0.5833328</y>
+      </Position>
+    </Spot>
+    <Spot>
+      <Type>TowerSpot</Type>
+      <Position>
+        <x>3.0833323</x>
+        <y>-2.83333349</y>
+      </Position>
+    </Spot>
+    <Spot>
+      <Type>TowerSpot</Type>
+      <Position>
+        <x>10.93883</x>
+        <y>-0.5959326</y>
+      </Position>
+    </Spot>
+    <Spot>
+      <Type>TowerSpot</Type>
+      <Position>
+        <x>11.728385</x>
+        <y>-3.28877234</y>
+      </Position>
+    </Spot>
+    <Spot>
+      <Type>TowerSpot</Type>
+      <Position>
+        <x>-11.4554043</x>
+        <y>-3.490972</y>
+      </Position>
+    </Spot>
+    <Spot>
+      <Type>TowerSpot</Type>
+      <Position>
+        <x>-7.46375942</x>
+        <y>-2.65755177</y>
+      </Position>
+    </Spot>
+    <Spot>
+      <Type>TowerSpot</Type>
+      <Position>
+        <x>-3.002611</x>
+        <y>8.224544</y>
+      </Position>
+    </Spot>
+    <Spot>
+      <Type>TowerSpot</Type>
+      <Position>
+        <x>-0.0833332539</x>
+        <y>-1.45833313</y>
+      </Position>
+    </Spot>
+    <Spot>
+      <Type>TowerSpot</Type>
+      <Position>
+        <x>3.263707</x>
+        <y>0.287206173</y>
+      </Position>
+    </Spot>
+    <Spot>
+      <Type>Connection</Type>
+      <Position>
+        <x>1.333334</x>
+        <y>-0.708333254</y>
+      </Position>
+    </Spot>
+    <Spot>
+      <Type>Connection</Type>
+      <Position>
+        <x>2</x>
+        <y>-1.58333361</y>
+      </Position>
+    </Spot>
+    <Spot>
+      <Type>Connection</Type>
+      <Position>
+        <x>-1.08333325</x>
+        <y>1.91666722</y>
+      </Position>
+    </Spot>
+    <Spot>
+      <Type>Connection</Type>
+      <Position>
+        <x>-0.583333731</x>
+        <y>0.375000238</y>
+      </Position>
+    </Spot>
+    <Spot>
+      <Type>Connection</Type>
+      <Position>
+        <x>-0.8750001</x>
+        <y>-0.375000238</y>
+      </Position>
+    </Spot>
+    <Spot>
+      <Type>Connection</Type>
+      <Position>
+        <x>0.249999747</x>
+        <y>-0.5833334</y>
+      </Position>
+    </Spot>
+    <Spot>
+      <Type>TowerSpot</Type>
+      <Position>
+        <x>0.5833328</x>
+        <y>0.333333015</y>
       </Position>
     </Spot>
   </Spots>
@@ -155,42 +218,12 @@
     </Edge>
     <Edge>
       <a>
-        <x>1.018277</x>
-        <y>-2.7937336</y>
+        <x>2</x>
+        <y>-1.58333361</y>
       </a>
       <b>
         <x>3.263707</x>
         <y>0.287206173</y>
-      </b>
-    </Edge>
-    <Edge>
-      <a>
-        <x>3.263707</x>
-        <y>0.287206173</y>
-      </a>
-      <b>
-        <x>-1.95822442</x>
-        <y>1.1749351</y>
-      </b>
-    </Edge>
-    <Edge>
-      <a>
-        <x>-1.95822442</x>
-        <y>1.1749351</y>
-      </a>
-      <b>
-        <x>1.018277</x>
-        <y>-2.7937336</y>
-      </b>
-    </Edge>
-    <Edge>
-      <a>
-        <x>-1.95822442</x>
-        <y>1.1749351</y>
-      </a>
-      <b>
-        <x>0.0261095036</x>
-        <y>3.73368144</y>
       </b>
     </Edge>
     <Edge>
@@ -341,6 +374,246 @@
       <b>
         <x>14.2286472</x>
         <y>-8.201567</y>
+      </b>
+    </Edge>
+    <Edge>
+      <a>
+        <x>1.018277</x>
+        <y>-2.7937336</y>
+      </a>
+      <b>
+        <x>3.0833323</x>
+        <y>-2.83333349</y>
+      </b>
+    </Edge>
+    <Edge>
+      <a>
+        <x>3.0833323</x>
+        <y>-2.83333349</y>
+      </a>
+      <b>
+        <x>3.0833323</x>
+        <y>-2.83333349</y>
+      </b>
+    </Edge>
+    <Edge>
+      <a>
+        <x>3.0833323</x>
+        <y>-2.83333349</y>
+      </a>
+      <b>
+        <x>3.263707</x>
+        <y>0.287206173</y>
+      </b>
+    </Edge>
+    <Edge>
+      <a>
+        <x>-1.08333325</x>
+        <y>1.91666722</y>
+      </a>
+      <b>
+        <x>-2.04166675</x>
+        <y>0.5833328</y>
+      </b>
+    </Edge>
+    <Edge>
+      <a>
+        <x>-0.0833332539</x>
+        <y>-1.45833313</y>
+      </a>
+      <b>
+        <x>-2.898172</x>
+        <y>-2.01044369</y>
+      </b>
+    </Edge>
+    <Edge>
+      <a>
+        <x>-0.8750001</x>
+        <y>-0.375000238</y>
+      </a>
+      <b>
+        <x>-0.0833332539</x>
+        <y>-1.45833313</y>
+      </b>
+    </Edge>
+    <Edge>
+      <a>
+        <x>-0.0833332539</x>
+        <y>-1.45833313</y>
+      </a>
+      <b>
+        <x>1.018277</x>
+        <y>-2.7937336</y>
+      </b>
+    </Edge>
+    <Edge>
+      <a>
+        <x>1.333334</x>
+        <y>-0.708333254</y>
+      </a>
+      <b>
+        <x>-0.0833332539</x>
+        <y>-1.45833313</y>
+      </b>
+    </Edge>
+    <Edge>
+      <a>
+        <x>0.5833328</x>
+        <y>0.333333015</y>
+      </a>
+      <b>
+        <x>3.263707</x>
+        <y>0.287206173</y>
+      </b>
+    </Edge>
+    <Edge>
+      <a>
+        <x>0.249999747</x>
+        <y>-0.5833334</y>
+      </a>
+      <b>
+        <x>-0.0833332539</x>
+        <y>-1.45833313</y>
+      </b>
+    </Edge>
+    <Edge>
+      <a>
+        <x>1.333334</x>
+        <y>-0.708333254</y>
+      </a>
+      <b>
+        <x>3.263707</x>
+        <y>0.287206173</y>
+      </b>
+    </Edge>
+    <Edge>
+      <a>
+        <x>0.5833328</x>
+        <y>0.333333015</y>
+      </a>
+      <b>
+        <x>1.333334</x>
+        <y>-0.708333254</y>
+      </b>
+    </Edge>
+    <Edge>
+      <a>
+        <x>2</x>
+        <y>-1.58333361</y>
+      </a>
+      <b>
+        <x>1.018277</x>
+        <y>-2.7937336</y>
+      </b>
+    </Edge>
+    <Edge>
+      <a>
+        <x>1.333334</x>
+        <y>-0.708333254</y>
+      </a>
+      <b>
+        <x>2</x>
+        <y>-1.58333361</y>
+      </b>
+    </Edge>
+    <Edge>
+      <a>
+        <x>2</x>
+        <y>-1.58333361</y>
+      </a>
+      <b>
+        <x>3.0833323</x>
+        <y>-2.83333349</y>
+      </b>
+    </Edge>
+    <Edge>
+      <a>
+        <x>-1.08333325</x>
+        <y>1.91666722</y>
+      </a>
+      <b>
+        <x>0.0261095036</x>
+        <y>3.73368144</y>
+      </b>
+    </Edge>
+    <Edge>
+      <a>
+        <x>-1.08333325</x>
+        <y>1.91666722</y>
+      </a>
+      <b>
+        <x>-0.583333731</x>
+        <y>0.375000238</y>
+      </b>
+    </Edge>
+    <Edge>
+      <a>
+        <x>-0.8750001</x>
+        <y>-0.375000238</y>
+      </a>
+      <b>
+        <x>-2.04166675</x>
+        <y>0.5833328</y>
+      </b>
+    </Edge>
+    <Edge>
+      <a>
+        <x>-0.583333731</x>
+        <y>0.375000238</y>
+      </a>
+      <b>
+        <x>-0.8750001</x>
+        <y>-0.375000238</y>
+      </b>
+    </Edge>
+    <Edge>
+      <a>
+        <x>-0.583333731</x>
+        <y>0.375000238</y>
+      </a>
+      <b>
+        <x>0.5833328</x>
+        <y>0.333333015</y>
+      </b>
+    </Edge>
+    <Edge>
+      <a>
+        <x>-0.583333731</x>
+        <y>0.375000238</y>
+      </a>
+      <b>
+        <x>-2.04166675</x>
+        <y>0.5833328</y>
+      </b>
+    </Edge>
+    <Edge>
+      <a>
+        <x>0.249999747</x>
+        <y>-0.5833334</y>
+      </a>
+      <b>
+        <x>0.5833328</x>
+        <y>0.333333015</y>
+      </b>
+    </Edge>
+    <Edge>
+      <a>
+        <x>-0.583333731</x>
+        <y>0.375000238</y>
+      </a>
+      <b>
+        <x>0.249999747</x>
+        <y>-0.5833334</y>
+      </b>
+    </Edge>
+    <Edge>
+      <a>
+        <x>0.249999747</x>
+        <y>-0.5833334</y>
+      </a>
+      <b>
+        <x>1.333334</x>
+        <y>-0.708333254</y>
       </b>
     </Edge>
   </Edges>

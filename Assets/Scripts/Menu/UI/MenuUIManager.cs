@@ -4,21 +4,25 @@ using System.Collections.Generic;
 
 public class MenuUIManager : MonoBehaviour
 {
+    // Static vars
     public static MenuUIManager Instance;
-
+    // Enums
     public enum Menus
     {
         Main = 0,
         Eras = 1,
         Levels = 2
     }
-
+    // Public vars
+    [Range(0f, 8f)]
     public float AnimationsSpeed;
+    [ReadOnly]
     public Menus CurrentMenu;
     public MenuPanel MainMenu, ErasMenu, LevelsMenu;
-
+    // Private vars
     ScrollerBehavior _scrollerEras, _scrollerLevels;
     LevelManager _levelManager;
+    GameEra _lastSeenEra;
 
     void Awake()
     {
@@ -35,7 +39,7 @@ public class MenuUIManager : MonoBehaviour
         _scrollerEras = ErasMenu.GetComponent<ScrollerBehavior>();
         for (int i = 0; i < _levelManager.Eras.Count; i++)
         {
-            _scrollerEras.AddOption(_levelManager.Eras[i].Title, _levelManager.Eras[i].Sprite, _levelManager.Eras[i].Unlocked);
+            _scrollerEras.AddOption(_levelManager.Eras[i].Name.ToString(), _levelManager.Eras[i].Sprite, _levelManager.Eras[i].Unlocked);
         }
 
         _scrollerLevels = LevelsMenu.GetComponent<ScrollerBehavior>();
@@ -54,19 +58,24 @@ public class MenuUIManager : MonoBehaviour
             PreviousMenu();
         }
 
-        _levelManager.CurrentEra = _levelManager.Eras[_scrollerEras.CurrentOption];
-
         switch (CurrentMenu)
         {
             case Menus.Eras:
                 ErasMenu.Title.text = "Choose an Era";
-                ErasMenu.Description.text = _levelManager.CurrentEra.Title;
+                ErasMenu.Description.text = _levelManager.CurrentEra.Name.ToString();
+                UpdateCurrentLevels();
                 break;
 
             case Menus.Levels:
                 LevelsMenu.Title.text = "Choose a level";
                 LevelsMenu.Description.text = _levelManager.CurrentLevel.Title;
                 break;
+        }
+
+        _levelManager.CurrentEra = _levelManager.Eras[_scrollerEras.CurrentOption];
+        if (_levelManager.CurrentEra.Levels.Count > 0)
+        {
+            _levelManager.CurrentLevel = _levelManager.CurrentEra.Levels[_scrollerLevels.CurrentOption];
         }
     }
 
@@ -81,7 +90,6 @@ public class MenuUIManager : MonoBehaviour
                 break;
 
             case Menus.Eras:
-                UpdateCurrentLevels();
                 ErasMenu.HideLeft(AnimationsSpeed);
                 LevelsMenu.Show(AnimationsSpeed);  
                 CurrentMenu = Menus.Levels;
@@ -118,12 +126,17 @@ public class MenuUIManager : MonoBehaviour
 
     public void UpdateCurrentLevels()
     {
-        _scrollerLevels.RemoveOptions();
-        List<Level> CurrentLevels = _levelManager.CurrentEra.Levels;
-
-        for (int i = 0; i < CurrentLevels.Count; i++)
+        if (_levelManager.CurrentEra != null && _lastSeenEra != _levelManager.CurrentEra)
         {
-            _scrollerLevels.AddOption(CurrentLevels[i].Title, CurrentLevels[i].Sprite, CurrentLevels[i].Unlocked);
+            _lastSeenEra = _levelManager.CurrentEra;
+
+            _scrollerLevels.RemoveOptions();
+            List<GameLevel> CurrentLevels = _levelManager.CurrentEra.Levels;
+
+            for (int i = 0; i < CurrentLevels.Count; i++)
+            {
+                _scrollerLevels.AddOption(CurrentLevels[i].Title, CurrentLevels[i].Sprite, CurrentLevels[i].Unlocked);
+            }
         }
     }
 

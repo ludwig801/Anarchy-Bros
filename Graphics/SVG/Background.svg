@@ -82,7 +82,7 @@
        width="1.5"
        y="-0.25"
        x="-0.25"
-       style="color-interpolation-filters:sRGB;"
+       style="color-interpolation-filters:sRGB"
        id="filter7576">
       <feGaussianBlur
          stdDeviation="0.01"
@@ -118,7 +118,7 @@
          specularExponent="35"
          specularConstant="1"
          surfaceScale="3"
-         lighting-color="rgb(255,255,255)"
+         lighting-color="#ffffff"
          result="result1"
          in="result0"
          id="feSpecularLighting7590">
@@ -140,10 +140,11 @@
          result="result4"
          in="fbSourceGraphic"
          in2="result2"
-         id="feComposite7596" />
+         id="feComposite7596"
+         k1="0"
+         k4="0" />
       <feComposite
          operator="out"
-         in="result9"
          in2="result4"
          result="result91"
          id="feComposite7598" />
@@ -156,7 +157,7 @@
        inkscape:label="Water"
        inkscape:menu="Textures"
        inkscape:menu-tooltip="Under a cracked glass"
-       style="color-interpolation-filters:sRGB;"
+       style="color-interpolation-filters:sRGB"
        id="filter7631">
       <feTurbulence
          baseFrequency="0.084000000000000005"
@@ -175,7 +176,8 @@
          scale="20"
          xChannelSelector="G"
          in2="result7"
-         id="feDisplacementMap7637" />
+         id="feDisplacementMap7637"
+         yChannelSelector="A" />
       <feComposite
          result="result2"
          operator="in"
@@ -205,7 +207,9 @@
          in="result4"
          operator="arithmetic"
          result="result91"
-         id="feComposite7647" />
+         id="feComposite7647"
+         k2="0"
+         k4="0" />
       <feBlend
          result="fbSourceGraphic"
          mode="multiply"
@@ -216,7 +220,11 @@
          in="fbSourceGraphic"
          result="result2"
          operator="arithmetic"
-         id="feComposite7651" />
+         id="feComposite7651"
+         k1="0"
+         k2="0"
+         k3="0"
+         k4="0" />
       <feComposite
          in="result2"
          result="result4"
@@ -224,7 +232,9 @@
          k2="2"
          k3="2"
          in2="fbSourceGraphic"
-         id="feComposite7653" />
+         id="feComposite7653"
+         k1="0"
+         k4="0" />
       <feBlend
          mode="screen"
          in="result4"
@@ -5083,10 +5093,10 @@
        inkscape:menu="Textures"
        inkscape:menu-tooltip="Ink paint on paper with some turbulent color shift"
        height="1.3"
-       y="-0.15"
+       y="-0.15000001"
        width="1.3"
-       x="-0.15"
-       style="color-interpolation-filters:sRGB;"
+       x="-0.15000001"
+       style="color-interpolation-filters:sRGB"
        id="filter7794">
       <feTurbulence
          type="turbulence"
@@ -5120,7 +5130,9 @@
          k3="0.5"
          k1="2"
          result="result6"
-         id="feComposite7804" />
+         id="feComposite7804"
+         k2="0"
+         k4="0" />
       <feComposite
          operator="in"
          in2="result5"
@@ -5130,7 +5142,7 @@
     </filter>
     <filter
        id="filter7812"
-       style="color-interpolation-filters:sRGB;"
+       style="color-interpolation-filters:sRGB"
        inkscape:menu-tooltip="Under a cracked glass"
        inkscape:menu="Textures"
        inkscape:label="Sand">
@@ -5151,7 +5163,8 @@
          xChannelSelector="G"
          scale="20"
          in="SourceGraphic"
-         result="result5" />
+         result="result5"
+         yChannelSelector="A" />
       <feComposite
          id="feComposite7820"
          in="result5"
@@ -5181,7 +5194,9 @@
          in="result4"
          in2="result2"
          k3="0.7"
-         k1="1.7" />
+         k1="1.7"
+         k2="0"
+         k4="0" />
       <feBlend
          id="feBlend7830"
          in2="result91"
@@ -5192,7 +5207,11 @@
          operator="arithmetic"
          result="result2"
          in="fbSourceGraphic"
-         in2="fbSourceGraphic" />
+         in2="fbSourceGraphic"
+         k1="0"
+         k2="0"
+         k3="0"
+         k4="0" />
       <feComposite
          id="feComposite7834"
          in2="fbSourceGraphic"
@@ -5200,7 +5219,9 @@
          k2="2"
          operator="arithmetic"
          result="result4"
-         in="result2" />
+         in="result2"
+         k1="0"
+         k4="0" />
       <feBlend
          id="feBlend7836"
          in2="result4"
@@ -5211,7 +5232,7 @@
        inkscape:label="Road"
        inkscape:menu="Textures"
        inkscape:menu-tooltip="Under a cracked glass"
-       style="color-interpolation-filters:sRGB;"
+       style="color-interpolation-filters:sRGB"
        id="filter7840">
       <feTurbulence
          baseFrequency="0.25900000000000001"
@@ -5230,7 +5251,8 @@
          scale="20"
          xChannelSelector="G"
          in2="result7"
-         id="feDisplacementMap7846" />
+         id="feDisplacementMap7846"
+         yChannelSelector="A" />
       <feComposite
          result="result2"
          operator="in"
@@ -5260,7 +5282,9 @@
          in="result4"
          operator="arithmetic"
          result="result91"
-         id="feComposite7856" />
+         id="feComposite7856"
+         k2="0"
+         k4="0" />
       <feBlend
          result="fbSourceGraphic"
          mode="multiply"
@@ -5271,7 +5295,11 @@
          in="fbSourceGraphic"
          result="result2"
          operator="arithmetic"
-         id="feComposite7860" />
+         id="feComposite7860"
+         k1="0"
+         k2="0"
+         k3="0"
+         k4="0" />
       <feComposite
          in="result2"
          result="result4"
@@ -5279,7 +5307,9 @@
          k2="2"
          k3="2"
          in2="fbSourceGraphic"
-         id="feComposite7862" />
+         id="feComposite7862"
+         k1="0"
+         k4="0" />
       <feBlend
          mode="screen"
          in="result4"
@@ -5789,9 +5819,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.49497474"
-     inkscape:cx="1093.867"
-     inkscape:cy="571.48385"
+     inkscape:zoom="0.35"
+     inkscape:cx="1331.6856"
+     inkscape:cy="440.7158"
      inkscape:document-units="px"
      inkscape:current-layer="layer2"
      showgrid="false"
@@ -5801,7 +5831,7 @@
      inkscape:window-x="-8"
      inkscape:window-y="-8"
      inkscape:window-maximized="1"
-     inkscape:snap-global="false"
+     inkscape:snap-global="true"
      inkscape:snap-page="true"
      inkscape:snap-bbox="true"
      inkscape:bbox-paths="true"
@@ -5821,7 +5851,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -5830,8 +5860,14 @@
      id="layer2"
      inkscape:label="Floor"
      style="display:inline"
-     transform="translate(0,123.99998)"
-     sodipodi:insensitive="true">
+     transform="translate(-4.5776367e-5,123.99995)">
+    <rect
+       style="opacity:1;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:8;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect5390"
+       width="2048"
+       height="1024"
+       x="4.5776367e-005"
+       y="-123.99995" />
     <rect
        y="-223.99997"
        x="-199.99998"
@@ -5851,7 +5887,9 @@
      inkscape:groupmode="layer"
      id="layer6"
      inkscape:label="Road"
-     sodipodi:insensitive="true">
+     style="display:inline"
+     sodipodi:insensitive="true"
+     transform="translate(-4.5776367e-5,-3.6811524e-5)">
     <path
        style="fill:#ffe34a;fill-opacity:0.06267808;fill-rule:evenodd;stroke:none;stroke-width:0.25;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;filter:url(#filter7840)"
        d="m 182.92578,0 c 21.28768,6.9694899 42.91643,12.862415 64.5957,19.119141 33.71384,11.783498 67.22323,25.217621 103.0879,28.408203 47.9431,15.09965 96.42134,28.973989 143.7871,45.595703 28.89288,16.917483 62.20394,18.721113 94.65821,21.226563 36.09874,7.47009 72.67459,11.22887 109.5625,7.91016 53.6027,-5.06156 105.48415,10.75858 156.5625,24.10937 23.25354,22.65591 55.56671,29.52023 85.4082,15.20508 24.73025,-8.95425 52.32521,-15.89752 73.60551,-31.5586 C 989.7718,98.41788 958.9842,70.272835 919.90625,58.273438 888.71485,47.862664 857.55278,33.728817 823.73242,37.080078 779.92997,35.81268 736.1895,41.427622 692.4668,38.318359 658.26599,28.99982 622.73278,26.318326 588.5,17.533203 566.66094,10.102721 545.11436,5.3035437 523.53516,0 L 182.92578,0 Z"
@@ -5913,7 +5951,8 @@
      id="layer4"
      inkscape:label="River"
      style="display:inline"
-     sodipodi:insensitive="true">
+     sodipodi:insensitive="true"
+     transform="translate(-4.5776367e-5,-3.6811524e-5)">
     <path
        inkscape:connector-curvature="0"
        id="path7810"
@@ -5935,7 +5974,8 @@
      id="layer7"
      inkscape:label="Props"
      style="display:inline"
-     sodipodi:insensitive="true">
+     sodipodi:insensitive="true"
+     transform="translate(-4.5776367e-5,-3.6811524e-5)">
     <path
        style="fill:#000000;fill-opacity:0.3431953;fill-rule:evenodd;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="m 1273.2143,441.49999 -9.6429,108.92857 147.5001,17.5 11.0714,-110 z"
@@ -9133,7 +9173,7 @@
      id="layer3"
      inkscape:label="Grid"
      style="display:none"
-     transform="translate(0,123.99998)"
+     transform="translate(-4.5776367e-5,123.99995)"
      sodipodi:insensitive="true">
     <rect
        style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.99999994;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"

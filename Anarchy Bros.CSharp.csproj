@@ -13,13 +13,11 @@
     <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>Unity Subset v3.5</TargetFrameworkProfile>
-    <CompilerResponseFile>
-    </CompilerResponseFile>
+    <CompilerResponseFile></CompilerResponseFile>
     <UnityProjectType>Game:1</UnityProjectType>
     <UnityBuildTarget>Android:13</UnityBuildTarget>
     <UnityVersion>5.3.1f1</UnityVersion>
-    <RootNamespace>
-    </RootNamespace>
+    <RootNamespace></RootNamespace>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -74,33 +72,34 @@
     <Compile Include="Assets\Scripts\Game\GameCameraManager.cs" />
     <Compile Include="Assets\Scripts\Game\GameManager.cs" />
     <Compile Include="Assets\Scripts\Game\IOManager.cs" />
-    <Compile Include="Assets\Scripts\Game\Map\Edge.cs" />
     <Compile Include="Assets\Scripts\Game\Map\GraphLogic.cs" />
     <Compile Include="Assets\Scripts\Game\Map\GraphManager.cs" />
+    <Compile Include="Assets\Scripts\Game\Map\MapEdge.cs" />
     <Compile Include="Assets\Scripts\Game\Map\MapManager.cs" />
-    <Compile Include="Assets\Scripts\Game\Map\Spot.cs" />
-    <Compile Include="Assets\Scripts\Game\Pieces\MeleePiece.cs" />
+    <Compile Include="Assets\Scripts\Game\Map\MapSpot.cs" />
+    <Compile Include="Assets\Scripts\Game\Pieces\BulletBehavior.cs" />
+    <Compile Include="Assets\Scripts\Game\Pieces\MeleeBehavior.cs" />
     <Compile Include="Assets\Scripts\Game\Pieces\MoveBehavior.cs" />
     <Compile Include="Assets\Scripts\Game\Pieces\PieceBehavior.cs" />
-    <Compile Include="Assets\Scripts\Game\Pieces\RangedPiece.cs" />
+    <Compile Include="Assets\Scripts\Game\Pieces\RangedBehavior.cs" />
+    <Compile Include="Assets\Scripts\Game\Pieces\WoundBehavior.cs" />
     <Compile Include="Assets\Scripts\Game\TowerManager.cs" />
     <Compile Include="Assets\Scripts\Game\UI\GameUIManager.cs" />
     <Compile Include="Assets\Scripts\Game\UI\HealthElement.cs" />
-    <Compile Include="Assets\Scripts\Game\Weapons\Bullet.cs" />
-    <Compile Include="Assets\Scripts\Game\Weapons\MeleeWeapon.cs" />
-    <Compile Include="Assets\Scripts\Game\Weapons\RangeWeapon.cs" />
-    <Compile Include="Assets\Scripts\Game\Weapons\WoundBehavior.cs" />
     <Compile Include="Assets\Scripts\Game\WoundManager.cs" />
-    <Compile Include="Assets\Scripts\Global\Era.cs" />
-    <Compile Include="Assets\Scripts\Global\Level.cs" />
+    <Compile Include="Assets\Scripts\Global\GameEra.cs" />
+    <Compile Include="Assets\Scripts\Global\GameLevel.cs" />
     <Compile Include="Assets\Scripts\Global\LevelManager.cs" />
     <Compile Include="Assets\Scripts\Menu\UI\MenuPanel.cs" />
     <Compile Include="Assets\Scripts\Menu\UI\MenuUIManager.cs" />
     <Compile Include="Assets\Scripts\Menu\UI\ScrollerBehavior.cs" />
     <Compile Include="Assets\Scripts\Menu\UI\ScrollerButton.cs" />
+    <Compile Include="Assets\Scripts\Menu\UI\ScrollerButtonSmall.cs" />
+    <Compile Include="Assets\Scripts\ReadOnlyAttribute.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Resources\Levels\Egyptian\lvl_0.xml" />
+    <None Include="Assets\Resources\Levels\Egyptian\lvl_1.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\SyntaxTree\UnityVS\2015\UnityVS.CSharp.targets" />
 </Project>

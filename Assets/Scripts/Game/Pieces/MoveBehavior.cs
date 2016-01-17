@@ -2,12 +2,14 @@
 
 public class MoveBehavior : MonoBehaviour
 {
+    // Public vars
     public float Speed;
-    public Spot Target;
-    public Spot Step;
-    public Spot CurrentSpot;
-    public Edge CurrentEdge;
-    public bool CanMove;
+    [ReadOnly] public MapSpot Target;
+    [ReadOnly] public MapSpot Step;
+    [ReadOnly] public MapSpot CurrentSpot;
+    [ReadOnly] public MapEdge CurrentEdge;
+    [ReadOnly] public bool CanMove;
+    // Properties
     public Animator Animator
     {
         get
@@ -35,7 +37,7 @@ public class MoveBehavior : MonoBehaviour
     public bool HasCurrentSpot { get { return CurrentSpot != null; } }
     public bool HasCurrentEdge { get { return CurrentEdge != null; } }
     public Vector2 Direction { get { return Tools2D.DirectionFromRotation(transform.rotation); } }
-
+    // Private vars
     Animator _animator;
     GameManager _gameManager;
     float _animSpeed;
@@ -52,19 +54,7 @@ public class MoveBehavior : MonoBehaviour
 
     void Update()
     {
-        if (!_gameManager.IsCurrentState(GameStates.Play))
-        {
-            Moving = false;
-            return;
-        }
-
-        if (!CanMove)
-        {
-            Moving = false;
-            return;
-        }
-
-        if (Target == null)
+        if (!CanMove || !_gameManager.IsCurrentState(GameStates.Play) || Target == null)
         {
             Moving = false;
             return;
@@ -93,7 +83,7 @@ public class MoveBehavior : MonoBehaviour
             Moving = true;
             if (CurrentSpot != null)
             {
-                CurrentSpot.GetEdge(Step, out CurrentEdge);
+                CurrentSpot.FindEdge(Step, out CurrentEdge);
                 CurrentSpot = null;
             }
             transform.position = Tools2D.MoveTowards(transform.position, Step.transform.position, Time.deltaTime * Speed);

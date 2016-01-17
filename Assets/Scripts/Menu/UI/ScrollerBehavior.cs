@@ -1,14 +1,20 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
-using UnityEngine.UI;
 
 public class ScrollerBehavior : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
-    public GameObject OptionButtonPrefab;
-    public RectTransform Content;
-    public float OptionScaleCurrent, OptionScaleDefault, AnimationSpeed, DragSensibility;
+    // Public vars
+    public GameObject OptionPrefab, OptionSmallPrefab;
+    public RectTransform Content, ContentSmall;
+    [Range(0, 1)]
+    public float VerticalScale;
+    [Range(0, 1)]
+    public float VerticalScaleSmall;
+    public float AnimationSpeed, DragSensibility;
     public List<ScrollerButton> Buttons;
+    public List<ScrollerButtonSmall> ButtonsSmall;
+    // Properties
     public int OptionsMin
     {
         get
@@ -27,6 +33,7 @@ public class ScrollerBehavior : MonoBehaviour, IBeginDragHandler, IDragHandler, 
     {
         get
         {
+            _currentOption = Mathf.Clamp(_currentOption, OptionsMin, OptionsMax);
             return _currentOption;
         }
 
@@ -46,19 +53,26 @@ public class ScrollerBehavior : MonoBehaviour, IBeginDragHandler, IDragHandler, 
             return _menuManager;
         }
     }
-
+    // Private vars
     MenuUIManager _menuManager;
     Vector2 _dragDelta;
+    float _aLeft, _aRight, _aTop, _aBottom, _aSmallOffsetX;
+    float _contentProportion, _contentSmallProportion;
     float _dragTime;
-    float _centerBtnRightEdge, _centerBtnLeftEdge;
     int _currentOption;
 
     void Start()
     {
         _menuManager = MenuUIManager.Instance;
 
-        _centerBtnRightEdge = 0.5f + 0.5f * OptionScaleCurrent;
-        _centerBtnLeftEdge = 0.5f - 0.5f * OptionScaleCurrent;
+        _contentProportion = Content.rect.height / Content.rect.width;
+        _aLeft = 0.5f * (1 - VerticalScale * _contentProportion);
+        _aRight = 0.5f * (1 + VerticalScale * _contentProportion);
+        _aTop = 0.5f * (1 + VerticalScale);
+        _aBottom = 0.5f * (1 - VerticalScale);
+
+        _contentSmallProportion = ContentSmall.rect.height / ContentSmall.rect.width;
+        _aSmallOffsetX = 0.5f * VerticalScaleSmall * _contentSmallProportion;
     }
 
     void Update()
@@ -68,63 +82,127 @@ public class ScrollerBehavior : MonoBehaviour, IBeginDragHandler, IDragHandler, 
             for (int i = 0; i < Buttons.Count; i++)
             {
                 ScrollerButton btn = Buttons[i];
+                ScrollerButtonSmall btnSmall = ButtonsSmall[i];
+                Vector2 anchorMinTo;
+                Vector2 anchorMaxTo;
+
                 int offset = (i - CurrentOption);
-                Vector2 anchorX = GetAnchorX(offset);
+
+                GetAnchors(offset, out anchorMinTo, out anchorMaxTo);
                 btn.Focused = (offset == 0);
-                btn.MoveTo(new Vector2(anchorX.x, btn.RectTransform.anchorMin.y), new Vector2(anchorX.y, btn.RectTransform.anchorMax.y), AnimationSpeed);
+                btn.MoveTo(anchorMinTo, anchorMaxTo, AnimationSpeed);
+
+                GetAnchorsSmall(offset, out anchorMinTo, out anchorMaxTo);
+                btnSmall.Focused = btn.Focused;
+                btnSmall.MoveTo(anchorMinTo, anchorMaxTo, AnimationSpeed);
             }
         }
     }
 
     public void RemoveOptions()
     {
-        Buttons.Clear();
+        for (int i = 0; i < Buttons.Count; i++)
+        {
+            Buttons[i].gameObject.SetActive(false);
+            ButtonsSmall[i].gameObject.SetActive(false);
+        }
+        CurrentOption = 0;
+    }
+
+    bool GetButton(out ScrollerButton btn, out ScrollerButtonSmall btnSmall)
+    {
+        btnSmall = null;
+        btn = null;
+
+        for (int i = 0; i < Buttons.Count; i++)
+        {
+            if (!Buttons[i].gameObject.activeSelf)
+            {
+                btn = Buttons[i];
+                btnSmall = ButtonsSmall[i];
+                break;
+            }
+        }
+
+        return (btn != null && btnSmall != null);
     }
 
     public void AddOption(string name, Sprite img, bool unlocked)
     {
-        ScrollerButton btn = Instantiate(OptionButtonPrefab).GetComponent<ScrollerButton>();
-        btn.transform.SetParent(Content);
+        ScrollerButton btn;
+        ScrollerButtonSmall btnSmall;
+
+        if (!GetButton(out btn, out btnSmall))
+        {
+            btn = Instantiate(OptionPrefab).GetComponent<ScrollerButton>();
+            btn.transform.SetParent(Content);
+            btnSmall = Instantiate(OptionSmallPrefab).GetComponent<ScrollerButtonSmall>();
+            btnSmall.transform.SetParent(ContentSmall);
+            Buttons.Add(btn);
+            ButtonsSmall.Add(btnSmall);
+            int i = Buttons.Count - 1;
+
+            btnSmall.Button.onClick.AddListener(() =>
+            {
+                CurrentOption = i;
+            });
+            btn.Button.onClick.AddListener(() =>
+            {
+                CurrentOption = i;
+                if (btn.Focused)
+                {
+                    MenuManager.NextMenu();
+                }
+            });
+        }
+        btn.gameObject.SetActive(true);
         btn.name = name;
-        btn.Unlocked = unlocked;
-        int i = Buttons.Count;
+        btn.Unlocked = unlocked;       
         if (img != null)
         {
             btn.ButtonImage.sprite = img;
         }
-        btn.Button.onClick.AddListener(() =>
-        {
-            CurrentOption = i;
-            if (btn.Focused)
-            {
-                MenuManager.NextMenu();
-            }   
-        });
-        Buttons.Add(btn);
+        btnSmall.gameObject.SetActive(true);
+        btnSmall.name = name;
+        btnSmall.Unlocked = unlocked;
     }
 
-    Vector2 GetAnchorX(int offset)
+    void GetAnchors(int offset, out Vector2 anchorMin, out Vector2 anchorMax)
     {
-        float anchorMin;
-        float anchorMax;
-
-        if (offset > 0)
+        if (offset == 0)
         {
-            anchorMin = (_centerBtnRightEdge) + (offset - 1) * OptionScaleDefault;
-            anchorMax = (_centerBtnRightEdge) + offset * OptionScaleDefault;
+            anchorMin = new Vector2(_aLeft, _aBottom);
+            anchorMax = new Vector2(_aRight, _aTop);
         }
         else if (offset < 0)
         {
-            anchorMin = (_centerBtnLeftEdge) + offset * OptionScaleDefault;
-            anchorMax = (_centerBtnLeftEdge) + (offset + 1) * OptionScaleDefault;
+            anchorMin = new Vector2(_aLeft - _aRight, _aBottom);
+            anchorMax = new Vector2(0, _aTop);
         }
         else
         {
-            anchorMin = (_centerBtnLeftEdge);
-            anchorMax = (_centerBtnRightEdge);
+            anchorMin = new Vector2(1, _aBottom);
+            anchorMax = new Vector2(1 + _aRight - _aLeft, _aTop);
         }
+    }
 
-        return new Vector2(anchorMin, anchorMax);
+    void GetAnchorsSmall(int offset, out Vector2 anchorMin, out Vector2 anchorMax)
+    {
+        float vScale = (offset == 0) ? VerticalScaleSmall : 0.5f * VerticalScaleSmall;
+        float vBorder = (1 - vScale) * 0.5f;
+        float xOffset = 0;
+        if (offset > 0)
+        {
+            xOffset = _aSmallOffsetX + (vScale * _contentSmallProportion) * (offset - 0.5f);
+        }
+        else if (offset < 0)
+        {
+            xOffset = (vScale * _contentSmallProportion) * (offset + 0.5f) - _aSmallOffsetX;
+        }
+        Vector2 center = new Vector2(0.5f + xOffset, 0.5f);
+        
+        anchorMin = new Vector2(center.x - 0.5f * vScale * _contentSmallProportion, vBorder);
+        anchorMax = new Vector2(center.x + 0.5f * vScale * _contentSmallProportion, 1 - vBorder);
     }
 
     float GetFadeFactor(int offset)

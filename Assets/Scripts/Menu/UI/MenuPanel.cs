@@ -62,8 +62,8 @@ public class MenuPanel : MonoBehaviour
     public void HideBelow(float animationsSpeed)
     {
         _animSpeed = animationsSpeed;
-        HiddenAnchorMin = new Vector2(0, -2);
-        HiddenAnchorMax = new Vector2(1, -1);
+        HiddenAnchorMin = new Vector2(0, -1);
+        HiddenAnchorMax = new Vector2(1, 0);
         Visible = false;
     }
 

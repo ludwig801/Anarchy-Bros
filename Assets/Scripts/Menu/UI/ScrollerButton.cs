@@ -59,13 +59,21 @@ public class ScrollerButton : MonoBehaviour
     Image _btnImage;
     Button _btn;
     Vector2 _anchorMinTo, _anchorMaxTo;
-    float _fadeSpeed, _moveSpeed;
+    float _fadeSpeed, _animSpeed;
+
+    void Start()
+    {
+        RectTransform.anchorMin = Vector2.zero;
+        RectTransform.anchorMax = Vector2.one;
+        RectTransform.offsetMin = Vector2.zero;
+        RectTransform.offsetMax = Vector2.zero;
+    }
 
     void Update()
     {
-        float t = Time.unscaledDeltaTime * _moveSpeed;
+        float t = Time.unscaledDeltaTime * _animSpeed;
 
-        Button.interactable = Unlocked && Focused;
+        Button.interactable = Unlocked;
         if (Focused)
         {
             ButtonImage.color = Color.Lerp(ButtonImage.color, Unlocked ? ColorFocused : Color.Lerp(ColorFocused, ColorLocked, 0.75f), t);
@@ -75,29 +83,15 @@ public class ScrollerButton : MonoBehaviour
             ButtonImage.color = Color.Lerp(ButtonImage.color, Unlocked ? ColorDefault : Color.Lerp(ColorDefault, ColorLocked, 0.75f), t);
         }
 
-        if (!Tools2D.Approximate(RectTransform.anchorMin, _anchorMinTo, 0.001f))
-        {
-            RectTransform.anchorMin = Vector2.Lerp(RectTransform.anchorMin, _anchorMinTo, t);
-        }
-        else
-        {
-            RectTransform.anchorMin = _anchorMinTo;
-        }
-        if (!Tools2D.Approximate(RectTransform.anchorMax, _anchorMaxTo, 0.001f))
-        {
-            RectTransform.anchorMax = Vector2.Lerp(RectTransform.anchorMax, _anchorMaxTo, t);
-        }
-        else
-        {
-            RectTransform.anchorMax = _anchorMaxTo;
-        }
+        RectTransform.anchorMin = Vector2.Lerp(RectTransform.anchorMin, _anchorMinTo, t);
+        RectTransform.anchorMax = Vector2.Lerp(RectTransform.anchorMax, _anchorMaxTo, t);
         RectTransform.offsetMin = Vector2.zero;
         RectTransform.offsetMax = Vector2.zero;
     }
 
     public void MoveTo(Vector2 anchorMin, Vector2 anchorMax, float animationSpeed)
     {
-        _moveSpeed = animationSpeed;
+        _animSpeed = animationSpeed;
         _anchorMinTo = anchorMin;
         _anchorMaxTo = anchorMax;
     }

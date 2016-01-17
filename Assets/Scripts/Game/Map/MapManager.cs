@@ -41,20 +41,24 @@ public class MapManager : MonoBehaviour
     {
         _gameManager = GameManager.Instance;
 
-        _editSource = Instantiate(EditSourcePrefab).transform;
-        _editSource.name = "Source [Edit Only]";
-        _editSource.transform.SetParent(transform);
-        _editSource.gameObject.SetActive(false);
+        if (_gameManager.Debugging)
+        {
+            _editSource = Instantiate(EditSourcePrefab).transform;
+            _editSource.name = "Source [Edit Only]";
+            _editSource.transform.SetParent(transform);
+            _editSource.gameObject.SetActive(false);
 
-        _editTarget = Instantiate(EditTargetPrefab).transform;
-        _editTarget.name = "Target [Edit Only]";
-        _editTarget.transform.SetParent(transform);
-        _editTarget.gameObject.SetActive(false);
+            _editTarget = Instantiate(EditTargetPrefab).transform;
+            _editTarget.name = "Target [Edit Only]";
+            _editTarget.transform.SetParent(transform);
+            _editTarget.gameObject.SetActive(false);
 
-        Targeting = false;
-        CurrentMode = SpotTypes.Connection;
+            Targeting = false;
+            CurrentMode = SpotTypes.Connection;
+        }
 
         SpriteRenderer groundRenderer = ObjGround.GetComponent<SpriteRenderer>();
+        groundRenderer.sprite = _gameManager.LevelManager.CurrentLevel.BackgroundSprite;
         float mapWidth = ObjGround.localScale.x * groundRenderer.sprite.textureRect.width / groundRenderer.sprite.pixelsPerUnit;
         float mapHeight = ObjGround.localScale.y * groundRenderer.sprite.textureRect.height / groundRenderer.sprite.pixelsPerUnit;
         Size = new Vector3(mapWidth, mapHeight, 1);
@@ -64,27 +68,30 @@ public class MapManager : MonoBehaviour
 
     void Update()
     {
-        switch (_gameManager.CurrentState)
+        if (_gameManager.Debugging)
         {
-            case GameStates.Edit:
-                _editSource.gameObject.SetActive(true);
-                _editTarget.gameObject.SetActive(Targeting);
-                if (Targeting)
-                {
-                    Vector2 newPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                    _editTarget.position = new Vector3(newPos.x, newPos.y, _editTarget.position.z);
-                }
-                else
-                {
-                    Vector2 newPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                    _editSource.position = new Vector3(newPos.x, newPos.y, _editSource.position.z);
-                }
-                break;
+            switch (_gameManager.CurrentState)
+            {
+                case GameStates.Edit:
+                    _editSource.gameObject.SetActive(true);
+                    _editTarget.gameObject.SetActive(Targeting);
+                    if (Targeting)
+                    {
+                        Vector2 newPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                        _editTarget.position = new Vector3(newPos.x, newPos.y, _editTarget.position.z);
+                    }
+                    else
+                    {
+                        Vector2 newPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                        _editSource.position = new Vector3(newPos.x, newPos.y, _editSource.position.z);
+                    }
+                    break;
 
-            default:
-                _editSource.gameObject.SetActive(false);
-                _editTarget.gameObject.SetActive(false);
-                break;
+                default:
+                    _editSource.gameObject.SetActive(false);
+                    _editTarget.gameObject.SetActive(false);
+                    break;
+            }
         }
     }
 
@@ -126,7 +133,7 @@ public class MapManager : MonoBehaviour
     {
         bool leftClick = eventData.button == PointerEventData.InputButton.Left;
         bool rightClick = eventData.button == PointerEventData.InputButton.Right;
-        Spot hitSpot;
+        MapSpot hitSpot;
 
         if (Graph.FindSpotNear(worldPos, out hitSpot) && rightClick)
         {
@@ -161,7 +168,7 @@ public class MapManager : MonoBehaviour
     {
         bool leftClick = eventData.button == PointerEventData.InputButton.Left;
         bool rightClick = eventData.button == PointerEventData.InputButton.Right;
-        Spot hitSpot;
+        MapSpot hitSpot;
 
         if (Graph.FindSpotNear(worldPos, out hitSpot))
         {
@@ -180,7 +187,7 @@ public class MapManager : MonoBehaviour
     {
         bool leftClick = eventData.button == PointerEventData.InputButton.Left;
         bool rightClick = eventData.button == PointerEventData.InputButton.Right;
-        Spot hitSpot;
+        MapSpot hitSpot;
 
         if (Graph.FindSpotNear(worldPos, out hitSpot))
         {
@@ -199,8 +206,8 @@ public class MapManager : MonoBehaviour
     {
         Vector2 sourcePos = _editSource.position;
         Vector2 targetPos = _editTarget.position;
-        Spot spotA, spotB;
-        Edge hitEdge;
+        MapSpot spotA, spotB;
+        MapEdge hitEdge;
 
         if (!Graph.FindSpotNear(sourcePos, out spotA))
         {
@@ -228,12 +235,12 @@ public class MapManager : MonoBehaviour
 
     }
 
-    void SplitEdge(Edge hitEdge, Spot spliterSpot)
+    void SplitEdge(MapEdge hitEdge, MapSpot spliterSpot)
     {
-        Spot spotA = hitEdge.A;
-        hitEdge.A.RemoveEdge(hitEdge);
+        MapSpot spotA = hitEdge.A;
+        hitEdge.A.Edges.Remove(hitEdge);
         hitEdge.A = spliterSpot;
-        spliterSpot.AddEdge(hitEdge);
+        spliterSpot.Edges.Add(hitEdge);
         Graph.CreateEdge(spliterSpot, spotA);
     }
 }

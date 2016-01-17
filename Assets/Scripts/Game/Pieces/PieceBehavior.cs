@@ -5,11 +5,18 @@ using UnityEngine;
 [RequireComponent(typeof(MoveBehavior))]
 public class PieceBehavior : MonoBehaviour
 {
-    public int MaxHealth, Health;
+    [Range(0, 100)]
+    public int MaxHealth;
+    [ReadOnly]
+    public int Health;
+    [Range(5, 10)]
+    public float RotationSpeed;
+    [Range(0, 2)]
     public float DeathSpeed;
     public Tags TargetTag;
-    public bool Alive { get { return (Health > 0) && gameObject.activeSelf; } }
+    [ReadOnly]
     public bool Reciclable;
+    public bool Alive { get { return (Health > 0) && gameObject.activeSelf; } }
     public bool Attacking
     {
         get
@@ -60,10 +67,10 @@ public class PieceBehavior : MonoBehaviour
     }
 
     GameManager _gameManager;
-    MoveBehavior _movement;
-    float _deltaTime, _animDeathSpeed;
-    Animator _animator;
     SpriteRenderer _renderer;
+    MoveBehavior _movement;
+    Animator _animator;
+    float _animDeathSpeed;
     bool _isAttacking;
 
     void Start()
@@ -84,18 +91,17 @@ public class PieceBehavior : MonoBehaviour
     {
         Health = 0;
         Animator.SetTrigger("Die");
-        Animator.SetBool("Alive", Alive);
-        Movement.CanMove = Alive;
+        Animator.SetBool("Alive", Alive); 
         GetComponent<Collider2D>().enabled = false;
+        Movement.CanMove = Alive;
         Movement.CurrentEdge = null;
         Movement.CurrentSpot = null;
         Movement.Target = null;
         Renderer.sortingOrder = 0;
         _gameManager.OnPieceKilled(this);
-        //_healthElement.gameObject.SetActive(false);
 
         yield return new WaitForSeconds(DeathSpeed);
-
+  
         Reciclable = true;
     }
 
@@ -108,15 +114,17 @@ public class PieceBehavior : MonoBehaviour
         Movement.CanMove = Alive;
         Reciclable = false;
         GetComponent<Collider2D>().enabled = true;
-        //_healthElement.gameObject.SetActive(true);
     }
 
     public void TakeDamage(int amount)
     {
-        Health -= amount;
-        if (Health <= 0)
+        if (Alive)
         {
-            StartCoroutine(Die());
+            Health -= amount;
+            if (Health <= 0)
+            {
+                StartCoroutine(Die());
+            }
         }
     }
 }

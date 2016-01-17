@@ -45,7 +45,7 @@ public class GameUIManager : MonoBehaviour
                 ResumeButton.gameObject.SetActive(false);
                 PauseButton.gameObject.SetActive(false);
                 PlaceTextPanel.gameObject.SetActive(true);
-                if (_gameManager.Towers.ActiveTowers >= _gameManager.Towers.MaxNumTowers)
+                if (_gameManager.Towers.AliveTowers >= _gameManager.Towers.MaxNumTowers)
                 {
                     PlayButton.gameObject.SetActive(true);
                 }
@@ -53,7 +53,7 @@ public class GameUIManager : MonoBehaviour
                 {
                     PlayButton.gameObject.SetActive(false);
                 }
-                _placeText.text = "Place Towers (" + (_gameManager.Towers.MaxNumTowers - _gameManager.Towers.ActiveTowers) + " left)";
+                _placeText.text = "Place Towers (" + (_gameManager.Towers.MaxNumTowers - _gameManager.Towers.AliveTowers) + " left)";
                 break;
 
             case GameStates.Play:

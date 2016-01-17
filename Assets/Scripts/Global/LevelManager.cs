@@ -5,10 +5,11 @@ public class LevelManager : MonoBehaviour
 {
     public static LevelManager Instance;
 
-    public Transform ErasObj;
-    public Era CurrentEra;
-    public Level CurrentLevel;
-    public List<Era> Eras;
+    public Transform ErasObj, LevelsObj;
+    public GameEra CurrentEra;
+    public GameLevel CurrentLevel;
+    public List<GameEra> Eras;
+    public bool Debugging;
 
     void Awake()
     {
@@ -31,16 +32,34 @@ public class LevelManager : MonoBehaviour
 
         Screen.sleepTimeout = SleepTimeout.NeverSleep;
 
+        LoadErasAndLevels();
+
+        CurrentEra = Eras[0];
+        CurrentLevel = CurrentEra.Levels[0];
+    }
+
+    void LoadErasAndLevels()
+    {
         for (int i = 0; i < ErasObj.childCount; i++)
         {
-            Era era = ErasObj.GetChild(i).GetComponent<Era>();
+            GameEra era = ErasObj.GetChild(i).GetComponent<GameEra>();
             if (era != null)
             {
                 Eras.Add(era);
             }
         }
 
-        CurrentEra = Eras[0];
-        CurrentLevel = CurrentEra.Levels[0];
+        for (int i = 0; i < Eras.Count; i++)
+        {
+            GameEra era = Eras[i];
+            for (int j = 0; j < LevelsObj.childCount; j++)
+            {
+                GameLevel level = LevelsObj.GetChild(j).GetComponent<GameLevel>();
+                if (level != null && level.Era == era.Name)
+                {
+                    era.Levels.Add(level);
+                }
+            }
+        }
     }
 }

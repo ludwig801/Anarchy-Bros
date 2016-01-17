@@ -7,7 +7,7 @@ public class EnemyManager : MonoBehaviour
     public float SpawnTime;
     public int MaxNumEnemies, MaxNumDeadBodies;
     public List<PieceBehavior> Objects;
-    public int AliveEnemies {get { return CountAliveEnemies(); }}
+    public int AliveEnemies;
 
     GameManager _gameManager;
     float _timeSinceLastSpawn;
@@ -15,8 +15,8 @@ public class EnemyManager : MonoBehaviour
     void Start()
     {
         _gameManager = GameManager.Instance;
-
         _timeSinceLastSpawn = 0;
+        AliveEnemies = 0;
     }
 
     void Update()
@@ -50,7 +50,7 @@ public class EnemyManager : MonoBehaviour
     void Spawn()
     {
         PieceBehavior objective;
-        Spot spawnSpot;
+        MapSpot spawnSpot;
 
         if (NewTarget(out objective, out spawnSpot))
         {
@@ -63,6 +63,7 @@ public class EnemyManager : MonoBehaviour
             obj.Movement.CurrentSpot = spawnSpot;
             obj.Renderer.sortingOrder = 1;
             _gameManager.UI.AssignHealthElement(obj);
+            AliveEnemies++;
         }
     }
 
@@ -89,30 +90,16 @@ public class EnemyManager : MonoBehaviour
         return piece;
     }
 
-    bool NewTarget(out PieceBehavior finalObjective, out Spot spawnSpot)
+    bool NewTarget(out PieceBehavior finalObjective, out MapSpot spawnSpot)
     {
-        spawnSpot = _gameManager.Map.Graph.GetRandomSpot(SpotTypes.EnemySpawn);
-        finalObjective = _gameManager.Towers.Random();
+        spawnSpot = null;
+        finalObjective = null;
 
-        return (finalObjective != null && spawnSpot != null);
+        return (_gameManager.Map.Graph.GetRandomSpot(SpotTypes.EnemySpawn, out spawnSpot) &&
+            _gameManager.Towers.GetRandomTower(out finalObjective));
     }
 
-    int CountAliveEnemies()
-    {
-        int count = 0;
-
-        for (int i = 0; i < Objects.Count; i++)
-        {
-            if (Objects[i].Alive)
-            {
-                count++;
-            }
-        }
-
-        return count;
-    }
-
-    public bool GetClosestEnemy(RangedPiece requester, out MoveBehavior closestEnemy)
+    public bool GetClosestEnemy(RangedBehavior requester, out MoveBehavior closestEnemy)
     {
         float minDist = float.MaxValue;
         closestEnemy = null;
@@ -120,7 +107,7 @@ public class EnemyManager : MonoBehaviour
         for (int i = 0; i < Objects.Count; i++)
         {
             PieceBehavior enemy = Objects[i];
-            if (enemy.Alive && Tools2D.Distance(enemy.transform.position, requester.Piece.transform.position) <= requester.Weapon.Range)
+            if (enemy.Alive && Tools2D.Distance(enemy.transform.position, requester.Piece.transform.position) <= requester.Range)
             {
                 float d = _gameManager.Map.GraphLogic.DistanceBetween(requester.Piece.Movement, enemy.Movement);
                 if (d < minDist)
@@ -134,12 +121,6 @@ public class EnemyManager : MonoBehaviour
         return (closestEnemy != null);
     }
 
-    public void Remove(PieceBehavior enemy)
-    {
-        Objects.Remove(enemy);
-        Destroy(enemy.gameObject);
-    }
-
     public void RemoveAll()
     {
         for (int i = 0; i < Objects.Count; i++)
@@ -150,15 +131,8 @@ public class EnemyManager : MonoBehaviour
         Objects.Clear();
     }
 
-    public void KillAll()
+    public void OnEnemyKilled()
     {
-        for (int i = 0; i < Objects.Count; i++)
-        {
-            PieceBehavior x = Objects[i];
-            if (x.Alive)
-            {
-                StartCoroutine(x.Die());
-            }
-        }
+        AliveEnemies--;
     }
 }

@@ -15,8 +15,8 @@ public class IOManager : MonoBehaviour
     public void SaveGraph()
     {
         MapManager map = _gameManager.Map;
-        List<Spot> spots = map.Graph.Spots;
-        List<Edge> edges = map.Graph.Edges;
+        List<MapSpot> spots = map.Graph.Spots;
+        List<MapEdge> edges = map.Graph.Edges;
 
         GameGraph graph = new GameGraph();
         for (int i = 0; i < spots.Count; i++)
@@ -29,15 +29,18 @@ public class IOManager : MonoBehaviour
             graph.AddEdge(edges[i]);
         }
 
-
         XmlSerializer serializer = new XmlSerializer(typeof(GameGraph));
-        if (!Directory.Exists(Application.persistentDataPath + "/Resources/Levels/" + LevelManager.Instance.CurrentEra.Title))
+        string eraPath = Application.dataPath + "/Resources/Levels/" + LevelManager.Instance.CurrentEra.Name;
+        if (!Directory.Exists(eraPath))
         {
-            Directory.CreateDirectory(Application.persistentDataPath + "/Resources/Levels/" + LevelManager.Instance.CurrentEra.Title);
+            Debug.Log("Directory [" + eraPath + "] does not exist. Creating...");
+            Directory.CreateDirectory(eraPath);
         }
 
-        StreamWriter stream = new StreamWriter(Application.persistentDataPath + "/Resources/Levels/" + LevelManager.Instance.CurrentEra.Title +
-            "/lvl_" + LevelManager.Instance.CurrentLevel.Order + ".xml", false, System.Text.Encoding.GetEncoding("UTF-8"));
+        string levelPath = Application.dataPath + "/Resources/Levels/" + LevelManager.Instance.CurrentEra.Name + "/lvl_" + LevelManager.Instance.CurrentLevel.Order + ".xml";
+
+        Debug.Log("Saving level [" + LevelManager.Instance.CurrentLevel.Title + "] in file: [" + levelPath + "]");
+        StreamWriter stream = new StreamWriter(levelPath, false, System.Text.Encoding.GetEncoding("UTF-8"));
 
         serializer.Serialize(stream, graph);
         stream.Dispose();
@@ -45,30 +48,22 @@ public class IOManager : MonoBehaviour
 
     public void LoadGraph()
     {
-        MapManager map = _gameManager.Map;
-        bool existed = false;
+
+        string path = "Levels/" + LevelManager.Instance.CurrentEra.Name + "/lvl_" + LevelManager.Instance.CurrentLevel.Order;
+        TextAsset lvl = Resources.Load(path, typeof(TextAsset)) as TextAsset;
+
+        if (lvl == null)
+        {
+            Debug.Log("Level had no graph saved. First time editing this level?");
+            return;
+        }
 
         XmlSerializer serializer = new XmlSerializer(typeof(GameGraph));
-        Stream stream;
-        if (File.Exists(Application.persistentDataPath + "/Resources/Levels/"
-            + LevelManager.Instance.CurrentEra + "/lvl_" + LevelManager.Instance.CurrentLevel.Order + ".xml"))
-        {
-            //Debug.Log("Loading from persistent data path...");
-            existed = true;
-            stream = new FileStream(Application.persistentDataPath + "/Resources/Levels/"
-            + LevelManager.Instance.CurrentEra + "/lvl_" + LevelManager.Instance.CurrentLevel.Order + ".xml", FileMode.Open);
-        }
-        else
-        {
-            //Debug.Log("Loading from resources...");
-            string path = "Levels/" + LevelManager.Instance.CurrentEra.Title + "/lvl_" + LevelManager.Instance.CurrentLevel.Order;
-            TextAsset lvl = Resources.Load(path, typeof(TextAsset)) as TextAsset;
-            stream = new MemoryStream(lvl.bytes);
-        }
-            
+        Stream stream = new MemoryStream(lvl.bytes);
         GameGraph graph = serializer.Deserialize(stream) as GameGraph;
         stream.Dispose();
 
+        MapManager map = _gameManager.Map;
         _gameManager.Map.Graph.RemoveAll();
 
         for (int i = 0; i < graph.Spots.Count; i++)
@@ -80,12 +75,10 @@ public class IOManager : MonoBehaviour
         for (int i = 0; i < graph.Edges.Count; i++)
         {
             IOEdge edge = graph.Edges[i];
-            map.Graph.CreateEdge(map.Graph.FindSpotExact(edge.a.ToVector2), map.Graph.FindSpotExact(edge.b.ToVector2));
-        }
-
-        if (!existed)
-        {
-            SaveGraph();
+            MapSpot a, b;
+            map.Graph.FindSpotExact(edge.a.ToVector2, out a);
+            map.Graph.FindSpotExact(edge.b.ToVector2, out b);
+            map.Graph.CreateEdge(a, b);
         }
     }
 }
@@ -104,7 +97,7 @@ public class GameGraph
         Edges = new List<IOEdge>();
     }
 
-    public void AddSpot(Spot spot)
+    public void AddSpot(MapSpot spot)
     {
         IOSpot x = new IOSpot();
         x.Position = new Point();
@@ -114,7 +107,7 @@ public class GameGraph
         Spots.Add(x);
     }
 
-    public void AddEdge(Edge edge)
+    public void AddEdge(MapEdge edge)
     {
         IOEdge ioEdge = new IOEdge();
         ioEdge.a = new Point();

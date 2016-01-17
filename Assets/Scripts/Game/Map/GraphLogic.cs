@@ -1,20 +1,25 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-using System;
 
 [RequireComponent(typeof(GraphManager))]
 public class GraphLogic : MonoBehaviour
 {
-    GraphManager _graph;
-    float[,] _distances;
-
-    void Start()
+    GraphManager Graph
     {
-        _graph = GetComponent<GraphManager>();
+        get
+        {
+            if (_graph == null)
+            {
+                _graph = GetComponent<GraphManager>();
+            }
+            return _graph;
+        }
     }
 
-    // Public Methods
-    public bool StepToTarget(MoveBehavior source, out Spot step)
+    GraphManager _graph;
+    float[,] _distancesBetweenSpots;
+
+    public bool StepToTarget(MoveBehavior source, out MapSpot step)
     {
         step = null;
 
@@ -30,7 +35,7 @@ public class GraphLogic : MonoBehaviour
         return (step != null);
     }
 
-    public bool ProvideTarget(MoveBehavior source, MoveBehavior target, out Spot step)
+    public bool ProvideTarget(MoveBehavior source, MoveBehavior target, out MapSpot step)
     {
         step = null;
 
@@ -53,9 +58,9 @@ public class GraphLogic : MonoBehaviour
         return (step != null);
     }
 
-    Spot ProvideTarget(Spot source, MoveBehavior target)
+    MapSpot ProvideTarget(MapSpot source, MoveBehavior target)
     {
-        Edge targetEdge = target.CurrentEdge;
+        MapEdge targetEdge = target.CurrentEdge;
         if (source.Edges.Contains(targetEdge))
         {
             return (target.Step == source) ? targetEdge.Neighbor(target.Step) : target.Step;
@@ -67,18 +72,18 @@ public class GraphLogic : MonoBehaviour
         return (distA < distB) ? targetEdge.A : targetEdge.B;
     }
 
-    Spot ProvideTarget(MoveBehavior source, MoveBehavior target)
+    MapSpot ProvideTarget(MoveBehavior source, MoveBehavior target)
     {
-        Edge sourceEdge = source.CurrentEdge;
-        Edge targetEdge = target.CurrentEdge;
+        MapEdge sourceEdge = source.CurrentEdge;
+        MapEdge targetEdge = target.CurrentEdge;
         if (sourceEdge == targetEdge)
         {
-            Spot targetSpot = target.Step == targetEdge.A ? targetEdge.A : targetEdge.B;
+            MapSpot targetSpot = target.Step == targetEdge.A ? targetEdge.A : targetEdge.B;
             Vector2 spotPos = targetSpot.transform.position;
             return Tools2D.Distance(target.transform.position, spotPos) < Tools2D.Distance(source.transform.position, spotPos) ? targetSpot : targetEdge.Neighbor(targetSpot);
         }
 
-        Spot bestSourceSpot = DistanceBetween(sourceEdge.A, target) < DistanceBetween(sourceEdge.B, target) ? sourceEdge.A : sourceEdge.B;
+        MapSpot bestSourceSpot = DistanceBetween(sourceEdge.A, target) < DistanceBetween(sourceEdge.B, target) ? sourceEdge.A : sourceEdge.B;
 
         return DistanceBetween(bestSourceSpot, targetEdge.A) < DistanceBetween(bestSourceSpot, targetEdge.B) ? targetEdge.A : targetEdge.B;
     }
@@ -113,14 +118,14 @@ public class GraphLogic : MonoBehaviour
 
     public void ReCalculate()
     {
-        int spotCount = _graph.SpotCount;
+        int spotCount = Graph.SpotCount;
 
-        _distances = new float[spotCount, spotCount];
+        _distancesBetweenSpots = new float[spotCount, spotCount];
         List<GraphSpot> graph = new List<GraphSpot>();
 
         for (int i = 0; i < spotCount; i++)
         {
-            Spot n = _graph.Spots[i];
+            MapSpot n = Graph.Spots[i];
             n.Index = i;
             GraphSpot gSpot = new GraphSpot(n.transform.position, float.MaxValue);
             graph.Add(gSpot);
@@ -134,33 +139,31 @@ public class GraphLogic : MonoBehaviour
         graph.Clear();
     }
 
-    // Private Methods
-    Spot StepToTarget(Spot source, Spot target)
+    MapSpot StepToTarget(MapSpot source, MapSpot target)
     {
-        if (source == target)
+        MapSpot best = null;
+
+        if (source != target)
         {
-            return null;
-        }
+            float minDist = int.MaxValue;
 
-        float minDist = int.MaxValue;
-        Spot best = null;
-
-        for (int i = 0; i < source.Edges.Count; i++)
-        {
-            Spot neighbor = source.Edges[i].Neighbor(source);
-            float d = _distances[neighbor.Index, target.Index] + DistanceBetween(source, neighbor);
-
-            if (d < minDist)
+            for (int i = 0; i < source.Edges.Count; i++)
             {
-                minDist = d;
-                best = neighbor;
+                MapSpot neighbor = source.Edges[i].Neighbor(source);
+                float d = _distancesBetweenSpots[neighbor.Index, target.Index] + DistanceBetween(source, neighbor);
+
+                if (d < minDist)
+                {
+                    minDist = d;
+                    best = neighbor;
+                }
             }
         }
 
         return best;
     }
 
-    Spot StepToTarget(Spot source, MoveBehavior target)
+    MapSpot StepToTarget(MapSpot source, MoveBehavior target)
     {
         if (target.CurrentEdge.HasSpot(source))
         {
@@ -175,18 +178,18 @@ public class GraphLogic : MonoBehaviour
         }
 
         float minDist = float.MaxValue;
-        Spot best = null;
+        MapSpot best = null;
 
         int tA = target.CurrentEdge.A.Index;
         int tB = target.CurrentEdge.B.Index;
 
         for (int i = 0; i < source.Edges.Count; i++)
         {
-            Spot neighbor = source.Edges[i].Neighbor(source);
+            MapSpot neighbor = source.Edges[i].Neighbor(source);
             int sourceIndex = neighbor.Index;
             float d = DistanceBetween(source, neighbor);
-            float dA = _distances[sourceIndex, tA];
-            float dB = _distances[sourceIndex, tB];
+            float dA = _distancesBetweenSpots[sourceIndex, tA];
+            float dB = _distancesBetweenSpots[sourceIndex, tB];
             d += (dA < dB) ? dA : dB;
 
             if (d < minDist)
@@ -199,46 +202,46 @@ public class GraphLogic : MonoBehaviour
         return best;
     }
 
-    Spot StepToTarget(MoveBehavior source, Spot target)
+    MapSpot StepToTarget(MoveBehavior source, MapSpot target)
     {
         if (target.Edges.Contains(source.CurrentEdge))
         {
             return target;
         }
 
-        Spot sA = source.CurrentEdge.A;
-        Spot sB = source.CurrentEdge.B;
+        MapSpot sA = source.CurrentEdge.A;
+        MapSpot sB = source.CurrentEdge.B;
 
         float distA = Vector2.Distance(source.transform.position, sA.transform.position) + DistanceBetween(sA, target);
         float distB = Vector2.Distance(source.transform.position, sB.transform.position) + DistanceBetween(sB, target);
         return (distA < distB) ? sA : sB;
     }
 
-    Spot StepToTarget(MoveBehavior source, MoveBehavior target)
+    MapSpot StepToTarget(MoveBehavior source, MoveBehavior target)
     {
-        Edge sourceEdge = source.CurrentEdge;
-        Edge targetEdge = target.CurrentEdge;
+        MapEdge sourceEdge = source.CurrentEdge;
+        MapEdge targetEdge = target.CurrentEdge;
 
         if (sourceEdge == targetEdge)
         {
-            Spot spot = target.Step == targetEdge.A ? targetEdge.A : targetEdge.B;
+            MapSpot spot = target.Step == targetEdge.A ? targetEdge.A : targetEdge.B;
             Vector2 spotPos = spot.transform.position;            
             return Tools2D.Distance(target.transform.position, spotPos) < Tools2D.Distance(source.transform.position, spotPos) ? spot : targetEdge.Neighbor(spot);
         }
 
-        Spot targetSpot = target.Step;
+        MapSpot targetSpot = target.Step;
         float distA = Tools2D.Distance(source.transform.position, sourceEdge.A.transform.position) + DistanceBetween(sourceEdge.A, targetSpot);
         float distB = Tools2D.Distance(source.transform.position, sourceEdge.B.transform.position) + DistanceBetween(sourceEdge.B, targetSpot);
 
         return distA < distB ? sourceEdge.A : sourceEdge.B;
     }
 
-    float DistanceBetween(Spot source, Spot target)
+    float DistanceBetween(MapSpot source, MapSpot target)
     {
-        return _distances[source.Index, target.Index];
+        return _distancesBetweenSpots[source.Index, target.Index];
     }
 
-    float DistanceBetween(Spot source, MoveBehavior target)
+    float DistanceBetween(MapSpot source, MoveBehavior target)
     {
         return Mathf.Min(DistanceBetween(source, target.CurrentEdge.A) + Tools2D.Distance(target.transform.position, target.CurrentEdge.A.transform.position),
             DistanceBetween(source, target.CurrentEdge.B) + Tools2D.Distance(target.transform.position, target.CurrentEdge.B.transform.position));
@@ -254,13 +257,13 @@ public class GraphLogic : MonoBehaviour
             graph[i].Dist = int.MaxValue;
         }
 
-        for (int i = 0; i < _graph.SpotCount; i++)
+        for (int i = 0; i < Graph.SpotCount; i++)
         {
-            Spot spot = _graph.Spots[i];
+            MapSpot spot = Graph.Spots[i];
 
             for (int j = 0; j < spot.Edges.Count; j++)
             {
-                Spot neighbor = spot.GetNeighbor(j);
+                MapSpot neighbor = spot.Edges[j].Neighbor(spot);
                 for (int w = 0; w < unvisited.Count; w++)
                 {
                     if (Tools2D.SamePos(unvisited[w].position, neighbor.transform.position))
@@ -294,7 +297,7 @@ public class GraphLogic : MonoBehaviour
 
         for (int i = 0; i < graph.Count; i++)
         {
-            _distances[sourceIndex, i] = graph[i].Dist;
+            _distancesBetweenSpots[sourceIndex, i] = graph[i].Dist;
         }
     }
 

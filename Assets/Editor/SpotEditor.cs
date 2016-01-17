@@ -1,16 +1,16 @@
 ﻿using UnityEngine;
 using UnityEditor;
 
-[CustomEditor(typeof(Spot))]
+[CustomEditor(typeof(MapSpot))]
 [CanEditMultipleObjects]
 public class SpotEditor : Editor
 {
-    Spot _script;
+    MapSpot _script;
     bool _occupied;
 
     void OnEnable()
     {
-        _script = (Spot)target;
+        _script = (MapSpot)target;
     }
 
     public override void OnInspectorGUI()

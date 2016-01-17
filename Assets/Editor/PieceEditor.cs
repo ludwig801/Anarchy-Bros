@@ -1,30 +1,18 @@
 ﻿using UnityEngine;
 using UnityEditor;
 
-[CustomEditor(typeof(PieceBehavior))]
-public class PieceEditor : Editor
+[CustomPropertyDrawer(typeof(ReadOnlyAttribute))]
+public class ReadOnlyDrawer : PropertyDrawer
 {
-    PieceBehavior _script;
-
-    void OnEnable()
+    public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
     {
-        _script = target as PieceBehavior;
+        return EditorGUI.GetPropertyHeight(property, label, true);
     }
-
-    public override void OnInspectorGUI()
+ 
+    public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
     {
         GUI.enabled = false;
-        EditorGUILayout.ObjectField("Script", _script, typeof(PieceBehavior), false);
-        GUI.enabled = true;
-        _script.MaxHealth = EditorGUILayout.IntField("Full Health", _script.MaxHealth);
-        GUI.enabled = false;
-        EditorGUILayout.IntSlider("Health", _script.Health, 0, _script.MaxHealth);
-        GUI.enabled = true;
-        _script.DeathSpeed = EditorGUILayout.Slider("Death Time", _script.DeathSpeed, 0f, 2f);
-        _script.TargetTag = (Tags)EditorGUILayout.EnumPopup("Target Tag", _script.TargetTag);
-        GUI.enabled = false;
-        EditorGUILayout.Toggle("Alive", _script.Alive);
-        EditorGUILayout.Toggle("Is Attacking", _script.Attacking);
+        EditorGUI.PropertyField(position, property, label, true);
         GUI.enabled = true;
     }
 }

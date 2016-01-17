@@ -6,19 +6,12 @@ public class GraphManager : MonoBehaviour
 {
     public Transform ObjSpots, ObjEdges;
     public GameObject ConnectionPrefab, TowerSpotPrefab, EnemySpawnPrefab, EdgePrefab;
-    public float SpotHitTolerance, EdgeHitTolerance;
-    public List<Spot> Spots;
-    public List<Edge> Edges;
+    public float EdgeHitTolerance;
+    public List<MapSpot> Spots;
+    public List<MapEdge> Edges;
     public int SpotCount { get { return Spots.Count; } }
 
-    GameManager _gameManager;
-
-    void Start()
-    {
-        _gameManager = GameManager.Instance;
-    }
-
-    public Spot CreateSpot(Vector2 worldPos, SpotTypes type)
+    public MapSpot CreateSpot(Vector2 worldPos, SpotTypes type)
     {
         GameObject obj;
 
@@ -45,7 +38,7 @@ public class GraphManager : MonoBehaviour
                 break;
         }
 
-        Spot spot = obj.GetComponent<Spot>();
+        MapSpot spot = obj.GetComponent<MapSpot>();
         spot.transform.position = worldPos;
         spot.Type = type;
         spot.transform.parent = ObjSpots;
@@ -54,31 +47,31 @@ public class GraphManager : MonoBehaviour
         return spot;
     }
 
-    public Edge CreateEdge(Spot a, Spot b)
+    public MapEdge CreateEdge(MapSpot a, MapSpot b)
     {
         if (FindEdge(a, b)) return null;
 
-        Edge obj = Instantiate(EdgePrefab).GetComponent<Edge>();
+        MapEdge obj = Instantiate(EdgePrefab).GetComponent<MapEdge>();
         obj.name = "Edge"; ;
         obj.transform.parent = ObjEdges;
         obj.A = a;
         obj.B = b;
-        obj.A.AddEdge(obj);
-        obj.B.AddEdge(obj);
+        obj.A.Edges.Add(obj);
+        obj.B.Edges.Add(obj);
         Edges.Add(obj);
 
         return obj;
     }
 
-    public Spot ChangeSpotType(Spot spot, SpotTypes newType)
+    public MapSpot ChangeSpotType(MapSpot spot, SpotTypes newType)
     {
-        Spot to = CreateSpot(spot.transform.position, newType);
+        MapSpot to = CreateSpot(spot.transform.position, newType);
         for (int i = spot.Edges.Count - 1; i >= 0; i--)
         {
-            Edge e = spot.Edges[i];
-            e.ReplaceNeighbor(spot, to);
-            to.AddEdge(e);
-            spot.RemoveEdge(spot.Edges[i]);
+            MapEdge edge = spot.Edges[i];
+            edge.ReplaceNeighbor(spot, to);
+            to.Edges.Add(edge);
+            spot.Edges.Remove(edge);
         }
 
         RemoveSpot(spot);
@@ -86,26 +79,27 @@ public class GraphManager : MonoBehaviour
         return to;
     }
 
-    public void RemovePieceFromSpot(PieceBehavior tower)
+    public void RemovePieceFromSpot(PieceBehavior piece)
     {
         for (int i = 0; i < Spots.Count; i++)
         {
-            if (Spots[i].Piece == tower)
+            if (Spots[i].Piece == piece)
             {
                 Spots[i].Piece = null;
+                break;
             }
         }
     }
 
-    public void RemoveEdge(Edge edge)
+    public void RemoveEdge(MapEdge edge)
     {
         Edges.Remove(edge);
-        edge.A.RemoveEdge(edge);
-        edge.B.RemoveEdge(edge);
+        edge.A.Edges.Remove(edge);
+        edge.B.Edges.Remove(edge);
         Destroy(edge.gameObject);
     }
 
-    public void RemoveSpot(Spot spot)
+    public void RemoveSpot(MapSpot spot)
     {
         for (int i = spot.Edges.Count - 1; i >= 0; i--)
         {
@@ -132,86 +126,44 @@ public class GraphManager : MonoBehaviour
         Spots.Clear();
     }
 
-    public bool FindSpotNear(Vector2 pos, out Spot hit)
+    public bool FindSpotNear(Vector2 pos, out MapSpot hit, SpotTypes type = SpotTypes.All)
     {
         hit = null;
 
-        switch (_gameManager.CurrentState)
+        for (int i = 0; i < Spots.Count; i++)
         {
-            case GameStates.Edit:
-                for (int i = 0; i < Spots.Count; i++)
-                {
-                    Spot spot = Spots[i];
-                    if (Tools2D.SamePos(spot.transform.position, pos, spot.ScaleInEditor))
-                    {
-                        hit = spot;
-                        break;
-                    }
-                }
+            MapSpot spot = Spots[i];
+            if (Tools2D.SamePos(spot.transform.position, pos, spot.transform.localScale.x) && (type == SpotTypes.All || spot.Type == type))
+            {
+                hit = spot;
                 break;
-
-            case GameStates.Pause:
-                for (int i = 0; i < Spots.Count; i++)
-                {
-                    Spot spot = Spots[i];
-                    if (Tools2D.SamePos(spot.transform.position, pos, spot.ScaleInGamePaused))
-                    {
-                        hit = spot;
-                        break;
-                    }
-                }
-                break;
-
-            case GameStates.Play:
-                for (int i = 0; i < Spots.Count; i++)
-                {
-                    Spot spot = Spots[i];
-                    if (Tools2D.SamePos(spot.transform.position, pos, spot.ScaleInGame))
-                    {
-                        hit = spot;
-                        break;
-                    }
-                }
-                break;
-
-            case GameStates.Place:
-                for (int i = 0; i < Spots.Count; i++)
-                {
-                    Spot spot = Spots[i];
-                    if (Tools2D.SamePos(spot.transform.position, pos, spot.ScaleInGamePaused))
-                    {
-                        hit = spot;
-                        break;
-                    }
-                }
-                break;
-
-            default:
-                break;
+            }
         }
 
         return (hit != null);
     }
 
-    public Spot FindSpotExact(Vector2 pos)
+    public bool FindSpotExact(Vector2 pos, out MapSpot hit)
     {
+        hit = null;
         for (int i = 0; i < Spots.Count; i++)
         {
-            Spot spot = Spots[i];
-            if (Tools2D.SamePos(spot.transform.position, pos, SpotHitTolerance))
+            MapSpot spot = Spots[i];
+            if (Tools2D.SamePos(spot.transform.position, pos, 0.01f))
             {
-                return spot;
+                hit = spot;
+                break;
             }
         }
-        return null;
+        return (hit != null);
     }
 
-    public bool FindEdge(Spot a, Spot b)
+    public bool FindEdge(MapSpot a, MapSpot b)
     {
-        Edge hit = null;
+        MapEdge hit = null;
         for (int i = 0; i < Edges.Count; i++)
         {
-            Edge x = Edges[i];
+            MapEdge x = Edges[i];
             if (x.Neighbor(a) == b)
             {
                 hit = x;
@@ -222,46 +174,34 @@ public class GraphManager : MonoBehaviour
         return (hit != null);
     }
 
-    public Edge FindEdge(Vector2 pos, float tolerance)
+    public bool FindEdge(Vector2 pos, out MapEdge hit)
     {
+        hit = null;
         for (int i = 0; i < Edges.Count; i++)
         {
-            Edge x = Edges[i];
-            Vector2 posA = x.A.transform.position;
-            Vector2 posB = x.B.transform.position;
+            MapEdge edge = Edges[i];
+            Vector2 posA = edge.A.transform.position;
+            Vector2 posB = edge.B.transform.position;
 
             Vector2 vAB = (posB - posA).normalized;
             Vector2 vAP = (pos - posA).normalized;
             Vector3 vBP = (pos - posB);
-            if (Mathf.Abs(Vector2.Dot(vAP, vAB) - 1f) < tolerance && Vector2.Dot(vBP, vAB) < 0)
+            if (Mathf.Abs(Vector2.Dot(vAP, vAB) - 1f) < 0.01f && Vector2.Dot(vBP, vAB) < 0)
             {
-                return x;
+                hit = edge;
+                break;
             }
         }
 
-        return null;
+        return (hit != null);
     }
 
-    public Edge FindEdge(Vector2 pos)
+    public bool GetRandomSpot(SpotTypes type, out MapSpot hit)
     {
-        return FindEdge(pos, EdgeHitTolerance);
-    }
-
-    public bool FindEdge(Vector2 pos, out Edge hit)
-    {
-        return (hit = FindEdge(pos)) != null;
-    }
-
-    public Spot GetRandomSpot(SpotTypes type)
-    {
+        hit = null;
         int rand = UnityEngine.Random.Range(0, TypeCount(type));
 
-        Spot s = null;
-
-        if (rand < 0)
-        {
-            return s;
-        }
+        if (rand < 0) return false;
 
         for (int i = 0; i < Spots.Count; i++)
         {
@@ -269,14 +209,14 @@ public class GraphManager : MonoBehaviour
             {
                 if (rand <= 0)
                 {
-                    s = Spots[i];
+                    hit = Spots[i];
                     break;
                 }
                 rand--;
             }
         }
 
-        return s;
+        return (hit != null);
     }
 
     int TypeCount(SpotTypes type)

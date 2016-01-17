@@ -6,11 +6,9 @@ public class TowerManager : MonoBehaviour
     public Transform ObjBullets;
     public GameObject TowerPrefab;
     public int MaxNumTowers;
-    public float TowerHitTolerance;
     public PieceBehavior SelectedTower;
     public List<PieceBehavior> Objects;
-    public int ActiveTowers { get { return CountActiveTowers(); } }
-    public int AliveTowers { get { return CountAliveTowers(); } }
+    public int AliveTowers;
     public bool HasSelectedTower { get { return SelectedTower != null; } }
 
     GameManager _gameManager;
@@ -18,6 +16,7 @@ public class TowerManager : MonoBehaviour
     void Start()
     {
         _gameManager = GameManager.Instance;
+        AliveTowers = 0;
     }
 
     PieceBehavior Find()
@@ -44,7 +43,7 @@ public class TowerManager : MonoBehaviour
         tower = null;
         for (int i = 0; i < Objects.Count; i++)
         {
-            if (Tools2D.SamePos(pos, Objects[i].transform.position, TowerHitTolerance))
+            if (Tools2D.SamePos(pos, Objects[i].transform.position, 0.5f * Objects[i].transform.localScale.x))
             {
                 tower = Objects[i];
             }
@@ -53,7 +52,7 @@ public class TowerManager : MonoBehaviour
         return (tower != null);
     }
 
-    public bool NoTowerHasTarget(Spot target)
+    public bool NoTowerHasTarget(MapSpot target)
     {
         for (int i = 0; i < Objects.Count; i++)
         {
@@ -71,7 +70,7 @@ public class TowerManager : MonoBehaviour
         SelectedTower = tower;
     }
 
-    public void MoveTower(PieceBehavior tower, Spot moveTo)
+    public void MoveTower(PieceBehavior tower, MapSpot moveTo)
     {
         _gameManager.Map.Graph.RemovePieceFromSpot(tower);
         tower.Movement.Target = moveTo;
@@ -130,9 +129,9 @@ public class TowerManager : MonoBehaviour
         return count;
     }
 
-    public void Spawn(Spot spot)
+    public void Spawn(MapSpot spot)
     {
-        if (ActiveTowers < MaxNumTowers)
+        if (AliveTowers < MaxNumTowers)
         {
             PieceBehavior obj = Find();
             obj.name = TowerPrefab.name;
@@ -142,31 +141,39 @@ public class TowerManager : MonoBehaviour
             spot.Piece = obj;
             obj.Movement.Target = spot;
             obj.Movement.CurrentSpot = spot;
-            obj.GetComponent<RangedPiece>();
+            obj.GetComponent<RangedBehavior>().BulletCan = ObjBullets;
             _gameManager.UI.AssignHealthElement(obj);
+            AliveTowers++;
         }
     }
 
-    public PieceBehavior Random()
+    public bool GetRandomTower(out PieceBehavior tower)
     {
-        int rand = UnityEngine.Random.Range(0, ActiveTowers);
+        tower = null;
+
+        int rand = UnityEngine.Random.Range(0, AliveTowers);
         for (int i = 0; i < Objects.Count; i++)
         {
             PieceBehavior x = Objects[i];
             if (x.Alive)
             {
-                if (rand <= 0) return x;
+                if (rand <= 0)
+                {
+                    tower = x;
+                    break;
+                }
                 rand--;
             }
         }
 
-        return null;
+        return (tower != null);
     }
 
     public void Remove(PieceBehavior tower)
     {
         Objects.Remove(tower);
         Destroy(tower.gameObject);
+        AliveTowers--;
     }
 
     public void RemoveAll()
@@ -191,6 +198,11 @@ public class TowerManager : MonoBehaviour
                 StartCoroutine(x.Die());
             }
         }
+    }
+
+    public void OnTowerKilled()
+    {
+        AliveTowers--;
     }
 
     public void RemoveAllBullets()

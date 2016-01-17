@@ -20,7 +20,8 @@ public enum SpotTypes
 {
     Connection = 0,
     TowerSpot = 1,
-    EnemySpawn = 2
+    EnemySpawn = 2,
+    All
 }
 
 public enum Tags
@@ -29,7 +30,7 @@ public enum Tags
     Enemy
 }
 
-public enum LevelEras
+public enum Eras
 {
     Egyptian,
     Greek,

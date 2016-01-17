@@ -1,18 +1,20 @@
 ﻿using UnityEngine;
-using System.Collections.Generic;
 using UnityEngine.EventSystems;
-using System;
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
-
+    // Public vars
     public Transform ObjMap, ObjTowers, ObjEnemies, ObjCanvas, ObjIO, ObjWounds;
-    public GameStates CurrentState
+    public GameStates CurrentState;
+    public int Score, ScorePerKill;
+    public bool Debugging;
+    // Properties
+    public LevelManager LevelManager
     {
         get
         {
-            return _currentState;
+            return LevelManager.Instance;
         }
     }
     public TowerManager Towers
@@ -71,26 +73,12 @@ public class GameManager : MonoBehaviour
             return _wounds;
         }
     }
-    public IOManager IO
-    {
-        get
-        {
-            if (_io == null)
-            {
-                _io = ObjIO.GetComponent<IOManager>();
-            }
-            return _io;
-        }
-    }
-    public int Score, ScorePerKill;
-
-    GameStates _currentState;
+    // Private vars
     TowerManager _towers;
     EnemyManager _enemies;
     MapManager _map;
     GameUIManager _ui;
     WoundManager _wounds;
-    IOManager _io;
 
     void Awake()
     {
@@ -99,11 +87,11 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        Score = 0;
-
-        IO.LoadGraph();
+        Debugging = LevelManager.Instance.Debugging;
+        ObjIO.GetComponent<IOManager>().LoadGraph();
 
         ChangeState(GameStates.Place);
+        Score = 0;
     }
 
     void Update()
@@ -149,8 +137,13 @@ public class GameManager : MonoBehaviour
     {
         if (requester.tag == Tags.Enemy.ToString())
         {
+            _enemies.OnEnemyKilled();
             Score += ScorePerKill;
-        }      
+        }
+        else if (requester.tag == Tags.Tower.ToString())
+        {
+            _towers.OnTowerKilled();
+        }
     }
 
     public void ChangeState(string newState)
@@ -220,12 +213,12 @@ public class GameManager : MonoBehaviour
                 break;
         }
 
-        _currentState = newState;
+        CurrentState = newState;
     }
 
     public bool IsCurrentState(GameStates comp)
     {
-        return comp == _currentState;
+        return comp == CurrentState;
     }
 
     public bool ProvideEnemyWithTargetSpot(MoveBehavior requester)
@@ -234,12 +227,12 @@ public class GameManager : MonoBehaviour
         return Towers.GetClosestTower(requester, out closestTower) && Map.GraphLogic.ProvideTarget(requester, closestTower, out requester.Target);
     }
 
-    public bool ProvideRangedPieceWithEnemyTarget(RangedPiece requester)
+    public bool ProvideRangedPieceWithEnemyTarget(RangedBehavior requester)
     {
         return Enemies.GetClosestEnemy(requester, out requester.Target);
     }
 
-    public bool StepToTarget(MoveBehavior requester, out Spot newStep)
+    public bool StepToTarget(MoveBehavior requester, out MapSpot newStep)
     {
         return Map.GraphLogic.StepToTarget(requester, out newStep);
     }
@@ -305,8 +298,8 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        Spot hitSpot;
-        if (Map.Graph.FindSpotNear(worldPos, out hitSpot) && hitSpot.Type == SpotTypes.TowerSpot && Towers.HasSelectedTower && Towers.NoTowerHasTarget(hitSpot))
+        MapSpot hitSpot;
+        if (Towers.HasSelectedTower && Map.Graph.FindSpotNear(worldPos, out hitSpot, SpotTypes.TowerSpot) && Towers.NoTowerHasTarget(hitSpot))
         {
             Towers.MoveTower(Towers.SelectedTower, hitSpot);
             ChangeState(GameStates.Play);
@@ -315,18 +308,12 @@ public class GameManager : MonoBehaviour
 
     void HandlePlaceClick(PointerEventData eventData, Vector2 worldPos)
     {
-        Spot hitSpot;
-        if (Map.Graph.FindSpotNear(worldPos, out hitSpot))
+        MapSpot hitSpot;
+        if (Map.Graph.FindSpotNear(worldPos, out hitSpot, SpotTypes.TowerSpot))
         {
-            PieceBehavior hitTower;
-            if (Towers.Find(worldPos, out hitTower))
+            if (hitSpot.Occupied)
             {
-                bool rightClick = (eventData.button == PointerEventData.InputButton.Right);
-
-                if (rightClick)
-                {
-                    Towers.Remove(hitTower);
-                }
+                Towers.Remove(hitSpot.Piece);
             }
             else if (hitSpot.Type == SpotTypes.TowerSpot)
             {
