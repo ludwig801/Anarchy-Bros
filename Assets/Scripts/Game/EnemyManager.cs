@@ -15,6 +15,7 @@ public class EnemyManager : MonoBehaviour
     void Start()
     {
         _gameManager = GameManager.Instance;
+
         _timeSinceLastSpawn = 0;
         AliveEnemies = 0;
     }
@@ -62,7 +63,7 @@ public class EnemyManager : MonoBehaviour
             obj.Movement.Step = spawnSpot;
             obj.Movement.CurrentSpot = spawnSpot;
             obj.Renderer.sortingOrder = 1;
-            _gameManager.UI.AssignHealthElement(obj);
+            _gameManager.UI.CreateEnemyHealthElement(obj);
             AliveEnemies++;
         }
     }

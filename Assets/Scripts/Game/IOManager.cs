@@ -30,16 +30,16 @@ public class IOManager : MonoBehaviour
         }
 
         XmlSerializer serializer = new XmlSerializer(typeof(GameGraph));
-        string eraPath = Application.dataPath + "/Resources/Levels/" + LevelManager.Instance.CurrentEra.Name;
+        string eraPath = Application.dataPath + "/Resources/Levels/" + GlobalManager.Instance.CurrentEra.Name;
         if (!Directory.Exists(eraPath))
         {
             Debug.Log("Directory [" + eraPath + "] does not exist. Creating...");
             Directory.CreateDirectory(eraPath);
         }
 
-        string levelPath = Application.dataPath + "/Resources/Levels/" + LevelManager.Instance.CurrentEra.Name + "/lvl_" + LevelManager.Instance.CurrentLevel.Order + ".xml";
+        string levelPath = Application.dataPath + "/Resources/Levels/" + GlobalManager.Instance.CurrentEra.Name + "/lvl_" + GlobalManager.Instance.CurrentLevel.Order + ".xml";
 
-        Debug.Log("Saving level [" + LevelManager.Instance.CurrentLevel.Title + "] in file: [" + levelPath + "]");
+        Debug.Log("Saving level [" + GlobalManager.Instance.CurrentLevel.Title + "] in file: [" + levelPath + "]");
         StreamWriter stream = new StreamWriter(levelPath, false, System.Text.Encoding.GetEncoding("UTF-8"));
 
         serializer.Serialize(stream, graph);
@@ -49,7 +49,7 @@ public class IOManager : MonoBehaviour
     public void LoadGraph()
     {
 
-        string path = "Levels/" + LevelManager.Instance.CurrentEra.Name + "/lvl_" + LevelManager.Instance.CurrentLevel.Order;
+        string path = "Levels/" + GlobalManager.Instance.CurrentEra.Name + "/lvl_" + GlobalManager.Instance.CurrentLevel.Order;
         TextAsset lvl = Resources.Load(path, typeof(TextAsset)) as TextAsset;
 
         if (lvl == null)

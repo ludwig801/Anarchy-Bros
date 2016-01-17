@@ -11,18 +11,32 @@ public class MenuUIManager : MonoBehaviour
     {
         Main = 0,
         Eras = 1,
-        Levels = 2
+        Levels = 2,
+        Options = 3
     }
     // Public vars
     [Range(0f, 8f)]
     public float AnimationsSpeed;
     [ReadOnly]
     public Menus CurrentMenu;
-    public MenuPanel MainMenu, ErasMenu, LevelsMenu;
+    public MenuPanel MainMenu, ErasMenu, LevelsMenu, OptionsMenu;
+    // Properties
+    public GameOptions GameOptions
+    {
+        get
+        {
+            if (_gameOptions == null)
+            {
+                _gameOptions = GetComponent<GameOptions>();
+            }
+            return _gameOptions;
+        }
+    }
     // Private vars
     ScrollerBehavior _scrollerEras, _scrollerLevels;
-    LevelManager _levelManager;
+    GlobalManager _globalManager;
     GameEra _lastSeenEra;
+    GameOptions _gameOptions;
 
     void Awake()
     {
@@ -34,12 +48,12 @@ public class MenuUIManager : MonoBehaviour
 
     void Start()
     {
-        _levelManager = LevelManager.Instance;
+        _globalManager = GlobalManager.Instance;
 
         _scrollerEras = ErasMenu.GetComponent<ScrollerBehavior>();
-        for (int i = 0; i < _levelManager.Eras.Count; i++)
+        for (int i = 0; i < _globalManager.Eras.Count; i++)
         {
-            _scrollerEras.AddOption(_levelManager.Eras[i].Name.ToString(), _levelManager.Eras[i].Sprite, _levelManager.Eras[i].Unlocked);
+            _scrollerEras.AddOption(_globalManager.Eras[i].Name.ToString(), _globalManager.Eras[i].Sprite, _globalManager.Eras[i].Unlocked);
         }
 
         _scrollerLevels = LevelsMenu.GetComponent<ScrollerBehavior>();
@@ -48,6 +62,7 @@ public class MenuUIManager : MonoBehaviour
         LevelsMenu.HideRight(float.MaxValue);
         MainMenu.HideBelow(float.MaxValue);
         MainMenu.Show(float.MaxValue);
+        OptionsMenu.HideBelow(float.MaxValue);
         CurrentMenu = Menus.Main;
     }
 
@@ -62,20 +77,20 @@ public class MenuUIManager : MonoBehaviour
         {
             case Menus.Eras:
                 ErasMenu.Title.text = "Choose an Era";
-                ErasMenu.Description.text = _levelManager.CurrentEra.Name.ToString();
+                ErasMenu.Description.text = _globalManager.CurrentEra.Name.ToString();
                 UpdateCurrentLevels();
                 break;
 
             case Menus.Levels:
                 LevelsMenu.Title.text = "Choose a level";
-                LevelsMenu.Description.text = _levelManager.CurrentLevel.Title;
+                LevelsMenu.Description.text = _globalManager.CurrentLevel.Title;
                 break;
         }
 
-        _levelManager.CurrentEra = _levelManager.Eras[_scrollerEras.CurrentOption];
-        if (_levelManager.CurrentEra.Levels.Count > 0)
+        _globalManager.CurrentEra = _globalManager.Eras[_scrollerEras.CurrentOption];
+        if (_globalManager.CurrentEra.Levels.Count > 0)
         {
-            _levelManager.CurrentLevel = _levelManager.CurrentEra.Levels[_scrollerLevels.CurrentOption];
+            _globalManager.CurrentLevel = _globalManager.CurrentEra.Levels[_scrollerLevels.CurrentOption];
         }
     }
 
@@ -121,17 +136,37 @@ public class MenuUIManager : MonoBehaviour
                 ErasMenu.Show(AnimationsSpeed);
                 CurrentMenu = Menus.Eras;
                 break;
+
+            case Menus.Options:
+                OptionsMenu.HideBelow(AnimationsSpeed);
+                MainMenu.Show(AnimationsSpeed);
+                CurrentMenu = Menus.Main;
+                break;
         }
+    }
+
+    public void OpenOptions()
+    {
+        MainMenu.HideAbove(AnimationsSpeed);
+        OptionsMenu.Show(AnimationsSpeed);
+        CurrentMenu = Menus.Options;
+    }
+
+    public void CloseOptions()
+    {
+        MainMenu.Show(AnimationsSpeed);
+        OptionsMenu.HideBelow(AnimationsSpeed);
+        CurrentMenu = Menus.Options;
     }
 
     public void UpdateCurrentLevels()
     {
-        if (_levelManager.CurrentEra != null && _lastSeenEra != _levelManager.CurrentEra)
+        if (_globalManager.CurrentEra != null && _lastSeenEra != _globalManager.CurrentEra)
         {
-            _lastSeenEra = _levelManager.CurrentEra;
+            _lastSeenEra = _globalManager.CurrentEra;
 
             _scrollerLevels.RemoveOptions();
-            List<GameLevel> CurrentLevels = _levelManager.CurrentEra.Levels;
+            List<GameLevel> CurrentLevels = _globalManager.CurrentEra.Levels;
 
             for (int i = 0; i < CurrentLevels.Count; i++)
             {
@@ -142,6 +177,7 @@ public class MenuUIManager : MonoBehaviour
 
     public void LoadScene(string sceneName)
     {
+        _globalManager.SetInGame(true);
         SceneManager.LoadScene(sceneName);
     }
 

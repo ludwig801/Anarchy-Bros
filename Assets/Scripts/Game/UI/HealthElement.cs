@@ -4,7 +4,6 @@ using UnityEngine.UI;
 public class HealthElement : MonoBehaviour
 {
     public PieceBehavior Target;
-    public Text TargetName;
     public Slider HealthBar;
     public Image HealthBarFill;
     public Color ColorHealthy, ColorDead;
@@ -27,7 +26,6 @@ public class HealthElement : MonoBehaviour
         if (Target != null && Target.Alive)
         {
             CanvasGroup.alpha = 1;
-            TargetName.text = Target.tag;
             HealthBar.maxValue = Target.MaxHealth;
             HealthBar.value = Target.Health;
             HealthBar.value = Target.Health;

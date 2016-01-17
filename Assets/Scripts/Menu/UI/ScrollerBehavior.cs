@@ -26,7 +26,15 @@ public class ScrollerBehavior : MonoBehaviour, IBeginDragHandler, IDragHandler, 
     {
         get
         {
-            return Mathf.Max(Buttons.Count - 1, 0);
+            int count = 0;
+            for (int i = 0; i < Buttons.Count; i++)
+            {
+                if (Buttons[i].gameObject.activeSelf)
+                {
+                    count++;
+                }
+            }
+            return Mathf.Max(count - 1, 0);
         }
     }
     public int CurrentOption
@@ -82,19 +90,22 @@ public class ScrollerBehavior : MonoBehaviour, IBeginDragHandler, IDragHandler, 
             for (int i = 0; i < Buttons.Count; i++)
             {
                 ScrollerButton btn = Buttons[i];
-                ScrollerButtonSmall btnSmall = ButtonsSmall[i];
-                Vector2 anchorMinTo;
-                Vector2 anchorMaxTo;
+                if (btn.gameObject.activeSelf)
+                {
+                    ScrollerButtonSmall btnSmall = ButtonsSmall[i];
+                    Vector2 anchorMinTo;
+                    Vector2 anchorMaxTo;
 
-                int offset = (i - CurrentOption);
+                    int offset = (i - CurrentOption);
 
-                GetAnchors(offset, out anchorMinTo, out anchorMaxTo);
-                btn.Focused = (offset == 0);
-                btn.MoveTo(anchorMinTo, anchorMaxTo, AnimationSpeed);
+                    GetAnchors(offset, out anchorMinTo, out anchorMaxTo);
+                    btn.Focused = (offset == 0);
+                    btn.MoveTo(anchorMinTo, anchorMaxTo, AnimationSpeed);
 
-                GetAnchorsSmall(offset, out anchorMinTo, out anchorMaxTo);
-                btnSmall.Focused = btn.Focused;
-                btnSmall.MoveTo(anchorMinTo, anchorMaxTo, AnimationSpeed);
+                    GetAnchorsSmall(offset, out anchorMinTo, out anchorMaxTo);
+                    btnSmall.Focused = btn.Focused;
+                    btnSmall.MoveTo(anchorMinTo, anchorMaxTo, AnimationSpeed);
+                }
             }
         }
     }

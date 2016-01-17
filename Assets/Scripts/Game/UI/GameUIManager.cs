@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class GameUIManager : MonoBehaviour
 {
-    public RectTransform PanelHealth;
+    public RectTransform EnemiesHealth, TowersHealth;
     public RectTransform HealthElementPrefab;
     public RectTransform PlayButton;
     public RectTransform PauseButton;
@@ -30,6 +30,8 @@ public class GameUIManager : MonoBehaviour
         switch (_gameManager.CurrentState)
         {
             case GameStates.Pause:
+                EnemiesHealth.gameObject.SetActive(true);
+                TowersHealth.gameObject.SetActive(true);
                 GameOverPanel.gameObject.SetActive(false);
                 GoBackButton.gameObject.SetActive(true);
                 ResumeButton.gameObject.SetActive(true);
@@ -40,6 +42,8 @@ public class GameUIManager : MonoBehaviour
                 break;
 
             case GameStates.Place:
+                EnemiesHealth.gameObject.SetActive(false);
+                TowersHealth.gameObject.SetActive(true);
                 GameOverPanel.gameObject.SetActive(false);
                 GoBackButton.gameObject.SetActive(true);
                 ResumeButton.gameObject.SetActive(false);
@@ -57,6 +61,8 @@ public class GameUIManager : MonoBehaviour
                 break;
 
             case GameStates.Play:
+                EnemiesHealth.gameObject.SetActive(true);
+                TowersHealth.gameObject.SetActive(true);
                 GameOverPanel.gameObject.SetActive(false);
                 GoBackButton.gameObject.SetActive(false);
                 ResumeButton.gameObject.SetActive(false);
@@ -67,6 +73,8 @@ public class GameUIManager : MonoBehaviour
                 break;
 
             case GameStates.GameOver:
+                EnemiesHealth.gameObject.SetActive(false);
+                TowersHealth.gameObject.SetActive(false);
                 GoBackButton.gameObject.SetActive(false);
                 ResumeButton.gameObject.SetActive(false);
                 PauseButton.gameObject.SetActive(false);
@@ -78,7 +86,7 @@ public class GameUIManager : MonoBehaviour
         }
     }
 
-    public HealthElement FindHealthElement()
+    public HealthElement FindEnemyHealthElement()
     {
         for (int i = 0; i < HealthElements.Count; i++)
         {
@@ -91,15 +99,40 @@ public class GameUIManager : MonoBehaviour
 
         HealthElement elem = Instantiate(HealthElementPrefab).GetComponent<HealthElement>();
         elem.name = "Health Indicator";
-        elem.transform.SetParent(PanelHealth);
+        elem.transform.SetParent(EnemiesHealth);
         HealthElements.Add(elem);
 
         return elem;
     }
 
-    public void AssignHealthElement(PieceBehavior requester)
+    public HealthElement FindTowerHealthElement()
     {
-        HealthElement elem = FindHealthElement();
+        for (int i = 0; i < HealthElements.Count; i++)
+        {
+            if (!HealthElements[i].gameObject.activeSelf)
+            {
+                HealthElements[i].gameObject.SetActive(true);
+                return HealthElements[i];
+            }
+        }
+
+        HealthElement elem = Instantiate(HealthElementPrefab).GetComponent<HealthElement>();
+        elem.name = "Health Indicator";
+        elem.transform.SetParent(TowersHealth);
+        HealthElements.Add(elem);
+
+        return elem;
+    }
+
+    public void CreateEnemyHealthElement(PieceBehavior requester)
+    {
+        HealthElement elem = FindEnemyHealthElement();
+        elem.Target = requester;
+    }
+
+    public void CreateTowerHealthElement(PieceBehavior requester)
+    {
+        HealthElement elem = FindTowerHealthElement();
         elem.Target = requester;
     }
 }

@@ -3,9 +3,15 @@ using UnityEngine.UI;
 
 public class MenuPanel : MonoBehaviour
 {
+    // Public vars
     public Text Title, Description;
+    [ReadOnly]
     public bool Visible;
-    public Vector2 HiddenAnchorMin, HiddenAnchorMax;
+    [ReadOnly]
+    public Vector2 HiddenAnchorMin;
+    [ReadOnly]
+    public Vector2 HiddenAnchorMax;
+    // Properties
     public RectTransform RectTransform
     {
         get
@@ -17,9 +23,9 @@ public class MenuPanel : MonoBehaviour
             return _rectTransform;
         }
     }
-    float _animSpeed;
-
+    // Private vars
     RectTransform _rectTransform;
+    float _animSpeed;
 
     void Update()
     {

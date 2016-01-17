@@ -89,9 +89,11 @@
     <Compile Include="Assets\Scripts\Game\WoundManager.cs" />
     <Compile Include="Assets\Scripts\Global\GameEra.cs" />
     <Compile Include="Assets\Scripts\Global\GameLevel.cs" />
-    <Compile Include="Assets\Scripts\Global\LevelManager.cs" />
+    <Compile Include="Assets\Scripts\Global\GameOptions.cs" />
+    <Compile Include="Assets\Scripts\Global\GlobalManager.cs" />
     <Compile Include="Assets\Scripts\Menu\UI\MenuPanel.cs" />
     <Compile Include="Assets\Scripts\Menu\UI\MenuUIManager.cs" />
+    <Compile Include="Assets\Scripts\Menu\UI\MultiOption.cs" />
     <Compile Include="Assets\Scripts\Menu\UI\ScrollerBehavior.cs" />
     <Compile Include="Assets\Scripts\Menu\UI\ScrollerButton.cs" />
     <Compile Include="Assets\Scripts\Menu\UI\ScrollerButtonSmall.cs" />

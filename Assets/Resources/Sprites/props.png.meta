@@ -1,6 +1,6 @@
 fileFormatVersion: 2
 guid: e9e382d0916022149907d75b5239288a
-timeCreated: 1452779391
+timeCreated: 1452992154
 licenseType: Free
 TextureImporter:
   fileIDToRecycleName:
@@ -93,7 +93,12 @@ TextureImporter:
   spritePixelsToUnits: 128
   alphaIsTransparency: 1
   textureType: 8
-  buildTargetSettings: []
+  buildTargetSettings:
+  - buildTarget: Android
+    maxTextureSize: 1024
+    textureFormat: -1
+    compressionQuality: 50
+    allowsAlphaSplitting: 0
   spriteSheet:
     sprites:
     - name: props_0
@@ -597,8 +602,50 @@ TextureImporter:
         - {x: 74, y: -107}
         - {x: 118, y: -57}
         - {x: 125, y: -25}
+    - name: props_12
+      rect:
+        serializedVersion: 2
+        x: 1024
+        y: 512
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 5, y: 113}
+        - {x: 1, y: 115}
+        - {x: -3, y: 115}
+        - {x: -18, y: 88}
+        - {x: -18, y: -114}
+        - {x: 18, y: -114}
+        - {x: 18, y: -32}
+        - {x: 8, y: 92}
+    - name: props_13
+      rect:
+        serializedVersion: 2
+        x: 1280
+        y: 512
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -55, y: 125}
+        - {x: -125, y: 100}
+        - {x: -125, y: -79}
+        - {x: -65, y: -125}
+        - {x: 124, y: -125}
+        - {x: 125, y: -121}
+        - {x: 125, y: 119}
+        - {x: 110, y: 125}
+      - - {x: -37, y: -89}
+        - {x: -91, y: -32}
+        - {x: -32, y: 91}
+        - {x: 92, y: -28}
     outline: []
-  spritePackingTag: Sprites_1
+  spritePackingTag: Props
   userData: 
   assetBundleName: 
   assetBundleVariant: 

@@ -61,10 +61,15 @@ TextureImporter:
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
-  spritePixelsToUnits: 512
+  spritePixelsToUnits: 128
   alphaIsTransparency: 1
   textureType: 8
-  buildTargetSettings: []
+  buildTargetSettings:
+  - buildTarget: Android
+    maxTextureSize: 1024
+    textureFormat: -1
+    compressionQuality: 50
+    allowsAlphaSplitting: 0
   spriteSheet:
     sprites:
     - name: buttons_0
@@ -670,7 +675,7 @@ TextureImporter:
         - {x: 177, y: -248}
         - {x: 178, y: -247}
     outline: []
-  spritePackingTag: Buttons
+  spritePackingTag: Props
   userData: 
   assetBundleName: 
   assetBundleVariant: 

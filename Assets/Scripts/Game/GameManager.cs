@@ -10,11 +10,11 @@ public class GameManager : MonoBehaviour
     public int Score, ScorePerKill;
     public bool Debugging;
     // Properties
-    public LevelManager LevelManager
+    public GlobalManager GlobalManager
     {
         get
         {
-            return LevelManager.Instance;
+            return GlobalManager.Instance;
         }
     }
     public TowerManager Towers
@@ -87,8 +87,11 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        Debugging = LevelManager.Instance.Debugging;
+        Debugging = GlobalManager.Instance.Debugging;
         ObjIO.GetComponent<IOManager>().LoadGraph();
+
+        Enemies.MaxNumDeadBodies = GlobalManager.BodyCountValue * 5;
+        Enemies.MaxNumEnemies = (GlobalManager.Difficulty + 1) * 4;
 
         ChangeState(GameStates.Place);
         Score = 0;
@@ -121,6 +124,7 @@ public class GameManager : MonoBehaviour
             default:
                 if (Input.GetKeyUp(KeyCode.Escape))
                 {
+                    GlobalManager.InGame = false;
                     LoadScene("initial");
                 }
                 break;

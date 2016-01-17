@@ -113,7 +113,7 @@ TextureImporter:
   textureType: 8
   buildTargetSettings:
   - buildTarget: Android
-    maxTextureSize: 2048
+    maxTextureSize: 1024
     textureFormat: -1
     compressionQuality: 50
     allowsAlphaSplitting: 0
@@ -476,21 +476,17 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline:
-      - - {x: 86, y: 23}
-        - {x: 73, y: 37}
-        - {x: 67, y: 41}
-        - {x: 55, y: 46}
-        - {x: 42, y: 61}
-        - {x: 11, y: 61}
-        - {x: -71, y: 38}
-        - {x: -91, y: -14}
-        - {x: -91, y: -71}
-        - {x: -69, y: -91}
-        - {x: -6, y: -91}
-        - {x: 38, y: -84}
-        - {x: 91, y: -5}
-        - {x: 92, y: 0}
-        - {x: 92, y: 16}
+      - - {x: 36, y: 61}
+        - {x: 0, y: 61}
+        - {x: -89, y: 10}
+        - {x: -93, y: -12}
+        - {x: -93, y: -79}
+        - {x: -74, y: -95}
+        - {x: -11, y: -95}
+        - {x: 44, y: -78}
+        - {x: 92, y: -8}
+        - {x: 92, y: 28}
+        - {x: 69, y: 45}
     - name: towers_17
       rect:
         serializedVersion: 2
@@ -502,17 +498,16 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline:
-      - - {x: 52, y: 46}
-        - {x: -34, y: 46}
-        - {x: -91, y: 4}
-        - {x: -91, y: -59}
-        - {x: -72, y: -84}
-        - {x: -58, y: -90}
-        - {x: -51, y: -91}
-        - {x: 30, y: -91}
-        - {x: 92, y: -45}
-        - {x: 92, y: 15}
-        - {x: 87, y: 24}
+      - - {x: 4, y: 46}
+        - {x: -83, y: 22}
+        - {x: -92, y: -7}
+        - {x: -92, y: -77}
+        - {x: -69, y: -100}
+        - {x: 4, y: -100}
+        - {x: 46, y: -92}
+        - {x: 92, y: -24}
+        - {x: 92, y: -1}
+        - {x: 47, y: 46}
     - name: towers_18
       rect:
         serializedVersion: 2
@@ -524,14 +519,13 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline:
-      - - {x: 36, y: 24}
-        - {x: -91, y: 24}
-        - {x: -91, y: -87}
-        - {x: -79, y: -91}
-        - {x: 36, y: -91}
-        - {x: 92, y: -48}
-        - {x: 92, y: -16}
-        - {x: 89, y: -11}
+      - - {x: -74, y: 24}
+        - {x: -94, y: 19}
+        - {x: -94, y: -100}
+        - {x: 51, y: -100}
+        - {x: 92, y: -55}
+        - {x: 92, y: -19}
+        - {x: 62, y: 24}
     - name: towers_19
       rect:
         serializedVersion: 2
@@ -543,17 +537,17 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline:
-      - - {x: 52, y: 46}
-        - {x: -34, y: 46}
-        - {x: -91, y: 4}
-        - {x: -91, y: -59}
-        - {x: -72, y: -84}
-        - {x: -58, y: -90}
-        - {x: -51, y: -91}
-        - {x: 30, y: -91}
-        - {x: 92, y: -45}
-        - {x: 92, y: 15}
-        - {x: 87, y: 24}
+      - - {x: 78, y: 9}
+        - {x: 48, y: 46}
+        - {x: 6, y: 46}
+        - {x: -79, y: 16}
+        - {x: -90, y: -14}
+        - {x: -90, y: -84}
+        - {x: -64, y: -95}
+        - {x: 18, y: -95}
+        - {x: 39, y: -82}
+        - {x: 92, y: -23}
+        - {x: 92, y: -9}
     - name: towers_20
       rect:
         serializedVersion: 2
@@ -565,23 +559,15 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline:
-      - - {x: 86, y: 23}
-        - {x: 73, y: 37}
-        - {x: 67, y: 41}
-        - {x: 55, y: 46}
-        - {x: 42, y: 61}
-        - {x: 11, y: 61}
-        - {x: -71, y: 38}
-        - {x: -91, y: -14}
-        - {x: -91, y: -71}
-        - {x: -69, y: -91}
-        - {x: -6, y: -91}
-        - {x: 38, y: -84}
-        - {x: 91, y: -5}
-        - {x: 92, y: 0}
-        - {x: 92, y: 16}
+      - - {x: -17, y: 61}
+        - {x: -91, y: 20}
+        - {x: -91, y: -91}
+        - {x: 63, y: -91}
+        - {x: 92, y: -14}
+        - {x: 92, y: 29}
+        - {x: 44, y: 61}
     outline: []
-  spritePackingTag: Sprites_1
+  spritePackingTag: Pieces
   userData: 
   assetBundleName: 
   assetBundleVariant: 

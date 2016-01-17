@@ -1,15 +1,16 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-public class LevelManager : MonoBehaviour
+public class GlobalManager : MonoBehaviour
 {
-    public static LevelManager Instance;
+    public static GlobalManager Instance;
 
     public Transform ErasObj, LevelsObj;
     public GameEra CurrentEra;
     public GameLevel CurrentLevel;
     public List<GameEra> Eras;
-    public bool Debugging;
+    public bool Debugging, InGame;
+    public int SoundEffectsValue, MusicValue, BodyCountValue, Difficulty;
 
     void Awake()
     {
@@ -60,6 +61,18 @@ public class LevelManager : MonoBehaviour
                     era.Levels.Add(level);
                 }
             }
+        }
+    }
+
+    internal void SetInGame(bool value)
+    {
+        InGame = value;
+        if (value)
+        {
+            SoundEffectsValue = (int)MenuUIManager.Instance.GameOptions.SoundEffectsSlider.value;
+            MusicValue = (int)MenuUIManager.Instance.GameOptions.MusicSlider.value;
+            BodyCountValue = MenuUIManager.Instance.GameOptions.BodyCount.Value;
+            Difficulty = MenuUIManager.Instance.GameOptions.Difficulty.Value;
         }
     }
 }

@@ -142,7 +142,7 @@ public class TowerManager : MonoBehaviour
             obj.Movement.Target = spot;
             obj.Movement.CurrentSpot = spot;
             obj.GetComponent<RangedBehavior>().BulletCan = ObjBullets;
-            _gameManager.UI.AssignHealthElement(obj);
+            _gameManager.UI.CreateTowerHealthElement(obj);
             AliveTowers++;
         }
     }

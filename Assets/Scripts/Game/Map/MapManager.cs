@@ -58,7 +58,7 @@ public class MapManager : MonoBehaviour
         }
 
         SpriteRenderer groundRenderer = ObjGround.GetComponent<SpriteRenderer>();
-        groundRenderer.sprite = _gameManager.LevelManager.CurrentLevel.BackgroundSprite;
+        groundRenderer.sprite = _gameManager.GlobalManager.CurrentLevel.BackgroundSprite;
         float mapWidth = ObjGround.localScale.x * groundRenderer.sprite.textureRect.width / groundRenderer.sprite.pixelsPerUnit;
         float mapHeight = ObjGround.localScale.y * groundRenderer.sprite.textureRect.height / groundRenderer.sprite.pixelsPerUnit;
         Size = new Vector3(mapWidth, mapHeight, 1);
