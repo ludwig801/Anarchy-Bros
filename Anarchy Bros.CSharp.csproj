@@ -13,11 +13,13 @@
     <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>Unity Subset v3.5</TargetFrameworkProfile>
-    <CompilerResponseFile></CompilerResponseFile>
+    <CompilerResponseFile>
+    </CompilerResponseFile>
     <UnityProjectType>Game:1</UnityProjectType>
     <UnityBuildTarget>Android:13</UnityBuildTarget>
     <UnityVersion>5.3.1f1</UnityVersion>
-    <RootNamespace></RootNamespace>
+    <RootNamespace>
+    </RootNamespace>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -87,6 +89,7 @@
     <Compile Include="Assets\Scripts\Game\UI\GameUIManager.cs" />
     <Compile Include="Assets\Scripts\Game\UI\HealthElement.cs" />
     <Compile Include="Assets\Scripts\Game\WoundManager.cs" />
+    <Compile Include="Assets\Scripts\Global\AudioManager.cs" />
     <Compile Include="Assets\Scripts\Global\GameEra.cs" />
     <Compile Include="Assets\Scripts\Global\GameLevel.cs" />
     <Compile Include="Assets\Scripts\Global\GameOptions.cs" />

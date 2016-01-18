@@ -10,7 +10,8 @@ public class GlobalManager : MonoBehaviour
     public GameLevel CurrentLevel;
     public List<GameEra> Eras;
     public bool Debugging, InGame;
-    public int SoundEffectsValue, MusicValue, BodyCountValue, Difficulty;
+    public float SoundEffectsValue, MusicValue;
+    public int BodyCountValue, Difficulty;
 
     void Awake()
     {
@@ -39,6 +40,19 @@ public class GlobalManager : MonoBehaviour
         CurrentLevel = CurrentEra.Levels[0];
     }
 
+    void Start()
+    {
+        SetInGame(false);
+    }
+
+    void Update()
+    {
+        if (!InGame && MenuUIManager.Instance != null)
+        {
+            MusicValue = MenuUIManager.Instance.GameOptions.MusicSlider.value;
+        }     
+    }
+
     void LoadErasAndLevels()
     {
         for (int i = 0; i < ErasObj.childCount; i++)
@@ -64,13 +78,13 @@ public class GlobalManager : MonoBehaviour
         }
     }
 
-    internal void SetInGame(bool value)
+    public void SetInGame(bool value)
     {
         InGame = value;
         if (value)
         {
-            SoundEffectsValue = (int)MenuUIManager.Instance.GameOptions.SoundEffectsSlider.value;
-            MusicValue = (int)MenuUIManager.Instance.GameOptions.MusicSlider.value;
+            SoundEffectsValue = MenuUIManager.Instance.GameOptions.SoundEffectsSlider.value;
+            MusicValue = MenuUIManager.Instance.GameOptions.MusicSlider.value;
             BodyCountValue = MenuUIManager.Instance.GameOptions.BodyCount.Value;
             Difficulty = MenuUIManager.Instance.GameOptions.Difficulty.Value;
         }

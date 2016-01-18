@@ -124,17 +124,18 @@ public class GameManager : MonoBehaviour
             default:
                 if (Input.GetKeyUp(KeyCode.Escape))
                 {
-                    GlobalManager.InGame = false;
-                    LoadScene("initial");
+                    GlobalManager.SetInGame(false);
+                    LoadMainMenu();
                 }
                 break;
         }
     }
 
-    public void LoadScene(string sceneName)
+    public void LoadMainMenu()
     {
         Time.timeScale = 1f;
-        UnityEngine.SceneManagement.SceneManager.LoadScene(sceneName);
+        UnityEngine.SceneManagement.SceneManager.LoadScene("initial");
+        GlobalManager.InGame = false;
     }
 
     public void OnPieceKilled(PieceBehavior requester)

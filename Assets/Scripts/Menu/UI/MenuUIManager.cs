@@ -64,6 +64,8 @@ public class MenuUIManager : MonoBehaviour
         MainMenu.Show(float.MaxValue);
         OptionsMenu.HideBelow(float.MaxValue);
         CurrentMenu = Menus.Main;
+
+        GameOptions.Load();
     }
 
     void Update()
@@ -138,6 +140,7 @@ public class MenuUIManager : MonoBehaviour
                 break;
 
             case Menus.Options:
+                GameOptions.Save();
                 OptionsMenu.HideBelow(AnimationsSpeed);
                 MainMenu.Show(AnimationsSpeed);
                 CurrentMenu = Menus.Main;
